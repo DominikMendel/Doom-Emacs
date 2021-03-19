@@ -29,8 +29,8 @@
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
-(setq org-directory "~/org")
-(setq org-journal-dir "~/org/journal")
+(setq org-directory "~/Dropbox/org")
+(setq org-journal-dir "~/Dropbox/org/journal")
 (setq org-journal-date-prefix "* ")
 (setq org-journal-file-format "Journal %Y-%m.org")
 (setq org-journal-date-format "%A, %d %B %Y")
@@ -42,6 +42,11 @@
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type t)
 
+(use-package org-fancy-priorities
+  :ensure t
+  :hook
+  (org-mode . org-fancy-priorities-mode)
+  :config(setq org-fancy-priorities-list '("❗" "⬆" "⬇" "☕")))
 
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
