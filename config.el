@@ -46,7 +46,14 @@
   :ensure t
   :hook
   (org-mode . org-fancy-priorities-mode)
-  :config(setq org-fancy-priorities-list '("❗" "⬆" "⬇" "☕")))
+  :config
+  (setq org-fancy-priorities-list '("❗" "⬆" "⬇" "☕")))
+
+(after! org
+
+  (setq org-todo-keywords '((sequence "TODO(t)" "INPROGRESS(i)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)")))
+
+  )
 
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
