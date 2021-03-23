@@ -39,6 +39,7 @@
 (setq org-journal-enable-cache t)
 (setq org-journal-file-type 'monthly)
 (setq! org-journal-time-format "")
+;; (setq! org-journal-carryover-items "TODO=\"TODO\"|TODO=\"INPROGRESS\"|TODO=\"WAITING\"")
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type t)
