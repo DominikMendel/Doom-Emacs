@@ -40,6 +40,8 @@
 (setq org-journal-file-type 'monthly)
 (setq! org-journal-time-format "")
 ;; (setq! org-journal-carryover-items "TODO=\"TODO\"|TODO=\"INPROGRESS\"|TODO=\"WAITING\"")
+;; (setq! org-journal-carryover-items "-TODO=\"DONE\"|-TODO=\"CANCELLED\"")
+;; (setq! org-journal-carryover-items "-TODO=\"DONE\"")
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type t)
@@ -51,11 +53,28 @@
 
 (setq org-startup-indented t)           ;; Indent according to section
 
+(defun make-youtube-time-link (link-text)
+  (let ((substrings (split-string link-text ",")))
+  (browse-url (format "%s&t=%sm%ss" (first substrings) (second substrings) (third substrings)))))
+
 (after! org
 
+  (org-add-link-type "yt" #'make-youtube-time-link)
   (setq org-todo-keywords '((sequence "INPROGRESS(i)" "TODO(t)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)") (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
+  ;; (setq org-agenda-skip-scheduled-if-done t)
+  ;; (setq org-fancy-priorities-list '("❗" "⬆" "⬇" "☕"))
 
   )
+
+;; (defun foobar ()
+;;   (org-map-entries
+;;    (lambda ()
+;;      (let ((headings (org-journal--carryover-item-with-parents)))
+;;        (setq org-map-continue-from (point))
+;;        headings))
+;;    org-journal-carryover-items))
+
+;; (foobar)
 
 (use-package org-fancy-priorities
   :ensure t
@@ -63,6 +82,11 @@
   (org-mode . org-fancy-priorities-mode)
   :config
   (setq org-fancy-priorities-list '("❗" "⬆" "⬇" "☕")))
+
+;; (define-package! org-fancy-priorities
+;;   :hook (org-mode . org-fancy-priorities-mode)
+;;   :config
+;;   (setq org-fancy-priorities-list '("❗" "⬆" "⬇" "☕")))
 
 
 ;; Here are some additional functions/macros that could help you configure Doom:
