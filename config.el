@@ -32,6 +32,7 @@
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/Dropbox/org")
 (setq org-journal-dir "~/Dropbox/org/journal")
+;; (setq org-journal-dir "~/Dropbox/org/journalTest")
 (setq org-journal-date-prefix "* ")
 (setq org-journal-file-format "Journal %Y-%m.org")
 (setq org-journal-date-format "%A, %d %B %Y")
@@ -40,6 +41,7 @@
 (setq org-journal-file-type 'monthly)
 (setq! org-journal-time-format "")
 ;; (setq! org-journal-carryover-items "TODO=\"TODO\"|TODO=\"INPROGRESS\"|TODO=\"WAITING\"")
+;; (setq! org-journal-carryover-items "TODO=\"TODO\"|TODO=\"INPROGRESS\"")
 ;; (setq! org-journal-carryover-items "-TODO=\"DONE\"|-TODO=\"CANCELLED\"")
 ;; (setq! org-journal-carryover-items "-TODO=\"DONE\"")
 ;; This determines the style of line numbers in effect. If set to `nil', line
@@ -57,24 +59,16 @@
   (let ((substrings (split-string link-text ",")))
   (browse-url (format "%s&t=%sm%ss" (first substrings) (second substrings) (third substrings)))))
 
+(after! org-journal
+  (setq! org-journal-carryover-items "-TODO=\"DONE\""))
+
 (after! org
 
   (org-add-link-type "yt" #'make-youtube-time-link)
-  (setq org-todo-keywords '((sequence "INPROGRESS(i)" "TODO(t)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)") (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
-  ;; (setq org-agenda-skip-scheduled-if-done t)
+  (setq org-todo-keywords '((sequence  "TODO(t)" "INPROGRESS(i)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)") (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
   ;; (setq org-fancy-priorities-list '("❗" "⬆" "⬇" "☕"))
 
   )
-
-;; (defun foobar ()
-;;   (org-map-entries
-;;    (lambda ()
-;;      (let ((headings (org-journal--carryover-item-with-parents)))
-;;        (setq org-map-continue-from (point))
-;;        headings))
-;;    org-journal-carryover-items))
-
-;; (foobar)
 
 (use-package org-fancy-priorities
   :ensure t
