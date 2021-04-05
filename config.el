@@ -60,15 +60,21 @@
   (browse-url (format "%s&t=%sm%ss" (first substrings) (second substrings) (third substrings)))))
 
 (after! org-journal
-  (setq! org-journal-carryover-items "-TODO=\"DONE\""))
+  (setq! org-journal-carryover-items "TODO=\"TODO\"|TODO=\"INPROGRESS\"|TODO=\"WAITING\"|TODO=\"BLOCKED\""))
+  ;; (setq! ort-todo-keyword-faces
+  ;;       `(("TODO" . org-warning) ("WAITING" . "yellow")
+  ;;         ("CANCELED" . (:foreground "blue" :weight bold)))))
 
 (after! org
 
   (org-add-link-type "yt" #'make-youtube-time-link)
-  (setq org-todo-keywords '((sequence  "TODO(t)" "INPROGRESS(i)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)") (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
+  ;; (setq org-todo-keywords '((sequence  "TODO(t)" "INPROGRESS(i)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)") (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
+  (setq org-todo-keywords
+        '((sequence  "TODO(t)" "INPROGRESS(i!)" "WAITING(w@/!)" "BLOCKED(b@/!)" "|" "DONE(d@)" "CANCELLED(c!)" "ABANDONED(a@)")
+          (sequence "[ ](T)" "[-](S!)" "[?](W!)" "|" "[X](D!)")))
   ;; (setq org-fancy-priorities-list '("❗" "⬆" "⬇" "☕"))
 
-  )
+)
 
 (use-package org-fancy-priorities
   :ensure t
@@ -102,4 +108,17 @@
 
 (map! :leader
       "w /" #'evil-window-vsplit
-      "w -" #'evil-window-split)
+      "w -" #'evil-window-split
+      "RET" #'org-insert-subheading
+      "k" #'org-previous-visible-heading
+      "K" #'outline-up-heading
+      "j" #'org-next-visible-heading
+      ;; "J" #'(lambda () (interactive) (call-interactively #'outline-up-heading) (call-interactively #'org/insert-item-below))
+      ;; "J" #'(lambda () (interactive) (call-interactively #'outline-up-heading) (#'org/insert-item-below 1))
+      "J" #'outline-back-to-heading
+      )
+
+;; (map! :localleader
+      ;; "j j" #'(lambda () (interactive) (call-interactively) (outline-up-heading) (org/insert-item-below)))
+        ;; "j j" #'(lambda () (interactive) (call-interactively #'outline-up-heading) (call-interactively #'org/insert-item-below))
+      ;; "j k" #'outline-up-heading)
