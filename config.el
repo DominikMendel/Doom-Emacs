@@ -40,6 +40,12 @@
 (setq org-journal-enable-cache t)
 (setq org-journal-file-type 'monthly)
 (setq! org-journal-time-format "")
+
+(setq org-roam-directory "~/Dropbox/org/roam")
+
+(setq deft-directory "~/Dropbox/org"
+      deft-extensions '("org" "txt")
+      deft-recursive t)
 ;; (setq! org-journal-carryover-items "TODO=\"TODO\"|TODO=\"INPROGRESS\"|TODO=\"WAITING\"")
 ;; (setq! org-journal-carryover-items "TODO=\"TODO\"|TODO=\"INPROGRESS\"")
 ;; (setq! org-journal-carryover-items "-TODO=\"DONE\"|-TODO=\"CANCELLED\"")
@@ -66,15 +72,24 @@
   ;;         ("CANCELED" . (:foreground "blue" :weight bold)))))
 
 (after! org
-
   (org-add-link-type "yt" #'make-youtube-time-link)
   ;; (setq org-todo-keywords '((sequence  "TODO(t)" "INPROGRESS(i)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)") (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
   (setq org-todo-keywords
         '((sequence  "TODO(t)" "INPROGRESS(i!)" "WAITING(w@/!)" "BLOCKED(b@/!)" "|" "DONE(d@)" "CANCELLED(c!)" "ABANDONED(a@)")
-          (sequence "[ ](T)" "[-](S!)" "[?](W!)" "|" "[X](D!)")))
+          (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
+  (setq org-log-done 'time)
   ;; (setq org-fancy-priorities-list '("❗" "⬆" "⬇" "☕"))
 
 )
+
+(after! org-roam
+  (setq org-roam-capture-templates
+        '(("d" "default" plain (function org-roam--capture-get-point)
+           "%?"
+           :file-name "%<%Y%m%d>-${slug}"
+           ;; :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n#+roam_tags: $^{org-roam-rags}\n#+roam_alias: \n"
+           :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n#+roam_tags:\n#+roam_alias:\n\n"
+           :unnarrowed t))))
 
 (use-package org-fancy-priorities
   :ensure t
