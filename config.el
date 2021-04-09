@@ -83,13 +83,30 @@
 )
 
 (after! org-roam
+  ;; (map! :leader
+  ;;       :prefix "r"
+  ;;       :desc "org-roam-insert" "i" #'org-roam-insert)
+
   (setq org-roam-capture-templates
         '(("d" "default" plain (function org-roam--capture-get-point)
            "%?"
            :file-name "%<%Y%m%d>-${slug}"
            ;; :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n#+roam_tags: $^{org-roam-rags}\n#+roam_alias: \n"
-           :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n#+roam_tags:\n#+roam_alias:\n\n"
-           :unnarrowed t))))
+           ;; :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n#+roam_tags: %^{prompt|temp1|temp2|temp3}\n#+roam_alias: \n"
+           :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n#+roam_tags: %^{prompt}\n#+roam_alias: \n"
+           ;; :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n#+roam_tags:\n#+roam_alias:\n\n"
+           ;; "Links: %?"
+           :unnarrowed t)
+
+          ("j" "Japanese" plain (function org-roam--capture-get-point)
+           :file-name "%<%Y%m%d>-${slug}"
+           ;; :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n#+roam_tags: $^{org-roam-rags}\n#+roam_alias: \n"
+           :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n#+roam_tags: %^{prompt}\nLinks: [[file:../../../Dropbox/org/roam/20210408-japanese.org][Japanese]] \n\nDefinition: "
+           ;; :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n#+roam_tags:\n#+roam_alias:\n\n"
+           "%?"
+           :unnarrowed t)
+          )))
+
 
 (use-package org-fancy-priorities
   :ensure t
