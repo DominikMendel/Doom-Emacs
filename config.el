@@ -86,26 +86,49 @@
   ;; (map! :leader
   ;;       :prefix "r"
   ;;       :desc "org-roam-insert" "i" #'org-roam-insert)
+  (org-roam-db-build-cache ())
 
   (setq org-roam-capture-templates
         '(("d" "default" plain (function org-roam--capture-get-point)
            "%?"
            :file-name "%<%Y%m%d>-${slug}"
-           ;; :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n#+roam_tags: $^{org-roam-rags}\n#+roam_alias: \n"
-           ;; :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n#+roam_tags: %^{prompt|temp1|temp2|temp3}\n#+roam_alias: \n"
-           :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n#+roam_tags: %^{prompt}\n#+roam_alias: \n"
-           ;; :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n#+roam_tags:\n#+roam_alias:\n\n"
-           ;; "Links: %?"
+           ;; added a double space at the end for the double-space insert link issue.
+           :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n- tags ::  "
            :unnarrowed t)
 
-          ("j" "Japanese" plain (function org-roam--capture-get-point)
+          ("a" "New Area" plain (function org-roam--capture-get-point)
+           "%?"
            :file-name "%<%Y%m%d>-${slug}"
-           ;; :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n#+roam_tags: $^{org-roam-rags}\n#+roam_alias: \n"
-           :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n#+roam_tags: %^{prompt}\nLinks: [[file:../../../Dropbox/org/roam/20210408-japanese.org][Japanese]] \n\nDefinition: "
-           ;; :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n#+roam_tags:\n#+roam_alias:\n\n"
+           ;; added a double space at the end for the double-space insert link issue.
+           :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n- tags :: [[file:../../../Dropbox/org/roam/20210410-indexes.org][Indexes]] "
+           :unnarrowed t)
+
+          ("r" "Reading" plain (function org-roam--capture-get-point)
+           "%?"
+           :file-name "%<%Y%m%d>-${slug}"
+           ;; added a double space at the end for the double-space insert link issue.
+           :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n- tags ::  %?\n* Notes\n* Vocabular\n* Overview"
+           :unnarrowed t)
+
+          ("j" "Japanese")
+          ("jj" "Japanese Vocabulary" plain (function org-roam--capture-get-point)
+           :file-name "%<%Y%m%d>-${slug}"
+           :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n#+roam_tags: %^{prompt}\n- tags :: [[file:../../../Dropbox/org/roam/20210410-japanese.org][Japanese]] \n\n* Definition"
            "%?"
            :unnarrowed t)
-          )))
+
+          ("jk" "Japanese Kanji" plain (function org-roam--capture-get-point)
+           ;; "%?"
+           :file-name "%<%Y%m%d>-${slug}"
+           :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n#+roam_tags: %^{prompt}\n- tags :: [[file:../../../Dropbox/org/roam/20210410-japanese.org][Japanese]] \n\n* Readings\n** onyomi %?\n** kunyomi "
+           :unnarrowed t)
+          ))
+
+  (setq org-roam-capture-ref-templates
+       '(("r" "ref" plain #'org-roam-capture--get-point "%?"
+          :file-name "website/%(url-host (url-generic-parse-url \"${ref}\"))-${slug}"
+          :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n#+roam_key: ${ref}\n- tags ::  "
+          :unnarrowed t))))
 
 
 (use-package org-fancy-priorities
