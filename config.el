@@ -79,7 +79,17 @@
           (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
   (setq org-log-done 'time)
   ;; (setq org-fancy-priorities-list '("❗" "⬆" "⬇" "☕"))
+  (defun +org/opened-buffer-files ()
+    "Return the list of files currently opened in emacs"
+    (delq nil
+          (mapcar (lambda (x)
+                    (if (and (buffer-file-name x)
+                             (string-match "\\.org$"
+                                           (buffer-file-name x)))
+                        (buffer-file-name x)))
+                  (buffer-list))))
 
+  (setq org-refile-targets '((+org/opened-buffer-files :maxlevel . 9)))
 )
 
 (after! org-roam
@@ -104,10 +114,9 @@
            :unnarrowed t)
 
           ("r" "Reading" plain (function org-roam--capture-get-point)
-           "%?"
            :file-name "%<%Y%m%d>-${slug}"
            ;; added a double space at the end for the double-space insert link issue.
-           :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n- tags ::  %?\n* Notes\n* Vocabular\n* Overview"
+           :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n- tags ::  %?\n\n* Notes\n* Vocabulary\n* Overview"
            :unnarrowed t)
 
           ("j" "Japanese")
@@ -118,11 +127,24 @@
            :unnarrowed t)
 
           ("jk" "Japanese Kanji" plain (function org-roam--capture-get-point)
-           ;; "%?"
            :file-name "%<%Y%m%d>-${slug}"
            :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n#+roam_tags: %^{prompt}\n- tags :: [[file:../../../Dropbox/org/roam/20210410-japanese.org][Japanese]] \n\n* Readings\n** onyomi %?\n** kunyomi "
            :unnarrowed t)
-          ))
+
+          ("v" "Vispero")
+          ("vv" "Vispero Default" plain (function org-roam--capture-get-point)
+           "%?"
+           :file-name "vispero/%<%Y%m%d>-${slug}"
+           ;; added a double space at the end for the double-space insert link issue.
+           :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n- tags :: [[file:~/Dropbox/org/roam/20210413-vispero.org][Vispero]] "
+           :unnarrowed t)
+          ("vb" "Vispero Bug" plain (function org-roam--capture-get-point)
+           :file-name "vispero/Bug ${slug}"
+           :head "#+TITLE: Bug ${title}\n#+Created: %u\n#+last_modified: %U\n#+roam_key: http://bugzilla.fsi.local/show_bug.cgi?id=${slug}\n#+roam_alias: ${slug}\n- tags :: [[file:~/Dropbox/org/roam/20210413-vispero_bugzilla.org][Vispero Bugzilla]] \n\n"
+           "%?"
+           :unnarrowed t))
+
+        )
 
   (setq org-roam-capture-ref-templates
        '(("r" "ref" plain #'org-roam-capture--get-point "%?"
