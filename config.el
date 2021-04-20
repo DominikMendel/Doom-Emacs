@@ -100,35 +100,42 @@
 
   (setq org-roam-capture-templates
         '(("d" "default" plain (function org-roam--capture-get-point)
-           "%?"
+           ;; "%?"
            :file-name "%<%Y%m%d>-${slug}"
            ;; added a double space at the end for the double-space insert link issue.
-           :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n- tags ::  "
+           :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n- tags ::  %?\n\n* "
            :unnarrowed t)
 
           ("a" "New Area" plain (function org-roam--capture-get-point)
            "%?"
            :file-name "%<%Y%m%d>-${slug}"
            ;; added a double space at the end for the double-space insert link issue.
-           :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n- tags :: [[file:../../../Dropbox/org/roam/20210410-indexes.org][Indexes]] "
+           :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n- tags :: [[file:../../../Dropbox/org/roam/20210410-indexes.org][Indexes]]"
            :unnarrowed t)
 
-          ("r" "Reading" plain (function org-roam--capture-get-point)
+          ("r" "Reading General")
+          ("rr" "Reading" plain (function org-roam--capture-get-point)
            :file-name "%<%Y%m%d>-${slug}"
            ;; added a double space at the end for the double-space insert link issue.
-           :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n- tags ::  %?\n\n* Notes\n* Vocabulary\n* Overview"
+           :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n- tags ::  %?\n\n* Notes\n* Overview"
+           :unnarrowed t)
+
+          ("rc" "Reading Character" plain (function org-roam--capture-get-point)
+           :file-name "%<%Y%m%d>-${slug}"
+           ;; added a double space at the end for the double-space insert link issue.
+           :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n- tags ::  %?\n\n* Notes\n* Mentions"
            :unnarrowed t)
 
           ("j" "Japanese")
           ("jj" "Japanese Vocabulary" plain (function org-roam--capture-get-point)
            :file-name "%<%Y%m%d>-${slug}"
-           :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n#+roam_tags: %^{prompt}\n- tags :: [[file:../../../Dropbox/org/roam/20210410-japanese.org][Japanese]] \n\n* Definition"
+           :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n#+roam_tags: %^{prompt}\n- tags :: [[file:../../../Dropbox/org/roam/20210410-japanese.org][Japanese]]\n\n* Definition"
            "%?"
            :unnarrowed t)
 
           ("jk" "Japanese Kanji" plain (function org-roam--capture-get-point)
            :file-name "%<%Y%m%d>-${slug}"
-           :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n#+roam_tags: %^{prompt}\n- tags :: [[file:../../../Dropbox/org/roam/20210410-japanese.org][Japanese]] \n\n* Readings\n** onyomi %?\n** kunyomi "
+           :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n#+roam_tags: %^{prompt}\n- tags :: [[file:../../../Dropbox/org/roam/20210410-japanese.org][Japanese]]\n\n* Readings\n** onyomi %?\n** kunyomi"
            :unnarrowed t)
 
           ("v" "Vispero")
@@ -136,11 +143,11 @@
            "%?"
            :file-name "vispero/%<%Y%m%d>-${slug}"
            ;; added a double space at the end for the double-space insert link issue.
-           :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n- tags :: [[file:~/Dropbox/org/roam/20210413-vispero.org][Vispero]] "
+           :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n- tags :: [[file:~/Dropbox/org/roam/20210413-vispero.org][Vispero]]"
            :unnarrowed t)
           ("vb" "Vispero Bug" plain (function org-roam--capture-get-point)
            :file-name "vispero/Bug ${slug}"
-           :head "#+TITLE: Bug ${title}\n#+Created: %u\n#+last_modified: %U\n#+roam_key: http://bugzilla.fsi.local/show_bug.cgi?id=${slug}\n#+roam_alias: ${slug}\n- tags :: [[file:~/Dropbox/org/roam/20210413-vispero_bugzilla.org][Vispero Bugzilla]] \n\n"
+           :head "#+TITLE: Bug ${title}\n#+Created: %u\n#+last_modified: %U\n#+roam_key: http://bugzilla.fsi.local/show_bug.cgi?id=${slug}\n#+roam_alias: ${slug}\n- tags :: [[file:~/Dropbox/org/roam/20210413-vispero_bugzilla.org][Vispero Bugzilla]]\n\n"
            "%?"
            :unnarrowed t))
 
@@ -193,6 +200,7 @@
       ;; "J" #'(lambda () (interactive) (call-interactively #'outline-up-heading) (call-interactively #'org/insert-item-below))
       ;; "J" #'(lambda () (interactive) (call-interactively #'outline-up-heading) (#'org/insert-item-below 1))
       "J" #'outline-back-to-heading
+      "I" #'org-roam-insert
       )
 
 ;; (map! :localleader
