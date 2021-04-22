@@ -32,7 +32,6 @@
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/Dropbox/org")
 (setq org-journal-dir "~/Dropbox/org/journal")
-;; (setq org-journal-dir "~/Dropbox/org/journalTest")
 (setq org-journal-date-prefix "* ")
 (setq org-journal-file-format "Journal %Y-%m.org")
 (setq org-journal-date-format "%A, %d %B %Y")
@@ -46,10 +45,6 @@
 (setq deft-directory "~/Dropbox/org"
       deft-extensions '("org" "txt")
       deft-recursive t)
-;; (setq! org-journal-carryover-items "TODO=\"TODO\"|TODO=\"INPROGRESS\"|TODO=\"WAITING\"")
-;; (setq! org-journal-carryover-items "TODO=\"TODO\"|TODO=\"INPROGRESS\"")
-;; (setq! org-journal-carryover-items "-TODO=\"DONE\"|-TODO=\"CANCELLED\"")
-;; (setq! org-journal-carryover-items "-TODO=\"DONE\"")
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type t)
@@ -103,51 +98,52 @@
            ;; "%?"
            :file-name "%<%Y%m%d>-${slug}"
            ;; added a double space at the end for the double-space insert link issue.
-           :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n- tags ::  %?\n\n* "
+           :head "#+TITLE: ${title}\n#+Created: %u\n- tags ::  %?\n\n* "
            :unnarrowed t)
 
           ("a" "New Area" plain (function org-roam--capture-get-point)
            "%?"
            :file-name "%<%Y%m%d>-${slug}"
            ;; added a double space at the end for the double-space insert link issue.
-           :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n- tags :: [[file:../../../Dropbox/org/roam/20210410-indexes.org][Indexes]]"
+           :head "#+TITLE: ${title}\n#+Created: %u\n- tags :: [[file:../../../Dropbox/org/roam/20210410-indexes.org][Indexes]]"
            :unnarrowed t)
 
           ("r" "Reading General")
           ("rr" "Reading" plain (function org-roam--capture-get-point)
            :file-name "%<%Y%m%d>-${slug}"
            ;; added a double space at the end for the double-space insert link issue.
-           :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n- tags ::  %?\n\n* Notes\n* Overview"
+           :head "#+TITLE: ${title}\n#+Created: %u\n- tags ::  %?\n\n* Notes\n* Overview"
            :unnarrowed t)
 
           ("rc" "Reading Character" plain (function org-roam--capture-get-point)
            :file-name "%<%Y%m%d>-${slug}"
            ;; added a double space at the end for the double-space insert link issue.
-           :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n- tags ::  %?\n\n* Notes\n* Mentions"
+           :head "#+TITLE: ${title}\n#+Created: %u\n- tags ::  %?\n\n* Notes\n* Mentions"
            :unnarrowed t)
 
           ("j" "Japanese")
           ("jj" "Japanese Vocabulary" plain (function org-roam--capture-get-point)
            :file-name "%<%Y%m%d>-${slug}"
-           :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n#+roam_tags: %^{prompt}\n- tags :: [[file:../../../Dropbox/org/roam/20210410-japanese.org][Japanese]]\n\n* Definition"
+           :head "#+TITLE: ${title}\n#+Created: %u\n#+roam_tags: %^{prompt}\n- tags :: [[file:../../../Dropbox/org/roam/20210410-japanese.org][Japanese]]\n\n* Definition"
            "%?"
            :unnarrowed t)
 
           ("jk" "Japanese Kanji" plain (function org-roam--capture-get-point)
            :file-name "%<%Y%m%d>-${slug}"
-           :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n#+roam_tags: %^{prompt}\n- tags :: [[file:../../../Dropbox/org/roam/20210410-japanese.org][Japanese]]\n\n* Readings\n** onyomi %?\n** kunyomi"
+           :head "#+TITLE: ${title}\n#+Created: %u\n#+roam_tags: %^{prompt}\n- tags :: [[file:../../../Dropbox/org/roam/20210410-japanese.org][Japanese]]\n\n* Readings\n** onyomi %?\n** kunyomi"
            :unnarrowed t)
+
 
           ("v" "Vispero")
           ("vv" "Vispero Default" plain (function org-roam--capture-get-point)
            "%?"
            :file-name "vispero/%<%Y%m%d>-${slug}"
            ;; added a double space at the end for the double-space insert link issue.
-           :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n- tags :: [[file:~/Dropbox/org/roam/20210413-vispero.org][Vispero]]"
+           :head "#+TITLE: ${title}\n#+Created: %u\n- tags :: [[file:~/Dropbox/org/roam/20210413-vispero.org][Vispero]]"
            :unnarrowed t)
           ("vb" "Vispero Bug" plain (function org-roam--capture-get-point)
            :file-name "vispero/Bug ${slug}"
-           :head "#+TITLE: Bug ${title}\n#+Created: %u\n#+last_modified: %U\n#+roam_key: http://bugzilla.fsi.local/show_bug.cgi?id=${slug}\n#+roam_alias: ${slug}\n- tags :: [[file:~/Dropbox/org/roam/20210413-vispero_bugzilla.org][Vispero Bugzilla]]\n\n"
+           :head "#+TITLE: Bug ${title}\n#+Created: %u\n#+roam_key: http://bugzilla.fsi.local/show_bug.cgi?id=${slug}\n#+roam_alias: ${slug}\n- tags :: [[file:~/Dropbox/org/roam/20210413-vispero_bugzilla.org][Vispero Bugzilla]]\n\n"
            "%?"
            :unnarrowed t))
 
@@ -156,7 +152,7 @@
   (setq org-roam-capture-ref-templates
        '(("r" "ref" plain #'org-roam-capture--get-point "%?"
           :file-name "website/%(url-host (url-generic-parse-url \"${ref}\"))-${slug}"
-          :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n#+roam_key: ${ref}\n- tags ::  "
+          :head "#+TITLE: ${title}\n#+Created: %u\n#+roam_key: ${ref}\n- tags ::  "
           :unnarrowed t))))
 
 
