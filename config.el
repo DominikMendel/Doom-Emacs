@@ -197,8 +197,46 @@
       ;; "J" #'(lambda () (interactive) (call-interactively #'outline-up-heading) (#'org/insert-item-below 1))
       "J" #'outline-back-to-heading
       "I" #'org-roam-insert
-      )
 
+      ;; :map org-journal-mode-map
+      ;; :localleader
+      ;; "c" 'nil
+
+      ;; :map org-journal-mode-map
+      ;; :localleader
+      ;; (:prefix ("c" . "clock")
+      ;;  "c" #'org-clock-cancel
+      ;;  "l" #'+org/toggle-last-clock
+      ;;  "i" #'org-clock-in
+      ;;  "I" #'org-clock-in-last
+      ;;  "o" #'org-clock-out
+      ;;  "r" #'org-resolve-clocks
+      ;;  "R" #'org-clock-report
+      ;;  "t" #'org-evaluate-time-range
+      ;;  )
+      )
+(map!
+ :map org-journal-mode-map
+ :localleader
+ "c" 'nil
+ )
+
+(map! :map org-journal-mode-map
+      :localleader
+      (:prefix ("c" . "clock")
+       "c" #'org-clock-cancel
+       "l" #'+org/toggle-last-clock
+       "i" #'org-clock-in
+       "I" #'org-clock-in-last
+       "o" #'org-clock-out
+       "r" #'org-resolve-clocks
+       "R" #'org-clock-report
+       "t" #'org-evaluate-time-range
+       )
+)
+
+(map! :n "," (cmd! (push (cons t ?m) unread-command-events)
+                   (push (cons t 32) unread-command-events)))
 ;; (map! :localleader
       ;; "j j" #'(lambda () (interactive) (call-interactively) (outline-up-heading) (org/insert-item-below)))
         ;; "j j" #'(lambda () (interactive) (call-interactively #'outline-up-heading) (call-interactively #'org/insert-item-below))
