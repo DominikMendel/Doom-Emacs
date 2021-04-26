@@ -32,6 +32,7 @@
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/Dropbox/org")
 (setq org-journal-dir "~/Dropbox/org/journal")
+(setq org-agenda-files (directory-files-recursively "~/Dropbox/org/" "\\.org$"))
 (setq org-journal-date-prefix "* ")
 (setq org-journal-file-format "Journal %Y-%m.org")
 (setq org-journal-date-format "%A, %d %B %Y")
@@ -41,6 +42,18 @@
 (setq! org-journal-time-format "")
 
 (setq org-roam-directory "~/Dropbox/org/roam")
+
+;; (defun org-focus-private() "Set focus on private things."
+;; (interactive)
+;; (setq org-agenda-files '("~/Dropbox/org/private.org")))
+
+;; (defun org-focus-work() "Set focus on work things."
+;; (interactive)
+;; (setq org-agenda-files '("~/org/work.org")))
+
+;; (defun org-focus-all() "Set focus on all things."
+;; (interactive)
+;; (setq org-agenda-files '("~/org/work.org" "~/org/private.org")))
 
 (setq deft-directory "~/Dropbox/org"
       deft-extensions '("org" "txt")
@@ -71,6 +84,7 @@
   ;; (setq org-todo-keywords '((sequence  "TODO(t)" "INPROGRESS(i)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)") (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
   (setq org-todo-keywords
         '((sequence  "TODO(t)" "INPROGRESS(i!)" "WAITING(w@/!)" "BLOCKED(b@/!)" "|" "DONE(d@)" "CANCELLED(c!)" "ABANDONED(a@)")
+          (sequence "QUESTION(q)" "|" "ANSWERED(!)")
           (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
   (setq org-log-done 'time)
   ;; (setq org-fancy-priorities-list '("❗" "⬆" "⬇" "☕"))
@@ -197,31 +211,16 @@
       ;; "J" #'(lambda () (interactive) (call-interactively #'outline-up-heading) (#'org/insert-item-below 1))
       "J" #'outline-back-to-heading
       "I" #'org-roam-insert
-
-      ;; :map org-journal-mode-map
-      ;; :localleader
-      ;; "c" 'nil
-
-      ;; :map org-journal-mode-map
-      ;; :localleader
-      ;; (:prefix ("c" . "clock")
-      ;;  "c" #'org-clock-cancel
-      ;;  "l" #'+org/toggle-last-clock
-      ;;  "i" #'org-clock-in
-      ;;  "I" #'org-clock-in-last
-      ;;  "o" #'org-clock-out
-      ;;  "r" #'org-resolve-clocks
-      ;;  "R" #'org-clock-report
-      ;;  "t" #'org-evaluate-time-range
-      ;;  )
       )
-(map!
+(map! :after org-journal
  :map org-journal-mode-map
  :localleader
  "c" 'nil
  )
 
-(map! :map org-journal-mode-map
+(map!
+ :after org-journal
+ :map org-journal-mode-map
       :localleader
       (:prefix ("c" . "clock")
        "c" #'org-clock-cancel
@@ -237,6 +236,7 @@
 
 (map! :n "," (cmd! (push (cons t ?m) unread-command-events)
                    (push (cons t 32) unread-command-events)))
+
 ;; (map! :localleader
       ;; "j j" #'(lambda () (interactive) (call-interactively) (outline-up-heading) (org/insert-item-below)))
         ;; "j j" #'(lambda () (interactive) (call-interactively #'outline-up-heading) (call-interactively #'org/insert-item-below))
