@@ -68,18 +68,21 @@
   (add-hook 'org-mode-hook (lambda () (org-superstar-mode 1))))
 
 (setq org-startup-indented t)           ;; Indent according to section
+(setq org-log-reschedule t)
+(setq org-log-into-drawer t)
 
 (defun make-youtube-time-link (link-text)
   (let ((substrings (split-string link-text ",")))
   (browse-url (format "%s&t=%sm%ss" (first substrings) (second substrings) (third substrings)))))
 
 (after! org-journal
-  (setq! org-journal-carryover-items "TODO=\"TODO\"|TODO=\"INPROGRESS\"|TODO=\"WAITING\"|TODO=\"BLOCKED\""))
+  (setq! org-journal-carryover-items "TODO=\"TODO\"|TODO=\"INPROGRESS\"|TODO=\"WAITING\"|TODO=\"BLOCKED\"|TODO=\"QUESTION\""))
   ;; (setq! ort-todo-keyword-faces
   ;;       `(("TODO" . org-warning) ("WAITING" . "yellow")
   ;;         ("CANCELED" . (:foreground "blue" :weight bold)))))
 
 (after! org
+  (setq org-clock-into-drawer "CLOCKING")
   (org-add-link-type "yt" #'make-youtube-time-link)
   ;; (setq org-todo-keywords '((sequence  "TODO(t)" "INPROGRESS(i)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)") (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
   (setq org-todo-keywords
@@ -112,7 +115,7 @@
            ;; "%?"
            :file-name "%<%Y%m%d>-${slug}"
            ;; added a double space at the end for the double-space insert link issue.
-           :head "#+TITLE: ${title}\n#+Created: %u\n- tags ::  %?\n\n* "
+           :head "#+TITLE: ${title}\n#+Created: %u\n- tags ::  %?\n* "
            :unnarrowed t)
 
           ("a" "New Area" plain (function org-roam--capture-get-point)
@@ -126,40 +129,46 @@
           ("rr" "Reading" plain (function org-roam--capture-get-point)
            :file-name "%<%Y%m%d>-${slug}"
            ;; added a double space at the end for the double-space insert link issue.
-           :head "#+TITLE: ${title}\n#+Created: %u\n- tags ::  %?\n\n* Notes\n* Overview"
+           :head "#+TITLE: ${title}\n#+Created: %u\n- tags ::  %?\n* Notes\n* Overview"
            :unnarrowed t)
 
           ("rc" "Reading Character" plain (function org-roam--capture-get-point)
            :file-name "%<%Y%m%d>-${slug}"
            ;; added a double space at the end for the double-space insert link issue.
-           :head "#+TITLE: ${title}\n#+Created: %u\n- tags ::  %?\n\n* Notes\n* Mentions"
+           :head "#+TITLE: ${title}\n#+Created: %u\n- tags ::  %?\n* Notes\n* Mentions"
            :unnarrowed t)
 
           ("j" "Japanese")
           ("jj" "Japanese Vocabulary" plain (function org-roam--capture-get-point)
            :file-name "%<%Y%m%d>-${slug}"
-           :head "#+TITLE: ${title}\n#+Created: %u\n#+roam_tags: %^{prompt}\n- tags :: [[file:../../../Dropbox/org/roam/20210410-japanese.org][Japanese]]\n\n* Definition"
+           :head "#+TITLE: ${title}\n#+Created: %u\n#+roam_tags: %^{prompt}\n- tags :: [[file:../../../Dropbox/org/roam/20210410-japanese.org][Japanese]]\n* Definition"
            "%?"
            :unnarrowed t)
 
           ("jk" "Japanese Kanji" plain (function org-roam--capture-get-point)
            :file-name "%<%Y%m%d>-${slug}"
-           :head "#+TITLE: ${title}\n#+Created: %u\n#+roam_tags: %^{prompt}\n- tags :: [[file:../../../Dropbox/org/roam/20210410-japanese.org][Japanese]]\n\n* Readings\n** onyomi %?\n** kunyomi"
+           :head "#+TITLE: ${title}\n#+Created: %u\n#+roam_tags: %^{prompt}\n- tags :: [[file:../../../Dropbox/org/roam/20210410-japanese.org][Japanese]]\n* Readings\n** onyomi %?\n** kunyomi"
            :unnarrowed t)
 
 
-          ("v" "Vispero")
-          ("vv" "Vispero Default" plain (function org-roam--capture-get-point)
-           "%?"
-           :file-name "vispero/%<%Y%m%d>-${slug}"
-           ;; added a double space at the end for the double-space insert link issue.
-           :head "#+TITLE: ${title}\n#+Created: %u\n- tags :: [[file:~/Dropbox/org/roam/20210413-vispero.org][Vispero]]"
-           :unnarrowed t)
-          ("vb" "Vispero Bug" plain (function org-roam--capture-get-point)
-           :file-name "vispero/Bug ${slug}"
-           :head "#+TITLE: Bug ${title}\n#+Created: %u\n#+roam_key: http://bugzilla.fsi.local/show_bug.cgi?id=${slug}\n#+roam_alias: ${slug}\n- tags :: [[file:~/Dropbox/org/roam/20210413-vispero_bugzilla.org][Vispero Bugzilla]]\n\n"
-           "%?"
-           :unnarrowed t))
+        ("v" "Vispero")
+        ("vv" "Vispero Default" plain (function org-roam--capture-get-point)
+         :file-name "vispero/%<%Y%m%d>-${slug}"
+         ;; added a double space at the end for the double-space insert link issue.
+         :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n- tags ::  %?"
+         :unnarrowed t)
+        ("vt" "Vispero Tagged" plain (function org-roam--capture-get-point)
+         "%?"
+         :file-name "vispero/%<%Y%m%d>-${slug}"
+         ;; added a double space at the end for the double-space insert link issue.
+         :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n- tags :: [[file:~/Dropbox/org/roam/20210413-vispero.org][Vispero]] "
+         :unnarrowed t)
+        ("vb" "Vispero Bug" plain (function org-roam--capture-get-point)
+         :file-name "vispero/Bug ${slug}"
+         :head "#+TITLE: Bug ${title}\n#+Created: %u\n#+last_modified: %U\n#+roam_key: http://bugzilla.fsi.local/show_bug.cgi?id=${slug}\n#+roam_alias: ${slug}\n- tags :: [[file:~/Dropbox/org/roam/20210413-vispero_bugzilla.org][Vispero Bugzilla]] \n"
+         "%?"
+         :unnarrowed t)
+        )
 
         )
 
