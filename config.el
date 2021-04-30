@@ -32,7 +32,8 @@
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/Dropbox/org")
 (setq org-journal-dir "~/Dropbox/org/journal")
-(setq org-agenda-files (directory-files-recursively "~/Dropbox/org/" "\\.org$"))
+;; (setq org-journal-dir "~/Dropbox/org/roam/journalTest")
+;; (setq org-agenda-files (directory-files-recursively "~/Dropbox/org/" "\\.org$"))
 (setq org-journal-date-prefix "* ")
 (setq org-journal-file-format "Journal %Y-%m.org")
 (setq org-journal-date-format "%A, %d %B %Y")
@@ -54,6 +55,9 @@
 ;; (defun org-focus-all() "Set focus on all things."
 ;; (interactive)
 ;; (setq org-agenda-files '("~/org/work.org" "~/org/private.org")))
+(after! org-agenda
+  (setq org-agenda-files (directory-files-recursively "~/Dropbox/org/" "\\.org$")))
+
 
 (setq deft-directory "~/Dropbox/org"
       deft-extensions '("org" "txt")
