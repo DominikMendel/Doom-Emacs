@@ -43,7 +43,7 @@
 (setq! org-journal-time-format "")
 
 (setq org-roam-directory "~/Dropbox/org/roam")
-
+(setq +org-roam-open-buffer-on-find-file nil)
 ;; (defun org-focus-private() "Set focus on private things."
 ;; (interactive)
 ;; (setq org-agenda-files '("~/Dropbox/org/private.org")))
@@ -55,6 +55,28 @@
 ;; (defun org-focus-all() "Set focus on all things."
 ;; (interactive)
 ;; (setq org-agenda-files '("~/org/work.org" "~/org/private.org")))
+(defun my/org-focus-not-work()
+  (interactive)
+  (setq org-agenda-files
+        (seq-filter (lambda(x) (not (string-match "/vispero/"(file-name-directory x))))
+        (directory-files-recursively "~/Dropbox/org" "\\.org$"))))
+
+(defun my/org-focus-all()
+  (interactive)
+  (setq org-agenda-files (directory-files-recursively "~/Dropbox/org" "\\.org$")))
+
+(defun vispero-journals() (directory-files-recursively "~/Dropbox/org/vispero/journal" "\\.org$"))
+
+;; Can instead add to 'org-clock-out-hook
+(add-hook 'before-save-hook 'org-update-all-dblocks())
+
+;; (defun my/test-function-get-roam-id()
+;;   (interactive)
+;;   (setq mytmpid (funcall 'org-roam-link--get-id-from-headline))
+;;   (kill-new mytmpid)
+;;   (message "Id is %s" mytmpid)
+;;   )
+
 (after! org-agenda
   (setq org-agenda-files (directory-files-recursively "~/Dropbox/org/" "\\.org$")))
 
@@ -74,6 +96,26 @@
 (setq org-startup-indented t)           ;; Indent according to section
 (setq org-log-reschedule t)
 (setq org-log-into-drawer t)
+(setq org-enforce-todo-checkbox-dependencies t)
+
+;; Reset checkboxes from Rainer
+;; (defun org-reset-checkbox-state-maybe ()
+;;   "Reset all checkboxes in an entry if the `RESET_CHECK_BOXES' property is set"
+;;   (interactive "*")
+;;   (if (org-entry-get (point) "RESET_CHECK_BOXES")
+;;       (org-reset-checkbox-state-subtree)))
+
+;; (defun org-checklist ()
+;;   (when (member org-state org-done-keywords) ;; org-state dynamically bound in org.el/org-todo
+;;     (org-reset-checkbox-state-maybe)))
+
+;; (add-hook 'org-after-todo-state-change-hook 'org-checklist)
+;;
+;;new attempt
+;; (defun glasser-org-reset-check-on-repeat ()
+;;   (when (and (org-get-repeat) (member org-state org-done-keywords))
+;;     (org-reset-checkbox-state-subtree)))
+;; (add-hook 'org-after-todo-state-change-hook 'glasser-org-reset-check-on-repeat)
 
 (defun make-youtube-time-link (link-text)
   (let ((substrings (split-string link-text ",")))
@@ -86,32 +128,32 @@
   ;;         ("CANCELED" . (:foreground "blue" :weight bold)))))
 
 (after! org
+  ;; (require 'org-checklist)
   (setq org-clock-into-drawer "CLOCKING")
   (org-add-link-type "yt" #'make-youtube-time-link)
   ;; (setq org-todo-keywords '((sequence  "TODO(t)" "INPROGRESS(i)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)") (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
   (setq org-todo-keywords
-        '((sequence  "TODO(t)" "INPROGRESS(i!)" "WAITING(w@/!)" "BLOCKED(b@/!)" "|" "DONE(d@)" "CANCELLED(c!)" "ABANDONED(a@)")
+        '((sequence  "TODO(t)" "INPROGRESS(i!)" "NEXT(n!)" "WAITING(w@/!)" "BLOCKED(b@/!)" "|" "DONE(d@)" "CANCELLED(c!)" "ABANDONED(a@)")
           (sequence "QUESTION(q)" "|" "ANSWERED(!)")
+          (sequence "REPEAT(r)" "|" "COMPLETED")
           (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
   (setq org-log-done 'time)
-  ;; (setq org-fancy-priorities-list '("❗" "⬆" "⬇" "☕"))
-  (defun +org/opened-buffer-files ()
-    "Return the list of files currently opened in emacs"
-    (delq nil
-          (mapcar (lambda (x)
-                    (if (and (buffer-file-name x)
-                             (string-match "\\.org$"
-                                           (buffer-file-name x)))
-                        (buffer-file-name x)))
-                  (buffer-list))))
+  ;; This allows refile targets in the same buffer:
+  ;; (defun +org/opened-buffer-files ()
+  ;;   "Return the list of files currently opened in emacs"
+  ;;   (delq nil
+  ;;         (mapcar (lambda (x)
+  ;;                   (if (and (buffer-file-name x)
+  ;;                            (string-match "\\.org$"
+  ;;                                          (buffer-file-name x)))
+  ;;                       (buffer-file-name x)))
+  ;;                 (buffer-list))))
 
-  (setq org-refile-targets '((+org/opened-buffer-files :maxlevel . 9)))
+  ;; (setq org-refile-targets '((+org/opened-buffer-files :maxlevel . 9)))
+  (setq org-refile-targets (quote ((org-agenda-files :maxlevel . 2))))
 )
 
 (after! org-roam
-  ;; (map! :leader
-  ;;       :prefix "r"
-  ;;       :desc "org-roam-insert" "i" #'org-roam-insert)
   (org-roam-db-build-cache ())
 
   (setq org-roam-capture-templates
