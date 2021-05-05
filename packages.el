@@ -2,6 +2,7 @@
 
 (package! org-fancy-priorities)
 (package! org-superstar)
+(package! org-super-agenda)
 ;;; $DOOMDIR/packages.el
 
 ;; To install a package with Doom you must declare them here and run 'doom sync'

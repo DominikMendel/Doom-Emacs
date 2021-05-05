@@ -78,7 +78,9 @@
 ;;   )
 
 (after! org-agenda
-  (setq org-agenda-files (directory-files-recursively "~/Dropbox/org/" "\\.org$")))
+  (setq org-agenda-files (directory-files-recursively "~/Dropbox/org/" "\\.org$"))
+  (add-to-list 'org-agenda-bulk-custom-functions
+               '(?a org-agenda-archive-to-archive-sibling)))
 
 
 (setq deft-directory "~/Dropbox/org"
@@ -97,6 +99,33 @@
 (setq org-log-reschedule t)
 (setq org-log-into-drawer t)
 (setq org-enforce-todo-checkbox-dependencies t)
+
+;;Org-Super-Agenda
+(use-package! org-super-agenda
+  :commands (org-super-agenda-mode))
+
+(after! org-agenda
+  (org-super-agenda-mode))
+
+(setq org-agenda-skip-scheduled-if-done t
+      org-agenda-skip-deadline-if-done t
+      org-agenda-include-deadlines t
+      org-agenda-block-separator nil
+      org-agenda-tags-column 100 ;; from testing this seems to be a good value
+      org-agenda-compact-blocks t)
+
+;; (use-package! org-super-agenda
+;;   :commands (org-super-agenda-moda))
+;; (after! org-agenda
+;;   (org-super-agenda-mode))
+
+;; (setq org-agenda-skip-scheduled-if-done t
+;;       org-agenda-skip-deadline-if-done t
+;;       org-agenda-include-deadlines t
+;;       org-agenda-block-separator nil
+;;       org-agenda-tags-column 100 ;; from testing this seems to be a good value
+;;       org-agenda-compact-blocks t)
+
 
 ;; Reset checkboxes from Rainer
 ;; (defun org-reset-checkbox-state-maybe ()
@@ -127,8 +156,11 @@
   ;;       `(("TODO" . org-warning) ("WAITING" . "yellow")
   ;;         ("CANCELED" . (:foreground "blue" :weight bold)))))
 
+(add-to-list 'org-modules 'org-checklist)
+
 (after! org
   ;; (require 'org-checklist)
+  (setq org-sparse-tree-open-archived-trees t) ;;For finding archived headings
   (setq org-clock-into-drawer "CLOCKING")
   (org-add-link-type "yt" #'make-youtube-time-link)
   ;; (setq org-todo-keywords '((sequence  "TODO(t)" "INPROGRESS(i)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)") (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
@@ -151,6 +183,7 @@
 
   ;; (setq org-refile-targets '((+org/opened-buffer-files :maxlevel . 9)))
   (setq org-refile-targets (quote ((org-agenda-files :maxlevel . 2))))
+
 )
 
 (after! org-roam
@@ -232,10 +265,6 @@
   :config
   (setq org-fancy-priorities-list '("❗" "⬆" "⬇" "☕")))
 
-;; (define-package! org-fancy-priorities
-;;   :hook (org-mode . org-fancy-priorities-mode)
-;;   :config
-;;   (setq org-fancy-priorities-list '("❗" "⬆" "⬇" "☕")))
 
 
 ;; Here are some additional functions/macros that could help you configure Doom:
