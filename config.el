@@ -44,17 +44,7 @@
 
 (setq org-roam-directory "~/Dropbox/org/roam")
 (setq +org-roam-open-buffer-on-find-file nil)
-;; (defun org-focus-private() "Set focus on private things."
-;; (interactive)
-;; (setq org-agenda-files '("~/Dropbox/org/private.org")))
 
-;; (defun org-focus-work() "Set focus on work things."
-;; (interactive)
-;; (setq org-agenda-files '("~/org/work.org")))
-
-;; (defun org-focus-all() "Set focus on all things."
-;; (interactive)
-;; (setq org-agenda-files '("~/org/work.org" "~/org/private.org")))
 (defun my/org-focus-not-work()
   (interactive)
   (setq org-agenda-files
@@ -81,7 +71,6 @@
   (setq org-agenda-files (directory-files-recursively "~/Dropbox/org/" "\\.org$"))
   (add-to-list 'org-agenda-bulk-custom-functions
                '(?a org-agenda-archive-to-archive-sibling)))
-
 
 (setq deft-directory "~/Dropbox/org"
       deft-extensions '("org" "txt")
@@ -114,6 +103,11 @@
       org-agenda-tags-column 100 ;; from testing this seems to be a good value
       org-agenda-compact-blocks t)
 
+;; (after! org-capture
+;;   (setq org-capture-templates
+;;   ;; (add-to-list 'org-capture-templates
+;;         '("T" "Todo" entry (file+headline "~/Dropbox/org/roam/vispero/20210503-vispero_agenda.org" "Tasks")
+;;           "* TODO %?\n %i\n %a")))
 ;; (use-package! org-super-agenda
 ;;   :commands (org-super-agenda-moda))
 ;; (after! org-agenda
@@ -160,6 +154,9 @@
 
 (after! org
   ;; (require 'org-checklist)
+  (setq org-startup-folded t)
+  (add-to-list 'org-modules 'org-checklist)
+  (require 'org-checklist)
   (setq org-sparse-tree-open-archived-trees t) ;;For finding archived headings
   (setq org-clock-into-drawer "CLOCKING")
   (org-add-link-type "yt" #'make-youtube-time-link)
@@ -184,7 +181,27 @@
   ;; (setq org-refile-targets '((+org/opened-buffer-files :maxlevel . 9)))
   (setq org-refile-targets (quote ((org-agenda-files :maxlevel . 2))))
 
-)
+  ;; (add-to-list 'org-capture-templates
+        ;; '("T" "Todo" entry (file+headline "~/Dropbox/org/roam/vispero/20210503-vispero_agenda.org" "Tasks")
+        ;;   "* TODO %?\n %i\n %a"))
+  (setq org-capture-templates
+               '(("T" "todoDOM" entry (file+headline "~/Dropbox/org/roam/vispero/20210503-vispero_agenda.org" "Tasks")
+                 ;; :file +org-capture-todo-file
+                  "* TODO %?\n %i\n %a")
+                 ;; :prepend t)
+                 ;; :headline "Test"
+                 ;; :type entry
+                 ;; :template ("* %?" "%i %a"))
+
+                 ("G" "todoDOM2"
+                 :file +org-capture-todo-file
+                 :prepend t
+                 :headline "Test"
+                 :type entry
+                 :template ("* %?" "%i %a"))
+
+                 ))
+  )
 
 (after! org-roam
   (org-roam-db-build-cache ())
@@ -283,6 +300,27 @@
 ;;
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
+
+
+(defun my/copy-idlink-to-clipboard() "Copy an ID link with the
+headline to killring, if no ID is there then create a new unique
+ID.  This function works only in org-mode or org-agenda buffers.
+
+The purpose of this function is to easily construct id:-links to
+org-mode items. If its assigned to a key it saves you marking the
+text and copying to the killring."
+       (interactive)
+       (when (eq major-mode 'org-agenda-mode) ;if we are in agenda mode we switch to orgmode
+	 (org-agenda-show)
+	 (org-agenda-goto))
+       (when (eq major-mode 'org-mode) ; do this only in org-mode buffers
+	 (setq mytmphead (nth 4 (org-heading-components)))
+         (setq mytmpid (funcall 'org-id-get-create))
+	 (setq mytmplink (format "[[id:%s][%s]]" mytmpid mytmphead))
+	 (kill-new mytmplink)
+	 (message "Copied %s to killring (clipboard)" mytmplink)
+         ))
+(global-set-key (kbd "<f5>") 'my/copy-idlink-to-clipboard)
 
 (map! :leader
       "w /" #'evil-window-vsplit
