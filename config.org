@@ -1,6 +1,8 @@
 #+TITLE: Config
 * Header info
-Some other text
+Just some personal information and my doom-theme.
+- I have been loving doom-horizon. I wanted something in dark mode that was best for my eyes.
+  + After going through all the themes I ended up on horizon.
 #+begin_src elisp
 ;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
 
@@ -32,26 +34,36 @@ Some other text
 ;; (setq doom-theme 'doom-one)
 (setq doom-theme 'doom-horizon)
 #+end_src
-* Org Journal
+* General values and Org-journal
 #+begin_src elisp
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
-(setq org-directory "~/Dropbox/org")
-(setq org-journal-dir "~/Dropbox/org/journal")
-;; (setq org-journal-dir "~/Dropbox/org/roam/journalTest")
-;; (setq org-agenda-files (directory-files-recursively "~/Dropbox/org/" "\\.org$"))
-(setq org-journal-date-prefix "* ")
-(setq org-journal-file-format "Journal %Y-%m.org")
-(setq org-journal-date-format "%A, %d %B %Y")
-(setq org-journal-enable-agenda-integration t)
-(setq org-journal-enable-cache t)
-(setq org-journal-file-type 'monthly)
+(setq org-directory "~/Dropbox/org"
+      org-journal-dir "~/Dropbox/org/journal"
+      org-journal-date-prefix "* "
+      org-journal-file-format "Journal %Y-%m.org"
+      org-journal-date-format "%A, %d %B %Y"
+      org-journal-enable-agenda-integration t
+      org-journal-enable-cache t
+      org-journal-file-type 'monthly
+      org-roam-directory "~/Dropbox/org/roam"
+      +org-roam-open-buffer-on-find-file nil)
+
 (setq! org-journal-time-format "")
 
-(setq org-roam-directory "~/Dropbox/org/roam")
-(setq +org-roam-open-buffer-on-find-file nil)
+
+(after! org-journal
+  (setq! org-journal-carryover-items "TODO=\"TODO\"|TODO=\"INPROGRESS\"|TODO=\"WAITING\"|TODO=\"BLOCKED\"|TODO=\"QUESTION\""))
 #+end_src
 * Org Agenda
+#+begin_src elisp
+(after! org-agenda
+  (setq org-agenda-files (directory-files-recursively "~/Dropbox/org/" "\\.org$"))
+  (add-to-list 'org-agenda-bulk-custom-functions
+               '(?a org-agenda-archive-to-archive-sibling)))
+#+end_src
+* Agenda focuses
+Functions used to swap Agenda focuses between personal and work.
 #+begin_src elisp
 (defun my/org-focus-not-work()
   (interactive)
@@ -66,38 +78,27 @@ Some other text
 (defun vispero-journals() (directory-files-recursively "~/Dropbox/org/vispero/journal" "\\.org$"))
 
 ;; Can instead add to 'org-clock-out-hook
-(add-hook 'before-save-hook 'org-update-all-dblocks())
-
-;; (defun my/test-function-get-roam-id()
-;;   (interactive)
-;;   (setq mytmpid (funcall 'org-roam-link--get-id-from-headline))
-;;   (kill-new mytmpid)
-;;   (message "Id is %s" mytmpid)
-;;   )
-
-(after! org-agenda
-  (setq org-agenda-files (directory-files-recursively "~/Dropbox/org/" "\\.org$"))
-  (add-to-list 'org-agenda-bulk-custom-functions
-               '(?a org-agenda-archive-to-archive-sibling)))
 #+end_src
 * Deft
 #+begin_src elisp
 (setq deft-directory "~/Dropbox/org"
       deft-extensions '("org" "txt")
       deft-recursive t)
-;; This determines the style of line numbers in effect. If set to `nil', line
-;; numbers are disabled. For relative line numbers, set this to `relative'.
-(setq display-line-numbers-type t)
-
+#+end_src
+* Logging
+#+begin_src elisp
 (use-package org-superstar  ;; Improved version of org-bullets
   :ensure t
   :config
   (add-hook 'org-mode-hook (lambda () (org-superstar-mode 1))))
 
-(setq org-startup-indented t)           ;; Indent according to section
-(setq org-log-reschedule t)
-(setq org-log-into-drawer t)
-(setq org-enforce-todo-checkbox-dependencies t)
+(setq org-startup-indented t           ;; Indent according to section
+      display-line-numbers-type t
+      org-log-reschedule t
+      org-log-into-drawer t
+      org-enforce-todo-checkbox-dependencies t)
+
+(add-hook 'before-save-hook 'org-update-all-dblocks())
 #+end_src
 * Org-super-agenda
 #+begin_src elisp
@@ -114,6 +115,82 @@ Some other text
       org-agenda-block-separator nil
       org-agenda-tags-column 100 ;; from testing this seems to be a good value
       org-agenda-compact-blocks t)
+
+(setq org-super-agenda-header-map (make-sparse-keymap)) ;;Needed for evil keys in org-super-agenda
+(setq org-agenda-custom-commands
+      '(("o" "Overview"
+         ((agenda "" ((org-agenda-span 'day)
+                      (org-super-agenda-groups
+                       '((:name "Today"
+                          :time-grid t
+                          :date today
+                          :todo "TODAY"
+                          :scheduled today
+                          :order 1)))))
+          (alltodo "" ((org-agenda-overriding-header "")
+                       (org-super-agenda-groups
+                        '((:name "Next to do"
+                           :todo "NEXT"
+                           :order 1)
+                          (:name "Important"
+                           :tag "Important"
+                           :priority "A"
+                           :order 6)
+                          (:name "Due Today"
+                           :deadline today
+                           :order 2)
+                          (:name "Due Soon"
+                           :deadline future
+                           :order 8)
+                          (:name "Overdue"
+                           :deadline past
+                           :face error
+                           :order 7)
+                          (:name "Assignments"
+                           :tag "Assignment"
+                           :order 10)
+                          (:name "Issues"
+                           :tag "Issue"
+                           :order 12)
+                          (:name "Emacs"
+                           :tag "Emacs"
+                           :order 13)
+                          (:name "Projects"
+                           :tag "Project"
+                           :order 14)
+                          (:name "Research"
+                           :tag "Research"
+                           :order 15)
+                          (:name "To read"
+                           :tag "Read"
+                           :order 30)
+                          (:name "Waiting"
+                           :todo "WAITING"
+                           :order 20)
+                          (:name "University"
+                           :tag "uni"
+                           :order 32)
+                          (:name "Trivial"
+                           :priority<= "E"
+                           :tag ("Trivial" "Unimportant")
+                           :todo ("SOMEDAY" )
+                           :order 90)
+                          (:discard (:tag ("Chore" "Routine" "Daily")))))))))))
+
+;; (setq org-agenda-custom-commands
+;;       '(("A" . "Agendas")
+;;       ("AT" "Daily Overview"
+;;        (agenda "" (org-agenda-span 'day)
+;;                (org-super-agenda-groups
+;;                 '((:name "Today"
+;;                    :time-grid t
+;;                    :date today
+;;                    :todo "INPROGRESS")))))
+
+;;       ("AW" "Weekly Overview"
+;;        (org-agenda-span 'week))
+
+;;       ))
 
 ;; (after! org-capture
 ;;   (setq org-capture-templates
@@ -133,35 +210,34 @@ Some other text
 ;;       org-agenda-compact-blocks t)
 
 
-;; Reset checkboxes from Rainer
-;; (defun org-reset-checkbox-state-maybe ()
-;;   "Reset all checkboxes in an entry if the `RESET_CHECK_BOXES' property is set"
-;;   (interactive "*")
-;;   (if (org-entry-get (point) "RESET_CHECK_BOXES")
-;;       (org-reset-checkbox-state-subtree)))
-
-;; (defun org-checklist ()
-;;   (when (member org-state org-done-keywords) ;; org-state dynamically bound in org.el/org-todo
-;;     (org-reset-checkbox-state-maybe)))
-
-;; (add-hook 'org-after-todo-state-change-hook 'org-checklist)
-;;
-;;new attempt
-;; (defun glasser-org-reset-check-on-repeat ()
-;;   (when (and (org-get-repeat) (member org-state org-done-keywords))
-;;     (org-reset-checkbox-state-subtree)))
-;; (add-hook 'org-after-todo-state-change-hook 'glasser-org-reset-check-on-repeat)
 
 (defun make-youtube-time-link (link-text)
   (let ((substrings (split-string link-text ",")))
-  (browse-url (format "%s&t=%sm%ss" (first substrings) (second substrings) (third substrings)))))
+    (browse-url (format "%s&t=%sm%ss" (first substrings) (second substrings) (third substrings)))))
+#+end_src
+* Checkbox attempts
+#+begin_src elisp :tangle false
+;;Reset checkboxes from Rainer
+(defun org-reset-checkbox-state-maybe ()
+  "Reset all checkboxes in an entry if the `RESET_CHECK_BOXES' property is set"
+  (interactive "*")
+  (if (org-entry-get (point) "RESET_CHECK_BOXES")
+      (org-reset-checkbox-state-subtree)))
 
-(after! org-journal
-  (setq! org-journal-carryover-items "TODO=\"TODO\"|TODO=\"INPROGRESS\"|TODO=\"WAITING\"|TODO=\"BLOCKED\"|TODO=\"QUESTION\""))
-  ;; (setq! ort-todo-keyword-faces
-  ;;       `(("TODO" . org-warning) ("WAITING" . "yellow")
-  ;;         ("CANCELED" . (:foreground "blue" :weight bold)))))
+(defun org-checklist ()
+  (when (member org-state org-done-keywords) ;; org-state dynamically bound in org.el/org-todo
+    (org-reset-checkbox-state-maybe)))
 
+(add-hook 'org-after-todo-state-change-hook 'org-checklist)
+
+;;new attempt
+(defun glasser-org-reset-check-on-repeat ()
+  (when (and (org-get-repeat) (member org-state org-done-keywords))
+    (org-reset-checkbox-state-subtree)))
+(add-hook 'org-after-todo-state-change-hook 'glasser-org-reset-check-on-repeat)
+#+end_src
+* Org
+#+begin_src elisp
 (add-to-list 'org-modules 'org-checklist)
 
 (after! org
@@ -214,7 +290,9 @@ Some other text
 
                  ))
   )
-
+#+end_src
+* Org-roam
+#+begin_src elisp
 (after! org-roam
   (org-roam-db-build-cache ())
 
@@ -285,8 +363,9 @@ Some other text
           :file-name "website/%(url-host (url-generic-parse-url \"${ref}\"))-${slug}"
           :head "#+TITLE: ${title}\n#+Created: %u\n#+roam_key: ${ref}\n- tags ::  "
           :unnarrowed t))))
-
-
+#+end_src
+* Org-fancy-priorities
+#+begin_src elisp
 (use-package org-fancy-priorities
   :ensure t
   :hook
@@ -333,7 +412,9 @@ text and copying to the killring."
 	 (message "Copied %s to killring (clipboard)" mytmplink)
          ))
 (global-set-key (kbd "<f5>") 'my/copy-idlink-to-clipboard)
-
+#+end_src
+* Key mappings
+#+begin_src elisp
 (map! :leader
       "w /" #'evil-window-vsplit
       "w -" #'evil-window-split
