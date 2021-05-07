@@ -1,5 +1,6 @@
 #+TITLE: Config
 * Header info
+Some other text
 #+begin_src elisp
 ;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
 
