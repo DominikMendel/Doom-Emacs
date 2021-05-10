@@ -140,7 +140,7 @@ text and copying to the killring."
   ;; (setq org-todo-keywords '((sequence  "TODO(t)" "INPROGRESS(i)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)") (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
   (setq org-todo-keywords
         '((sequence  "TODO(t)" "INPROGRESS(i!)" "NEXT(n!)" "WAITING(w@/!)" "BLOCKED(b@/!)" "|" "DONE(d@)" "CANCELLED(c!)" "ABANDONED(a@)")
-          (sequence "QUESTION(q)" "|" "ANSWERED(!)")
+          (sequence "QUESTION(q)" "|" "ANSWERED(@/!)")
           (sequence "REPEAT(r)" "|" "COMPLETED")
           (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
   (setq org-log-done 'time)
