@@ -55,14 +55,15 @@ Just some personal information and my doom-theme.
 (after! org-journal
   (setq! org-journal-carryover-items "TODO=\"TODO\"|TODO=\"INPROGRESS\"|TODO=\"WAITING\"|TODO=\"BLOCKED\"|TODO=\"QUESTION\""))
 #+end_src
-* Org Agenda
+* Custom functions
+** Youtube url link
+I wanted to extend the YouTube url link in Org Mode by including time markings. This function will concat the minutes and seconds to the end of the url link
 #+begin_src elisp
-(after! org-agenda
-  (setq org-agenda-files (directory-files-recursively "~/Dropbox/org/" "\\.org$"))
-  (add-to-list 'org-agenda-bulk-custom-functions
-               '(?a org-agenda-archive-to-archive-sibling)))
+(defun make-youtube-time-link (link-text)
+  (let ((substrings (split-string link-text ",")))
+    (browse-url (format "%s&t=%sm%ss" (first substrings) (second substrings) (third substrings)))))
 #+end_src
-* Agenda focuses
+** Agenda focuses
 Functions used to swap Agenda focuses between personal and work.
 #+begin_src elisp
 (defun my/org-focus-not-work()
@@ -74,10 +75,37 @@ Functions used to swap Agenda focuses between personal and work.
 (defun my/org-focus-all()
   (interactive)
   (setq org-agenda-files (directory-files-recursively "~/Dropbox/org" "\\.org$")))
-
+#+end_src
+** Clocktable function
+This function is used in the ":match" parameter for an Org-clocktable. It will pull all clocked times from my entire work journal directory.
+- This is very useful to record how much time I spent working on a specific project.
+- I usually follow the Org-clocktable with the corresponding tag associated with the project to filter all of my total work to the work in the project I want.
+  #+begin_src elisp
 (defun vispero-journals() (directory-files-recursively "~/Dropbox/org/vispero/journal" "\\.org$"))
+  #+end_src
+** Create linkable UUID
+- Credit to Rainer König
+I use this function all the time to create a UUID link to a header file so I can keep track of the link even after I archive it.
+This is epsecially useful in my workflow where I would copy a task from my agenda to my journal to show that I am working on said task for the day. Later when I finish that task and archive it I still have a valid link.
+#+begin_src elisp
+(defun my/copy-idlink-to-clipboard() "Copy an ID link with the
+headline to killring, if no ID is there then create a new unique
+ID.  This function works only in org-mode or org-agenda buffers.
 
-;; Can instead add to 'org-clock-out-hook
+The purpose of this function is to easily construct id:-links to
+org-mode items. If its assigned to a key it saves you marking the
+text and copying to the killring."
+       (interactive)
+       (when (eq major-mode 'org-agenda-mode) ;if we are in agenda mode we switch to orgmode
+         (org-agenda-show)
+         (org-agenda-goto))
+       (when (eq major-mode 'org-mode) ; do this only in org-mode buffers
+         (setq mytmphead (nth 4 (org-heading-components)))
+         (setq mytmpid (funcall 'org-id-get-create))
+         (setq mytmplink (format "[[id:%s][%s]]" mytmpid mytmphead))
+         (kill-new mytmplink)
+         (message "Copied %s to killring (clipboard)" mytmplink)))
+(global-set-key (kbd "<f5>") 'my/copy-idlink-to-clipboard)
 #+end_src
 * Deft
 #+begin_src elisp
@@ -87,10 +115,6 @@ Functions used to swap Agenda focuses between personal and work.
 #+end_src
 * Logging
 #+begin_src elisp
-(use-package org-superstar  ;; Improved version of org-bullets
-  :ensure t
-  :config
-  (add-hook 'org-mode-hook (lambda () (org-superstar-mode 1))))
 
 (setq org-startup-indented t           ;; Indent according to section
       display-line-numbers-type t
@@ -100,7 +124,69 @@ Functions used to swap Agenda focuses between personal and work.
 
 (add-hook 'before-save-hook 'org-update-all-dblocks())
 #+end_src
-* Org-super-agenda
+* Org
+** Generl org
+#+begin_src elisp
+(add-to-list 'org-modules 'org-checklist)
+
+(after! org
+  ;; (require 'org-checklist)
+  (setq org-startup-folded t)
+  (add-to-list 'org-modules 'org-checklist)
+  (require 'org-checklist)
+  (setq org-sparse-tree-open-archived-trees t) ;;For finding archived headings
+  (setq org-clock-into-drawer "CLOCKING")
+  (org-add-link-type "yt" #'make-youtube-time-link)
+  ;; (setq org-todo-keywords '((sequence  "TODO(t)" "INPROGRESS(i)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)") (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
+  (setq org-todo-keywords
+        '((sequence  "TODO(t)" "INPROGRESS(i!)" "NEXT(n!)" "WAITING(w@/!)" "BLOCKED(b@/!)" "|" "DONE(d@)" "CANCELLED(c!)" "ABANDONED(a@)")
+          (sequence "QUESTION(q)" "|" "ANSWERED(!)")
+          (sequence "REPEAT(r)" "|" "COMPLETED")
+          (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
+  (setq org-log-done 'time)
+  (setq org-refile-targets (quote ((org-agenda-files :maxlevel . 2))))
+
+  )
+#+end_src
+** Org-capture-templates
+- %a allows for a link inserted from the file/headline you are currently at and inserts it into the capture
+- %A is the same as %a but prompts for a description of the link
+#+begin_src elisp
+(setq +org-capture-todo-file "~/Dropbox/org/roam/vispero/20210503-vispero_agenda.org")
+(after! org
+  ;; (add-to-list 'org-capture-templates
+  ;; '("T" "Todo" entry (file+headline "~/Dropbox/org/roam/vispero/20210503-vispero_agenda.org" "Tasks")
+  ;;   "* TODO %?\n %i\n %a"))
+  (setq org-capture-templates
+        '(
+          ("p" "Personal")
+          ("pt" "todoDOM" entry (file+headline "~/Dropbox/org/roam/vispero/20210503-vispero_agenda.org" "Tasks")
+           "* TODO %?\n %i\n"
+           :empty-lines-before 1
+           :clock-in t)
+          ;; :prepend t)
+          ;; :headline "Test"
+          ;; :type entry
+          ;; :template ("* %?" "%i %a"))
+
+          ("w" "Work")
+          ("wt" "Work General ToDo" entry (file+headline +org-capture-todo-file "Tasks")
+           "* TODO %?\n %i\n")
+
+          ("wp" "Work Project" entry (file+headline +org-capture-todo-file "Projects")
+           "* TODO %?\n %i\n%a\n")
+
+          ))
+  )
+#+end_src
+** Org Agenda
+#+begin_src elisp
+(after! org-agenda
+  (setq org-agenda-files (directory-files-recursively "~/Dropbox/org/" "\\.org$"))
+  (add-to-list 'org-agenda-bulk-custom-functions
+               '(?a org-agenda-archive-to-archive-sibling)))
+#+end_src
+** Org-super-agenda
 #+begin_src elisp
 ;;Org-Super-Agenda
 (use-package! org-super-agenda
@@ -211,87 +297,8 @@ Functions used to swap Agenda focuses between personal and work.
 
 
 
-(defun make-youtube-time-link (link-text)
-  (let ((substrings (split-string link-text ",")))
-    (browse-url (format "%s&t=%sm%ss" (first substrings) (second substrings) (third substrings)))))
 #+end_src
-* Checkbox attempts
-#+begin_src elisp :tangle false
-;;Reset checkboxes from Rainer
-(defun org-reset-checkbox-state-maybe ()
-  "Reset all checkboxes in an entry if the `RESET_CHECK_BOXES' property is set"
-  (interactive "*")
-  (if (org-entry-get (point) "RESET_CHECK_BOXES")
-      (org-reset-checkbox-state-subtree)))
-
-(defun org-checklist ()
-  (when (member org-state org-done-keywords) ;; org-state dynamically bound in org.el/org-todo
-    (org-reset-checkbox-state-maybe)))
-
-(add-hook 'org-after-todo-state-change-hook 'org-checklist)
-
-;;new attempt
-(defun glasser-org-reset-check-on-repeat ()
-  (when (and (org-get-repeat) (member org-state org-done-keywords))
-    (org-reset-checkbox-state-subtree)))
-(add-hook 'org-after-todo-state-change-hook 'glasser-org-reset-check-on-repeat)
-#+end_src
-* Org
-#+begin_src elisp
-(add-to-list 'org-modules 'org-checklist)
-
-(after! org
-  ;; (require 'org-checklist)
-  (setq org-startup-folded t)
-  (add-to-list 'org-modules 'org-checklist)
-  (require 'org-checklist)
-  (setq org-sparse-tree-open-archived-trees t) ;;For finding archived headings
-  (setq org-clock-into-drawer "CLOCKING")
-  (org-add-link-type "yt" #'make-youtube-time-link)
-  ;; (setq org-todo-keywords '((sequence  "TODO(t)" "INPROGRESS(i)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)") (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
-  (setq org-todo-keywords
-        '((sequence  "TODO(t)" "INPROGRESS(i!)" "NEXT(n!)" "WAITING(w@/!)" "BLOCKED(b@/!)" "|" "DONE(d@)" "CANCELLED(c!)" "ABANDONED(a@)")
-          (sequence "QUESTION(q)" "|" "ANSWERED(!)")
-          (sequence "REPEAT(r)" "|" "COMPLETED")
-          (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
-  (setq org-log-done 'time)
-  ;; This allows refile targets in the same buffer:
-  ;; (defun +org/opened-buffer-files ()
-  ;;   "Return the list of files currently opened in emacs"
-  ;;   (delq nil
-  ;;         (mapcar (lambda (x)
-  ;;                   (if (and (buffer-file-name x)
-  ;;                            (string-match "\\.org$"
-  ;;                                          (buffer-file-name x)))
-  ;;                       (buffer-file-name x)))
-  ;;                 (buffer-list))))
-
-  ;; (setq org-refile-targets '((+org/opened-buffer-files :maxlevel . 9)))
-  (setq org-refile-targets (quote ((org-agenda-files :maxlevel . 2))))
-
-  ;; (add-to-list 'org-capture-templates
-        ;; '("T" "Todo" entry (file+headline "~/Dropbox/org/roam/vispero/20210503-vispero_agenda.org" "Tasks")
-        ;;   "* TODO %?\n %i\n %a"))
-  (setq org-capture-templates
-               '(("T" "todoDOM" entry (file+headline "~/Dropbox/org/roam/vispero/20210503-vispero_agenda.org" "Tasks")
-                 ;; :file +org-capture-todo-file
-                  "* TODO %?\n %i\n %a")
-                 ;; :prepend t)
-                 ;; :headline "Test"
-                 ;; :type entry
-                 ;; :template ("* %?" "%i %a"))
-
-                 ("G" "todoDOM2"
-                 :file +org-capture-todo-file
-                 :prepend t
-                 :headline "Test"
-                 :type entry
-                 :template ("* %?" "%i %a"))
-
-                 ))
-  )
-#+end_src
-* Org-roam
+** Org-roam
 #+begin_src elisp
 (after! org-roam
   (org-roam-db-build-cache ())
@@ -354,9 +361,7 @@ Functions used to swap Agenda focuses between personal and work.
          :head "#+TITLE: Bug ${title}\n#+Created: %u\n#+last_modified: %U\n#+roam_key: http://bugzilla.fsi.local/show_bug.cgi?id=${slug}\n#+roam_alias: ${slug}\n- tags :: [[file:~/Dropbox/org/roam/20210413-vispero_bugzilla.org][Vispero Bugzilla]] \n"
          "%?"
          :unnarrowed t)
-        )
-
-        )
+        ))
 
   (setq org-roam-capture-ref-templates
        '(("r" "ref" plain #'org-roam-capture--get-point "%?"
@@ -364,7 +369,15 @@ Functions used to swap Agenda focuses between personal and work.
           :head "#+TITLE: ${title}\n#+Created: %u\n#+roam_key: ${ref}\n- tags ::  "
           :unnarrowed t))))
 #+end_src
-* Org-fancy-priorities
+* Org visuals
+** Org Superstar
+#+begin_src elisp
+(use-package org-superstar  ;; Improved version of org-bullets
+  :ensure t
+  :config
+  (add-hook 'org-mode-hook (lambda () (org-superstar-mode 1))))
+#+end_src
+** Org-fancy-priorities
 #+begin_src elisp
 (use-package org-fancy-priorities
   :ensure t
@@ -393,25 +406,6 @@ Functions used to swap Agenda focuses between personal and work.
 ;; they are implemented.
 
 
-(defun my/copy-idlink-to-clipboard() "Copy an ID link with the
-headline to killring, if no ID is there then create a new unique
-ID.  This function works only in org-mode or org-agenda buffers.
-
-The purpose of this function is to easily construct id:-links to
-org-mode items. If its assigned to a key it saves you marking the
-text and copying to the killring."
-       (interactive)
-       (when (eq major-mode 'org-agenda-mode) ;if we are in agenda mode we switch to orgmode
-	 (org-agenda-show)
-	 (org-agenda-goto))
-       (when (eq major-mode 'org-mode) ; do this only in org-mode buffers
-	 (setq mytmphead (nth 4 (org-heading-components)))
-         (setq mytmpid (funcall 'org-id-get-create))
-	 (setq mytmplink (format "[[id:%s][%s]]" mytmpid mytmphead))
-	 (kill-new mytmplink)
-	 (message "Copied %s to killring (clipboard)" mytmplink)
-         ))
-(global-set-key (kbd "<f5>") 'my/copy-idlink-to-clipboard)
 #+end_src
 * Key mappings
 #+begin_src elisp
@@ -427,33 +421,70 @@ text and copying to the killring."
       "J" #'outline-back-to-heading
       "I" #'org-roam-insert
       )
+
 (map! :after org-journal
- :map org-journal-mode-map
- :localleader
- "c" 'nil
- )
+      :map org-journal-mode-map
+      :localleader
+      "c" 'nil
+      )
 
 (map!
  :after org-journal
  :map org-journal-mode-map
-      :localleader
-      (:prefix ("c" . "clock")
-       "c" #'org-clock-cancel
-       "l" #'+org/toggle-last-clock
-       "i" #'org-clock-in
-       "I" #'org-clock-in-last
-       "o" #'org-clock-out
-       "r" #'org-resolve-clocks
-       "R" #'org-clock-report
-       "t" #'org-evaluate-time-range
-       )
-)
+ :localleader
+ (:prefix ("c" . "clock")
+  "c" #'org-clock-cancel
+  "l" #'+org/toggle-last-clock
+  "i" #'org-clock-in
+  "I" #'org-clock-in-last
+  "o" #'org-clock-out
+  "r" #'org-resolve-clocks
+  "R" #'org-clock-report
+  "t" #'org-evaluate-time-range
+  )
+ )
 
 (map! :n "," (cmd! (push (cons t ?m) unread-command-events)
                    (push (cons t 32) unread-command-events)))
 
 ;; (map! :localleader
-      ;; "j j" #'(lambda () (interactive) (call-interactively) (outline-up-heading) (org/insert-item-below)))
-        ;; "j j" #'(lambda () (interactive) (call-interactively #'outline-up-heading) (call-interactively #'org/insert-item-below))
-      ;; "j k" #'outline-up-heading)
+;; "j j" #'(lambda () (interactive) (call-interactively) (outline-up-heading) (org/insert-item-below)))
+;; "j j" #'(lambda () (interactive) (call-interactively #'outline-up-heading) (call-interactively #'org/insert-item-below))
+;; "j k" #'outline-up-heading)
+#+end_src
+* Unused functions
+#+begin_src elisp :tangle no
+  ;; This allows refile targets in the same buffer:
+  (defun +org/opened-buffer-files ()
+    "Return the list of files currently opened in emacs"
+    (delq nil
+          (mapcar (lambda (x)
+                    (if (and (buffer-file-name x)
+                             (string-match "\\.org$"
+                                           (buffer-file-name x)))
+                        (buffer-file-name x)))
+                  (buffer-list))))
+
+  (setq org-refile-targets '((+org/opened-buffer-files :maxlevel . 9)))
+#+end_src
+** Checkbox attempts
+#+begin_src elisp :tangle no
+;;Reset checkboxes from Rainer
+(defun org-reset-checkbox-state-maybe ()
+  "Reset all checkboxes in an entry if the `RESET_CHECK_BOXES' property is set"
+  (interactive "*")
+  (if (org-entry-get (point) "RESET_CHECK_BOXES")
+      (org-reset-checkbox-state-subtree)))
+
+(defun org-checklist ()
+  (when (member org-state org-done-keywords) ;; org-state dynamically bound in org.el/org-todo
+    (org-reset-checkbox-state-maybe)))
+
+(add-hook 'org-after-todo-state-change-hook 'org-checklist)
+
+;;new attempt
+(defun glasser-org-reset-check-on-repeat ()
+  (when (and (org-get-repeat) (member org-state org-done-keywords))
+    (org-reset-checkbox-state-subtree)))
+(add-hook 'org-after-todo-state-change-hook 'glasser-org-reset-check-on-repeat)
 #+end_src
