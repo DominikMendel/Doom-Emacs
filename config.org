@@ -152,6 +152,14 @@ text and copying to the killring."
 - %a allows for a link inserted from the file/headline you are currently at and inserts it into the capture
 - %A is the same as %a but prompts for a description of the link
 #+begin_src elisp
+(defun org-journal-find-location ()
+  ;; Open today's journal, but specify a non-nil prefix argument in order to
+  ;; inhibit inserting the heading; org-capture will insert the heading.
+  (org-journal-new-entry t)
+  (unless (eq org-journal-file-type 'daily)
+    (org-narrow-to-subtree))
+  (goto-char (point-max)))
+
 (setq +org-capture-todo-file "~/Dropbox/org/roam/vispero/20210503-vispero_agenda.org")
 (after! org
   ;; (add-to-list 'org-capture-templates
@@ -176,6 +184,19 @@ text and copying to the killring."
           ("wp" "Work Project" entry (file+headline +org-capture-todo-file "Projects")
            "* TODO %?\n %i\n%a\n")
 
+          ("j" "Journal")
+          ("jj" "Journal New Entry" plain (function org-journal-find-location)
+           ;; "** %(format-time-string org-journal-time-format)%^{Title}%i%?"
+           "** %(format-time-string org-journal-time-format)%i%?"
+           :jump-to-captured nil
+           :immediate-finish nil
+           :unnarrowed nil)
+
+          ("jt" "Journal New Clock Entry" plain (function org-journal-find-location)
+           "** %(format-time-string org-journal-time-format)%i%?"
+           :jump-to-captured nil
+           :immediate-finish nil
+           :clock-in t)
           ))
   )
 #+end_src
