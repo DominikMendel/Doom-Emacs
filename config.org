@@ -139,9 +139,9 @@ text and copying to the killring."
   (org-add-link-type "yt" #'make-youtube-time-link)
   ;; (setq org-todo-keywords '((sequence  "TODO(t)" "INPROGRESS(i)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)") (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
   (setq org-todo-keywords
-        '((sequence  "TODO(t)" "INPROGRESS(i!)" "NEXT(n!)" "WAITING(w@/!)" "BLOCKED(b@/!)" "|" "DONE(d@)" "CANCELLED(c!)" "ABANDONED(a@)")
+        '((sequence  "TODO(t)" "INPROGRESS(i!)" "IN-REVIEW(r!)" "NEXT(n!)" "WAITING(w@/!)" "BLOCKED(b@/!)" "SOMEDAY(s!)" "|" "DONE(d@)" "CANCELLED(c!)" "ABANDONED(a@)")
           (sequence "QUESTION(q)" "|" "ANSWERED(@/!)")
-          (sequence "REPEAT(r)" "|" "COMPLETED")
+          (sequence "REPEAT" "|" "COMPLETED")
           (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
   (setq org-log-done 'time)
   (setq org-refile-targets (quote ((org-agenda-files :maxlevel . 2))))
@@ -509,4 +509,3 @@ text and copying to the killring."
     (org-reset-checkbox-state-subtree)))
 (add-hook 'org-after-todo-state-change-hook 'glasser-org-reset-check-on-repeat)
 #+end_src
-* Test test
