@@ -150,6 +150,7 @@
         +dragndrop                         ; drag & drop files/images into org buffers
         +roam
         +journal
+        +pretty
         +jupyter	; ipython/jupyter support for babel)       ;;php               ; perl's insecure younger brother
 	)
        ;;plantuml          ; diagrams for confusing people more

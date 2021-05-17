@@ -127,17 +127,13 @@ text and copying to the killring."
 * Org
 ** Generl org
 #+begin_src elisp
-(add-to-list 'org-modules 'org-checklist)
-
 (after! org
-  ;; (require 'org-checklist)
   (setq org-startup-folded t)
   (add-to-list 'org-modules 'org-checklist)
   (require 'org-checklist)
   (setq org-sparse-tree-open-archived-trees t) ;;For finding archived headings
   (setq org-clock-into-drawer "CLOCKING")
   (org-add-link-type "yt" #'make-youtube-time-link)
-  ;; (setq org-todo-keywords '((sequence  "TODO(t)" "INPROGRESS(i)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)") (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
   (setq org-todo-keywords
         '((sequence  "TODO(t)" "INPROGRESS(i!)" "IN-REVIEW(r!)" "NEXT(n!)" "WAITING(w@/!)" "BLOCKED(b@/!)" "SOMEDAY(s!)" "|" "DONE(d@)" "CANCELLED(c!)" "ABANDONED(a@)")
           (sequence "QUESTION(q)" "|" "ANSWERED(@/!)")
@@ -209,7 +205,6 @@ text and copying to the killring."
 #+end_src
 ** Org-super-agenda
 #+begin_src elisp
-;;Org-Super-Agenda
 (use-package! org-super-agenda
   :commands (org-super-agenda-mode))
 
@@ -224,80 +219,163 @@ text and copying to the killring."
       org-agenda-compact-blocks t)
 
 (setq org-super-agenda-header-map (make-sparse-keymap)) ;;Needed for evil keys in org-super-agenda
-(setq org-agenda-custom-commands
-      '(("o" "Overview"
-         ((agenda "" ((org-agenda-span 'day)
-                      (org-super-agenda-groups
-                       '((:name "Today"
-                          :time-grid t
-                          :date today
-                          :todo "TODAY"
-                          :scheduled today
-                          :order 1)))))
-          (alltodo "" ((org-agenda-overriding-header "")
-                       (org-super-agenda-groups
-                        '((:name "Next to do"
-                           :todo "NEXT"
-                           :order 1)
-                          (:name "Important"
-                           :tag "Important"
-                           :priority "A"
-                           :order 6)
-                          (:name "Due Today"
-                           :deadline today
-                           :order 2)
-                          (:name "Due Soon"
-                           :deadline future
-                           :order 8)
-                          (:name "Overdue"
-                           :deadline past
-                           :face error
-                           :order 7)
-                          (:name "Assignments"
-                           :tag "Assignment"
-                           :order 10)
-                          (:name "Issues"
-                           :tag "Issue"
-                           :order 12)
-                          (:name "Emacs"
-                           :tag "Emacs"
-                           :order 13)
-                          (:name "Projects"
-                           :tag "Project"
-                           :order 14)
-                          (:name "Research"
-                           :tag "Research"
-                           :order 15)
-                          (:name "To read"
-                           :tag "Read"
-                           :order 30)
-                          (:name "Waiting"
-                           :todo "WAITING"
-                           :order 20)
-                          (:name "University"
-                           :tag "uni"
-                           :order 32)
-                          (:name "Trivial"
-                           :priority<= "E"
-                           :tag ("Trivial" "Unimportant")
-                           :todo ("SOMEDAY" )
-                           :order 90)
-                          (:discard (:tag ("Chore" "Routine" "Daily")))))))))))
+(after! org
+  (setq org-agenda-custom-commands
+        '(
+          ("ot" "Overview test"
+           ((agenda "" ((org-agenda-span 'day)
+                        (org-super-agenda-groups
+                         '((:name "Today"
+                            :time-grid t
+                            :date today
+                            :todo "TODAY"
+                            :scheduled today
+                            :order 1)))))
+            (alltodo "" ((org-agenda-overriding-header "")
+                         (org-super-agenda-groups
+                          '((:name "Next to do"
+                             :todo "NEXT"
+                             :order 4)
+                            (:name "Important"
+                             :tag "Important"
+                             :priority "A"
+                             :order 6)
+                            (:name "Due Today"
+                             :deadline today
+                             :order 2)
+                            (:name "Due Soon"
+                             :deadline future
+                             :order 8)
+                            (:name "Overdue"
+                             :deadline past
+                             :face error
+                             :order 7)
+                            (:name "Projects"
+                             :tag "Project"
+                             :order 10)
+                            (:name "Questions"
+                             :todo "QUESTION"
+                             :order 15)
+                            (:name "Inprogress"
+                             :todo "INPROGRESS"
+                             :order 3)
+                            (:name "In review"
+                             :todo "IN-REVIEW"
+                             :order 14)
+                            (:name "Waiting"
+                             :todo "WAITING"
+                             :order 20)
+                            (:name "Some day"
+                             :todo "SOMEDAY"
+                             :order 25)
+                            (:name "Trivial"
+                             :priority<= "C"
+                             :tag ("Trivial" "Unimportant")
+                             :todo ("SOMEDAY")
+                             :order 90)
+                            (:name "Everything else"
+                             :anything t
+                             :auto-tags t
+                             :order 89)
+                            ;; (:name "Random shit"
+                            ;;  :auto-tags t
+                            ;;  :priority<= "C"
+                            ;;  :order 89)
+                            (:discard (:tag ("Chore" "Routine" "Daily")))
+                            ))))))
+
+
+          ("p" "Projects"
+           ;; (
+           ((agenda "" ((org-agenda-span 'day)
+                        (org-super-agenda-groups
+                         '((:name "Today"
+                            :time-grid t
+                            :date today
+                            :todo "TODAY"
+                            :scheduled today
+                            :order 1)))))
+            (alltodo "" ((org-agenda-overriding-header "")
+                         (org-super-agenda-groups
+                          `((:name "WAITING"
+                             :children "WAITING"
+                             :order 2)
+                            (:discard (:anything t)))
+                          )))))
+          ;; ))))
+          ))
+
+  )
+
+;; '(
+;;   ("o" "Overview")
+;;   ("ot" "Overview Test"
+;; ((agenda "" ((org-agenda-span 'day)
+;;              (org-super-agenda-groups
+;;               '((:name "Today"
+;;                  :time-grid t
+;;                  :date today
+;;                  :todo "TODAY"
+;;                  :scheduled today
+;;                  :order 1)))))
+;;  (alltodo "" ((org-agenda-overriding-header "")
+;;               (org-super-agenda-groups
+;;                '((:name "Next to do"
+;;                   :todo "NEXT"
+;;                   :order 4)
+;;                  (:name "Important"
+;;                   :tag "Important"
+;;                   :priority "A"
+;;                   :order 6)
+;;                  (:name "Due Today"
+;;                   :deadline today
+;;                   :order 2)
+;;                  (:name "Due Soon"
+;;                   :deadline future
+;;                   :order 8)
+;;                  (:name "Overdue"
+;;                   :deadline past
+;;                   :face error
+;;                   :order 7)
+;;                  (:name "Projects"
+;;                   :tag "Project"
+;;                   :order 10)
+;;                  (:name "Questions"
+;;                   :todo "QUESTION"
+;;                   :order 15)
+;;                  (:name "Inprogress"
+;;                   :todo "INPROGRESS"
+;;                   :order 3)
+;;                  (:name "In review"
+;;                   :todo "IN-REVIEW"
+;;                   :order 14)
+;;                  (:name "Waiting"
+;;                   :todo "WAITING"
+;;                   :order 20)
+;;                  (:name "Some day"
+;;                   :todo "SOMEDAY"
+;;                   :order 25)
+;;                  (:name "Trivial"
+;;                   :priority<= "C"
+;;                   :tag ("Trivial" "Unimportant")
+;;                   :todo ("SOMEDAY")
+;;                   :order 90)
+;;                  (:discard (:tag ("Chore" "Routine" "Daily")))))))))))
 
 ;; (setq org-agenda-custom-commands
 ;;       '(("A" . "Agendas")
-;;       ("AT" "Daily Overview"
-;;        (agenda "" (org-agenda-span 'day)
-;;                (org-super-agenda-groups
-;;                 '((:name "Today"
-;;                    :time-grid t
-;;                    :date today
-;;                    :todo "INPROGRESS")))))
+;;         ("AT" "Daily Overview"
+;;          (agenda "" (org-agenda-span 'day)
+;;                  (org-super-agenda-groups
+;;                   '((:name "Today"
+;;                      :time-grid t
+;;                      :date today
+;;                      :todo "INPROGRESS")))))
 
-;;       ("AW" "Weekly Overview"
-;;        (org-agenda-span 'week))
+;;         ("AW" "Weekly Overview"
+;;          (org-agenda-span 'week))
 
-;;       ))
+;;         ))
 
 ;; (after! org-capture
 ;;   (setq org-capture-templates
@@ -315,9 +393,6 @@ text and copying to the killring."
 ;;       org-agenda-block-separator nil
 ;;       org-agenda-tags-column 100 ;; from testing this seems to be a good value
 ;;       org-agenda-compact-blocks t)
-
-
-
 #+end_src
 ** Org-roam
 #+begin_src elisp
@@ -392,20 +467,22 @@ text and copying to the killring."
 #+end_src
 * Org visuals
 ** Org Superstar
+Don't need anymore. It is included in org +pretty
 #+begin_src elisp
-(use-package org-superstar  ;; Improved version of org-bullets
-  :ensure t
-  :config
-  (add-hook 'org-mode-hook (lambda () (org-superstar-mode 1))))
+;; (use-package org-superstar  ;; Improved version of org-bullets
+;;   :ensure t
+;;   :config
+;;   (add-hook 'org-mode-hook (lambda () (org-superstar-mode 1))))
 #+end_src
 ** Org-fancy-priorities
+Don't need anymore. It is included in org +pretty
 #+begin_src elisp
-(use-package org-fancy-priorities
-  :ensure t
-  :hook
-  (org-mode . org-fancy-priorities-mode)
-  :config
-  (setq org-fancy-priorities-list '("❗" "⬆" "⬇" "☕")))
+;; (use-package org-fancy-priorities
+;;   :ensure t
+;;   :hook
+;;   (org-mode . org-fancy-priorities-mode)
+;;   :config
+;;   (setq org-fancy-priorities-list '("❗" "⬆" "⬇" "☕")))
 
 
 
@@ -425,8 +502,6 @@ text and copying to the killring."
 ;;
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
-
-
 #+end_src
 * Key mappings
 #+begin_src elisp
