@@ -39,7 +39,7 @@ Just some personal information and my doom-theme.
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/Dropbox/org"
-      ;; org-journal-dir "~/Dropbox/org/journal"
+      org-journal-dir "~/Dropbox/org/journal"
       org-journal-date-prefix "* "
       org-journal-file-format "Journal %Y-%m.org"
       org-journal-date-format "%A, %d %B %Y"
@@ -63,13 +63,17 @@ Just some personal information and my doom-theme.
 #+end_src
 ** Org journal per system
 - String obtained for system by "uname -r"
-#+begin_src elisp :tangle (when (eq (doom-system-distro) 'arch) "yes" "no")
+,#+begin_src elisp :tangle (when (eq (doom-system-distro) 'arch) "yes" "no")
+(after! org
   (setq org-journal-dir "~/Dropbox/org/journal")
-#+end_src
+  )
+,#+end_src
 
-#+begin_src elisp :tangle (when (eq (doom-system-distro) 'arch) "no" "yes")
+,#+begin_src elisp :tangle (when (eq (doom-system-distro) 'arch) "no" "yes")
+(after! org-journal
   (setq org-journal-dir "~/Dropbox/org/vispero/journal")
-#+end_src
+  )
+,#+end_src
 * Custom functions
 ** Youtube url link
 I wanted to extend the YouTube url link in Org Mode by including time markings. This function will concat the minutes and seconds to the end of the url link
