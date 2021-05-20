@@ -42,7 +42,7 @@ Just some personal information and my doom-theme.
       org-journal-dir "~/Dropbox/org/journal"
       org-journal-date-prefix "* "
       org-journal-file-format "Journal %Y-%m.org"
-      org-journal-date-format "%A, %d %B %Y"
+      org-journal-date-format "%A, %d %B %Y\n\n#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:"
       org-journal-enable-agenda-integration t
       org-journal-enable-cache t
       org-journal-file-type 'monthly
@@ -74,6 +74,17 @@ Just some personal information and my doom-theme.
   (setq org-journal-dir "~/Dropbox/org/vispero/journal")
   )
 ,#+end_src
+** Org journal entries
+#+begin_src elisp
+;; (add-hook 'org-journal-after-entry-create-hook
+;;           (lambda ()
+;;             (save-excursion
+;;               (let ((template "#+OPTIONS: num:nil"))
+;;                 (beginning-of-buffer)
+;;                 (unless (search-forward template nil t)
+;;                   (insert template "\n\n"))))))
+(setq org-journal-date-prefix "#+OPTIONS: num:nil\n* ")
+#+end_src
 * Custom functions
 ** Youtube url link
 I wanted to extend the YouTube url link in Org Mode by including time markings. This function will concat the minutes and seconds to the end of the url link
