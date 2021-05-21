@@ -168,7 +168,7 @@ text and copying to the killring."
         '((sequence  "TODO(t)" "INPROGRESS(i!)" "IN-REVIEW(r!)" "NEXT(n!)" "WAITING(w@/!)" "BLOCKED(b@/!)" "SOMEDAY(s!)" "|" "DONE(d@)" "CANCELLED(c!)" "ABANDONED(a@)")
           (sequence "QUESTION(q)" "|" "ANSWERED(@/!)")
           (sequence "REPEAT" "|" "COMPLETED")
-          (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
+          (sequence "[ ](T)" "[-](I)" "[?](?)" "|" "[X](D)")))
   (setq org-log-done 'time)
   (setq org-refile-targets (quote ((org-agenda-files :maxlevel . 2))))
 
