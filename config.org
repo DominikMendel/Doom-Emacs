@@ -1,16 +1,5 @@
 #+TITLE: Config
-* Org journal per system
-#+begin_src elisp :tangle (if (eq (doom-system-distro) 'arch) "yes" "no")
-;; (after! org
-  (setq org-journal-dir "~/Dropbox/org/journal")
-  ;; )
-#+end_src
-
-#+begin_src elisp :tangle (if (eq (doom-system-distro) 'arch) "no" "yes")
-;; (after! org-journal
-(setq org-journal-dir "~/Dropbox/org/vispero/journal")
-;; )
-#+end_src
+#+PROPERTY: header-args+ :tangle config.el
 * Header info
 Just some personal information and my doom-theme.
 - I have been loving doom-horizon. I wanted something in dark mode that was best for my eyes.
@@ -51,7 +40,7 @@ Just some personal information and my doom-theme.
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/Dropbox/org"
-      ;; org-journal-dir "~/Dropbox/org/journal"
+      ;; org-journal-dir "~/Dropbox/org/vispero/journal"
       org-journal-date-prefix "* "
       org-journal-file-format "Journal %Y-%m.org"
       org-journal-date-format "%A, %d %B %Y\n#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:"
@@ -613,4 +602,12 @@ Don't need anymore. It is included in org +pretty
   (when (and (org-get-repeat) (member org-state org-done-keywords))
     (org-reset-checkbox-state-subtree)))
 (add-hook 'org-after-todo-state-change-hook 'glasser-org-reset-check-on-repeat)
+#+end_src
+* Org journal per system 1
+#+begin_src elisp :tangle (if (eq (doom-system-distro) 'arch) "config.el" "no")
+(setq org-journal-dir "~/Dropbox/org/journal")
+#+end_src
+* Org journal per system 2
+#+begin_src elisp :tangle (if (eq (doom-system-distro) 'ubuntu) "config.el" "no")
+(setq org-journal-dir "~/Dropbox/org/vispero/journal")
 #+end_src
