@@ -1,4 +1,16 @@
 #+TITLE: Config
+* Org journal per system
+#+begin_src elisp :tangle (if (eq (doom-system-distro) 'arch) "yes" "no")
+;; (after! org
+  (setq org-journal-dir "~/Dropbox/org/journal")
+  ;; )
+#+end_src
+
+#+begin_src elisp :tangle (if (eq (doom-system-distro) 'arch) "no" "yes")
+;; (after! org-journal
+(setq org-journal-dir "~/Dropbox/org/vispero/journal")
+;; )
+#+end_src
 * Header info
 Just some personal information and my doom-theme.
 - I have been loving doom-horizon. I wanted something in dark mode that was best for my eyes.
@@ -39,10 +51,10 @@ Just some personal information and my doom-theme.
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/Dropbox/org"
-      org-journal-dir "~/Dropbox/org/journal"
+      ;; org-journal-dir "~/Dropbox/org/journal"
       org-journal-date-prefix "* "
       org-journal-file-format "Journal %Y-%m.org"
-      org-journal-date-format "%A, %d %B %Y\n\n#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:"
+      org-journal-date-format "%A, %d %B %Y\n#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:"
       org-journal-enable-agenda-integration t
       org-journal-enable-cache t
       org-journal-file-type 'monthly
@@ -61,19 +73,6 @@ Just some personal information and my doom-theme.
   (when (eq system-type 'gnu/linux)
     (shell-command-to-string "lsb_release -sd | awk \'{printf $1}\'")))
 #+end_src
-** Org journal per system
-- String obtained for system by "uname -r"
-,#+begin_src elisp :tangle (when (eq (doom-system-distro) 'arch) "yes" "no")
-(after! org
-  (setq org-journal-dir "~/Dropbox/org/journal")
-  )
-,#+end_src
-
-,#+begin_src elisp :tangle (when (eq (doom-system-distro) 'arch) "no" "yes")
-(after! org-journal
-  (setq org-journal-dir "~/Dropbox/org/vispero/journal")
-  )
-,#+end_src
 ** Org journal entries
 #+begin_src elisp
 ;; (add-hook 'org-journal-after-entry-create-hook
@@ -83,7 +82,8 @@ Just some personal information and my doom-theme.
 ;;                 (beginning-of-buffer)
 ;;                 (unless (search-forward template nil t)
 ;;                   (insert template "\n\n"))))))
-(setq org-journal-date-prefix "#+OPTIONS: num:nil\n* ")
+
+;; (setq org-journal-date-prefix "#+OPTIONS: num:nil\n* ")
 #+end_src
 * Custom functions
 ** Youtube url link
