@@ -198,7 +198,7 @@ text and copying to the killring."
 ** Org Agenda
 #+begin_src elisp
 (after! org-agenda
-  (setq org-agenda-files (directory-files-recursively "~/Dropbox/org/" "\\.org$"))
+  ;; (setq org-agenda-files (directory-files-recursively "~/Dropbox/org/" "\\.org$"))
   (add-to-list 'org-agenda-bulk-custom-functions
                '(?a org-agenda-archive-to-archive-sibling)))
 #+end_src
@@ -594,9 +594,11 @@ Don't need anymore. It is included in org +pretty
 * Work machine
 #+begin_src elisp :tangle (if (eq (doom-system-distro) 'ubuntu) "config.el" "no")
 (setq org-journal-dir "~/Dropbox/org/vispero/journal"
-      org-agenda-files (directory-files-recursively "~/Dropbox/org" "\\.org$")
       org-journal-date-format "%A, %d %B %Y\n#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:"
-                )
+      )
+(after! org
+  org-agenda-files (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$")
+  )
 #+end_src
 * Things to add
 ** A way to make all roam captures go to vispero directory if on work PC
@@ -607,3 +609,4 @@ Don't need anymore. It is included in org +pretty
 (setq org-journal-file-format "%Y/%W_%m-%d.org")
 (setq org-journal-file-type 'weekly)
 #+end_src
+** Make org directory and org roam directory for work go straight to the vispero path
