@@ -40,10 +40,8 @@ Just some personal information and my doom-theme.
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/Dropbox/org"
-      ;; org-journal-dir "~/Dropbox/org/vispero/journal"
       org-journal-date-prefix "* "
       org-journal-file-format "Journal %Y-%m.org"
-      org-journal-date-format "%A, %d %B %Y\n#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:"
       org-journal-enable-agenda-integration t
       org-journal-enable-cache t
       org-journal-file-type 'monthly
@@ -55,24 +53,6 @@ Just some personal information and my doom-theme.
 
 (after! org-journal
   (setq! org-journal-carryover-items "TODO=\"TODO\"|TODO=\"INPROGRESS\"|TODO=\"WAITING\"|TODO=\"BLOCKED\"|TODO=\"QUESTION\""))
-
-(defun which-linux-distribution ()
-  "from lsb_release"
-  (interactive)
-  (when (eq system-type 'gnu/linux)
-    (shell-command-to-string "lsb_release -sd | awk \'{printf $1}\'")))
-#+end_src
-** Org journal entries
-#+begin_src elisp
-;; (add-hook 'org-journal-after-entry-create-hook
-;;           (lambda ()
-;;             (save-excursion
-;;               (let ((template "#+OPTIONS: num:nil"))
-;;                 (beginning-of-buffer)
-;;                 (unless (search-forward template nil t)
-;;                   (insert template "\n\n"))))))
-
-;; (setq org-journal-date-prefix "#+OPTIONS: num:nil\n* ")
 #+end_src
 * Custom functions
 ** Youtube url link
@@ -603,11 +583,27 @@ Don't need anymore. It is included in org +pretty
     (org-reset-checkbox-state-subtree)))
 (add-hook 'org-after-todo-state-change-hook 'glasser-org-reset-check-on-repeat)
 #+end_src
-* Org journal per system 1
+* Personal Machine
 #+begin_src elisp :tangle (if (eq (doom-system-distro) 'arch) "config.el" "no")
-(setq org-journal-dir "~/Dropbox/org/journal")
+(setq org-journal-dir "~/Dropbox/org/journal"
+      org-agenda-files (seq-filter (lambda(x) (not (string-match "/vispero/"(file-name-directory x))))
+                                   (directory-files-recursively "~/Dropbox/org" "\\.org$"))
+      org-journal-date-format "%A, %d %B %Y"
+      )
 #+end_src
-* Org journal per system 2
+* Work machine
 #+begin_src elisp :tangle (if (eq (doom-system-distro) 'ubuntu) "config.el" "no")
-(setq org-journal-dir "~/Dropbox/org/vispero/journal")
+(setq org-journal-dir "~/Dropbox/org/vispero/journal"
+      org-agenda-files (directory-files-recursively "~/Dropbox/org" "\\.org$")
+      org-journal-date-format "%A, %d %B %Y\n#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:"
+                )
+#+end_src
+* Things to add
+** A way to make all roam captures go to vispero directory if on work PC
+- Can make the captures the same but instead reference some variable directory
+  + Then have the OS version tangles just change that variable
+** Make work journal weekly
+#+begin_src elisp :tangle no
+(setq org-journal-file-format "%Y/%W_%m-%d.org")
+(setq org-journal-file-type 'weekly)
 #+end_src
