@@ -438,31 +438,41 @@ text and copying to the killring."
            :head "#+TITLE: ${title}\n#+Created: %u\n#+roam_tags: %^{prompt}\n- tags :: [[file:../../../Dropbox/org/roam/20210410-japanese.org][Japanese]]\n* Readings\n** onyomi %?\n** kunyomi"
            :unnarrowed t)
 
+          ("t" "Test")
+          ("tt" "Test test" plain (function org-roam--capture-get-point)
+           ;; :file-name (test-directory-string "testingbuhhNameDontMatter")
+           ;; :file-name (test-directory-string "%<%Y%m%d>-${slug}")
+           ;; :file-name (test-directory-multiple "%y" "%m" "%d" "${slug}")
+           :function (test-directory-multiple "y" "m" "d" "slug")
+           ;; added a double space at the end for the double-space insert link issue.
+           :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n- tags ::  %?"
+           :unnarrowed t)
 
-        ("v" "Vispero")
-        ("vv" "Vispero Default" plain (function org-roam--capture-get-point)
-         :file-name "vispero/%<%Y%m%d>-${slug}"
-         ;; added a double space at the end for the double-space insert link issue.
-         :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n- tags ::  %?"
-         :unnarrowed t)
-        ("vt" "Vispero Tagged" plain (function org-roam--capture-get-point)
-         "%?"
-         :file-name "vispero/%<%Y%m%d>-${slug}"
-         ;; added a double space at the end for the double-space insert link issue.
-         :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n- tags :: [[file:~/Dropbox/org/roam/20210413-vispero.org][Vispero]] "
-         :unnarrowed t)
-        ("vb" "Vispero Bug" plain (function org-roam--capture-get-point)
-         :file-name "vispero/Bug ${slug}"
-         :head "#+TITLE: Bug ${title}\n#+Created: %u\n#+last_modified: %U\n#+roam_key: http://bugzilla.fsi.local/show_bug.cgi?id=${slug}\n#+roam_alias: ${slug}\n- tags :: [[file:~/Dropbox/org/roam/20210413-vispero_bugzilla.org][Vispero Bugzilla]] \n"
-         "%?"
-         :unnarrowed t)
-        ))
+
+          ("v" "Vispero")
+          ("vv" "Vispero Default" plain (function org-roam--capture-get-point)
+           :file-name "vispero/%<%Y%m%d>-${slug}"
+           ;; added a double space at the end for the double-space insert link issue.
+           :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n- tags ::  %?"
+           :unnarrowed t)
+          ("vt" "Vispero Tagged" plain (function org-roam--capture-get-point)
+           "%?"
+           :file-name "vispero/%<%Y%m%d>-${slug}"
+           ;; added a double space at the end for the double-space insert link issue.
+           :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n- tags :: [[file:~/Dropbox/org/roam/20210413-vispero.org][Vispero]] "
+           :unnarrowed t)
+          ("vb" "Vispero Bug" plain (function org-roam--capture-get-point)
+           :file-name "vispero/Bug ${slug}"
+           :head "#+TITLE: Bug ${title}\n#+Created: %u\n#+last_modified: %U\n#+roam_key: http://bugzilla.fsi.local/show_bug.cgi?id=${slug}\n#+roam_alias: ${slug}\n- tags :: [[file:~/Dropbox/org/roam/20210413-vispero_bugzilla.org][Vispero Bugzilla]] \n"
+           "%?"
+           :unnarrowed t)
+          ))
 
   (setq org-roam-capture-ref-templates
-       '(("r" "ref" plain #'org-roam-capture--get-point "%?"
-          :file-name "website/%(url-host (url-generic-parse-url \"${ref}\"))-${slug}"
-          :head "#+TITLE: ${title}\n#+Created: %u\n#+roam_key: ${ref}\n- tags ::  "
-          :unnarrowed t))))
+        '(("r" "ref" plain #'org-roam-capture--get-point "%?"
+           :file-name "website/%(url-host (url-generic-parse-url \"${ref}\"))-${slug}"
+           :head "#+TITLE: ${title}\n#+Created: %u\n#+roam_key: ${ref}\n- tags ::  "
+           :unnarrowed t))))
 #+end_src
 * Org visuals
 ** Org Superstar
@@ -590,6 +600,12 @@ Don't need anymore. It is included in org +pretty
                                    (directory-files-recursively "~/Dropbox/org" "\\.org$"))
       org-journal-date-format "%A, %d %B %Y"
       )
+
+(defun test-directory-string (file-path)
+  (concat "testDirectory/" file-path))
+
+(defun test-directory-multiple (a b c d)
+  (concat testDirectory/" a b c d))
 #+end_src
 * Work machine
 #+begin_src elisp :tangle (if (eq (doom-system-distro) 'ubuntu) "config.el" "no")
@@ -610,3 +626,5 @@ Don't need anymore. It is included in org +pretty
 (setq org-journal-file-type 'weekly)
 #+end_src
 ** Make org directory and org roam directory for work go straight to the vispero path
+*** :file-name cannot run a function I think
+** Make a bug + swarmzilla hyperlink type
