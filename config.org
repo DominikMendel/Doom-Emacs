@@ -610,11 +610,9 @@ Don't need anymore. It is included in org +pretty
 * Work machine
 #+begin_src elisp :tangle (if (eq (doom-system-distro) 'ubuntu) "config.el" "no")
 (setq org-journal-dir "~/Dropbox/org/vispero/journal"
+      org-agenda-files (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$")
       org-journal-date-format "%A, %d %B %Y\n#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:"
       )
-(after! org
-  org-agenda-files (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$")
-  )
 #+end_src
 * Things to add
 ** A way to make all roam captures go to vispero directory if on work PC
