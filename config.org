@@ -235,13 +235,13 @@ text and copying to the killring."
                           '((:name "Next to do"
                              :todo "NEXT"
                              :order 4)
+                            (:name "Due Today"
+                             :deadline today
+                             :order 2)
                             (:name "Important"
                              :tag "Important"
                              :priority "A"
                              :order 6)
-                            (:name "Due Today"
-                             :deadline today
-                             :order 2)
                             (:name "Due Soon"
                              :deadline future
                              :order 8)
@@ -249,15 +249,17 @@ text and copying to the killring."
                              :deadline past
                              :face error
                              :order 7)
-                            (:name "Projects"
-                             :tag "Project"
-                             :order 10)
-                            (:name "Questions"
-                             :todo "QUESTION"
-                             :order 15)
                             (:name "Inprogress"
                              :todo "INPROGRESS"
                              :order 3)
+                            (:name "Questions"
+                             ;; :regexp (:todo "QUESTION" :tag "question")
+                             :todo "QUESTION"
+                             :tag "question"
+                             :order 10)
+                            (:name "Projects"
+                             :tag "Project"
+                             :order 15)
                             (:name "In review"
                              :todo "IN-REVIEW"
                              :order 14)
