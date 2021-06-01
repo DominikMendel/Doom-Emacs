@@ -41,10 +41,10 @@ Just some personal information and my doom-theme.
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/Dropbox/org"
       org-journal-date-prefix "* "
-      org-journal-file-format "Journal %Y-%m.org"
+      ;; org-journal-file-format "Journal %Y-%m.org"
       org-journal-enable-agenda-integration t
       org-journal-enable-cache t
-      org-journal-file-type 'monthly
+      ;; org-journal-file-type 'monthly
       org-roam-directory "~/Dropbox/org/roam"
       +org-roam-open-buffer-on-find-file nil)
 
@@ -61,19 +61,6 @@ I wanted to extend the YouTube url link in Org Mode by including time markings. 
 (defun make-youtube-time-link (link-text)
   (let ((substrings (split-string link-text ",")))
     (browse-url (format "%s&t=%sm%ss" (first substrings) (second substrings) (third substrings)))))
-#+end_src
-** Agenda focuses
-Functions used to swap Agenda focuses between personal and work.
-#+begin_src elisp
-(defun my/org-focus-not-work()
-  (interactive)
-  (setq org-agenda-files
-        (seq-filter (lambda(x) (not (string-match "/vispero/"(file-name-directory x))))
-        (directory-files-recursively "~/Dropbox/org" "\\.org$"))))
-
-(defun my/org-focus-all()
-  (interactive)
-  (setq org-agenda-files (directory-files-recursively "~/Dropbox/org" "\\.org$")))
 #+end_src
 ** Clocktable function
 This function is used in the ":match" parameter for an Org-clocktable. It will pull all clocked times from my entire work journal directory.
@@ -155,28 +142,13 @@ text and copying to the killring."
     (org-narrow-to-subtree))
   (goto-char (point-max)))
 
-(setq +org-capture-todo-file "~/Dropbox/org/roam/vispero/20210503-vispero_agenda.org")
 (after! org
-  ;; (add-to-list 'org-capture-templates
-  ;; '("T" "Todo" entry (file+headline "~/Dropbox/org/roam/vispero/20210503-vispero_agenda.org" "Tasks")
-  ;;   "* TODO %?\n %i\n %a"))
   (setq org-capture-templates
         '(
-          ("p" "Personal")
-          ("pt" "todoDOM" entry (file+headline "~/Dropbox/org/roam/vispero/20210503-vispero_agenda.org" "Tasks")
-           "* TODO %?\n %i\n"
-           :empty-lines-before 1
-           :clock-in t)
-          ;; :prepend t)
-          ;; :headline "Test"
-          ;; :type entry
-          ;; :template ("* %?" "%i %a"))
-
-          ("w" "Work")
-          ("wt" "Work General ToDo" entry (file+headline +org-capture-todo-file "Tasks")
+          ("t" "General ToDo" entry (file+headline +org-capture-todo-file "Tasks")
            "* TODO %?\n %i\n")
 
-          ("wp" "Work Project" entry (file+headline +org-capture-todo-file "Projects")
+          ("p" "General Project" entry (file+headline +org-capture-todo-file "Projects")
            "* TODO %?\n %i\n%a\n")
 
           ("j" "Journal")
@@ -192,8 +164,25 @@ text and copying to the killring."
            :jump-to-captured nil
            :immediate-finish nil
            :clock-in t)
-          ))
-  )
+
+          ("s" "Specific location")
+          ("sp" "Personal")
+          ("spt" "todoDOM" entry (file+headline "~/Dropbox/org/roam/personal_agenda.org" "Tasks")
+           "* TODO %?\n %i\n")
+          ;; :empty-lines-before 1)
+          ;; :prepend t)
+          ;; :headline "Test"
+          ;; :type entry
+          ;; :template ("* %?" "%i %a"))
+
+          ("sw" "Work")
+          ("swt" "Work General ToDo" entry (file+headline "~/Dropbox/org/roam/vispero/vispero_agenda.org" "Tasks")
+           "* TODO %?\n %i\n")
+
+          ("swp" "Work Project" entry (file+headline "~/Dropbox/org/roam/vispero/vispero_agenda.org" "Projects")
+           "* TODO %?\n %i\n%a\n")
+
+          )))
 #+end_src
 ** Org Agenda
 #+begin_src elisp
@@ -381,7 +370,7 @@ text and copying to the killring."
 ;; (after! org-capture
 ;;   (setq org-capture-templates
 ;;   ;; (add-to-list 'org-capture-templates
-;;         '("T" "Todo" entry (file+headline "~/Dropbox/org/roam/vispero/20210503-vispero_agenda.org" "Tasks")
+;;         '("T" "Todo" entry (file+headline "~/Dropbox/org/roam/vispero/vispero_agenda.org" "Tasks")
 ;;           "* TODO %?\n %i\n %a")))
 ;; (use-package! org-super-agenda
 ;;   :commands (org-super-agenda-moda))
@@ -403,69 +392,69 @@ text and copying to the killring."
   (setq org-roam-capture-templates
         '(("d" "default" plain (function org-roam--capture-get-point)
            ;; "%?"
-           :file-name "%<%Y%m%d>-${slug}"
+           :file-name "${slug}"
            ;; added a double space at the end for the double-space insert link issue.
-           :head "#+TITLE: ${title}\n#+Created: %u\n- tags ::  %?\n* "
+           :head "#+TITLE: ${title}\n- tags ::  %?\n* "
            :unnarrowed t)
 
           ("a" "New Area" plain (function org-roam--capture-get-point)
            "%?"
-           :file-name "%<%Y%m%d>-${slug}"
+           :file-name "${slug}"
            ;; added a double space at the end for the double-space insert link issue.
-           :head "#+TITLE: ${title}\n#+Created: %u\n- tags :: [[file:../../../Dropbox/org/roam/20210410-indexes.org][Indexes]]"
+           :head "#+TITLE: ${title}\n- tags :: [[file:../../../Dropbox/org/roam/indexes.org][Indexes]]"
            :unnarrowed t)
 
           ("r" "Reading General")
           ("rr" "Reading" plain (function org-roam--capture-get-point)
-           :file-name "%<%Y%m%d>-${slug}"
+           :file-name "${slug}"
            ;; added a double space at the end for the double-space insert link issue.
-           :head "#+TITLE: ${title}\n#+Created: %u\n- tags ::  %?\n* Notes\n* Overview"
+           :head "#+TITLE: ${title}\n- tags ::  %?\n* Notes\n* Overview"
            :unnarrowed t)
 
           ("rc" "Reading Character" plain (function org-roam--capture-get-point)
-           :file-name "%<%Y%m%d>-${slug}"
+           :file-name "${slug}"
            ;; added a double space at the end for the double-space insert link issue.
-           :head "#+TITLE: ${title}\n#+Created: %u\n- tags ::  %?\n* Notes\n* Mentions"
+           :head "#+TITLE: ${title}\n- tags ::  %?\n* Notes\n* Mentions"
            :unnarrowed t)
 
           ("j" "Japanese")
           ("jj" "Japanese Vocabulary" plain (function org-roam--capture-get-point)
-           :file-name "%<%Y%m%d>-${slug}"
-           :head "#+TITLE: ${title}\n#+Created: %u\n#+roam_tags: %^{prompt}\n- tags :: [[file:../../../Dropbox/org/roam/20210410-japanese.org][Japanese]]\n* Definition"
+           :file-name "${slug}"
+           :head "#+TITLE: ${title}\n#+roam_tags: %^{prompt}\n- tags :: [[file:../../../Dropbox/org/roam/japanese.org][Japanese]]\n* Definition"
            "%?"
            :unnarrowed t)
 
           ("jk" "Japanese Kanji" plain (function org-roam--capture-get-point)
-           :file-name "%<%Y%m%d>-${slug}"
-           :head "#+TITLE: ${title}\n#+Created: %u\n#+roam_tags: %^{prompt}\n- tags :: [[file:../../../Dropbox/org/roam/20210410-japanese.org][Japanese]]\n* Readings\n** onyomi %?\n** kunyomi"
+           :file-name "${slug}"
+           :head "#+TITLE: ${title}\n#+roam_tags: %^{prompt}\n- tags :: [[file:../../../Dropbox/org/roam/japanese.org][Japanese]]\n* Readings\n** onyomi %?\n** kunyomi"
            :unnarrowed t)
 
           ("t" "Test")
           ("tt" "Test test" plain (function org-roam--capture-get-point)
            ;; :file-name (test-directory-string "testingbuhhNameDontMatter")
-           ;; :file-name (test-directory-string "%<%Y%m%d>-${slug}")
+           ;; :file-name (test-directory-string "${slug}")
            ;; :file-name (test-directory-multiple "%y" "%m" "%d" "${slug}")
            :function (test-directory-multiple "y" "m" "d" "slug")
            ;; added a double space at the end for the double-space insert link issue.
-           :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n- tags ::  %?"
+           :head "#+TITLE: ${title}\n- tags ::  %?"
            :unnarrowed t)
 
 
           ("v" "Vispero")
           ("vv" "Vispero Default" plain (function org-roam--capture-get-point)
-           :file-name "vispero/%<%Y%m%d>-${slug}"
+           :file-name "vispero/${slug}"
            ;; added a double space at the end for the double-space insert link issue.
-           :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n- tags ::  %?"
+           :head "#+TITLE: ${title}\n- tags ::  %?"
            :unnarrowed t)
           ("vt" "Vispero Tagged" plain (function org-roam--capture-get-point)
            "%?"
-           :file-name "vispero/%<%Y%m%d>-${slug}"
+           :file-name "vispero/${slug}"
            ;; added a double space at the end for the double-space insert link issue.
-           :head "#+TITLE: ${title}\n#+Created: %u\n#+last_modified: %U\n- tags :: [[file:~/Dropbox/org/roam/20210413-vispero.org][Vispero]] "
+           :head "#+TITLE: ${title}\n- tags :: [[file:~/Dropbox/org/roam/vispero.org][Vispero]] "
            :unnarrowed t)
           ("vb" "Vispero Bug" plain (function org-roam--capture-get-point)
            :file-name "vispero/Bug ${slug}"
-           :head "#+TITLE: Bug ${title}\n#+Created: %u\n#+last_modified: %U\n#+roam_key: http://bugzilla.fsi.local/show_bug.cgi?id=${slug}\n#+roam_alias: ${slug}\n- tags :: [[file:~/Dropbox/org/roam/20210413-vispero_bugzilla.org][Vispero Bugzilla]] \n"
+           :head "#+TITLE: Bug ${title}\n#+roam_key: http://bugzilla.fsi.local/show_bug.cgi?id=${slug}\n#+roam_alias: ${slug}\n- tags :: [[file:~/Dropbox/org/roam/vispero_bugzilla.org][Vispero Bugzilla]] \n"
            "%?"
            :unnarrowed t)
           ))
@@ -473,7 +462,7 @@ text and copying to the killring."
   (setq org-roam-capture-ref-templates
         '(("r" "ref" plain #'org-roam-capture--get-point "%?"
            :file-name "website/%(url-host (url-generic-parse-url \"${ref}\"))-${slug}"
-           :head "#+TITLE: ${title}\n#+Created: %u\n#+roam_key: ${ref}\n- tags ::  "
+           :head "#+TITLE: ${title}\n#+roam_key: ${ref}\n- tags ::  "
            :unnarrowed t))))
 #+end_src
 * Org visuals
@@ -595,26 +584,67 @@ Don't need anymore. It is included in org +pretty
     (org-reset-checkbox-state-subtree)))
 (add-hook 'org-after-todo-state-change-hook 'glasser-org-reset-check-on-repeat)
 #+end_src
+* Swamp focuses
+Functions used to swap focuses between personal and work.
+#+begin_src elisp
+(defun my/org-focus-personal()
+  (interactive)
+  (setq org-agenda-files (append (seq-filter (lambda(x) (not (string-match "/vispero/"(file-name-directory x))))
+                                             (directory-files-recursively "~/Dropbox/org/roam" "\\.org$")) (directory-files-recursively "~/Dropbox/org/journal" "\\.org$"))
+        +org-capture-todo-file "~/Dropbox/org/roam/personal_agenda.org"
+        ))
+
+(defun my/org-focus-work()
+  (interactive)
+  (setq org-agenda-files (append (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$") (directory-files-recursively "~/Dropbox/org/vispero/journal" "\\.org$"))
+        +org-capture-todo-file "~/Dropbox/org/roam/vispero/vispero_agenda.org"
+        ))
+#+end_src
 * Personal Machine
 #+begin_src elisp :tangle (if (eq (doom-system-distro) 'arch) "config.el" "no")
 (setq org-journal-dir "~/Dropbox/org/journal"
-      org-agenda-files (seq-filter (lambda(x) (not (string-match "/vispero/"(file-name-directory x))))
-                                   (directory-files-recursively "~/Dropbox/org" "\\.org$"))
+      ;; org-agenda-files (seq-filter (lambda(x) (not (string-match "/vispero/"(file-name-directory x))))
+      ;;                              (directory-files-recursively "~/Dropbox/org" "\\.org$"))
+
       org-journal-date-format "%A, %d %B %Y"
+      +org-capture-todo-file "~/Dropbox/org/roam/personal_agenda.org"
+      org-agenda-files 'personal-agenda-files
+      org-journal-file-format "Journal %Y-%m.org"
+      org-journal-file-type 'monthly
       )
+
+;; (setq org-agenda-files (append (directory-files-recursively "~/Dropbox/org/roam" "\\.org$") (directory-files-recursively "~/Dropbox/org/journal" "\\.org$")))
+
+(setq org-agenda-files (append (seq-filter (lambda(x) (not (string-match "/vispero/"(file-name-directory x))))
+                                           (directory-files-recursively "~/Dropbox/org/roam" "\\.org$")) (directory-files-recursively "~/Dropbox/org/journal" "\\.org$")))
+
+
 
 (defun test-directory-string (file-path)
   (concat "testDirectory/" file-path))
 
 (defun test-directory-multiple (a b c d)
-  (concat testDirectory/" a b c d))
+  (concat "testDirectory/" a b c d))
 #+end_src
 * Work machine
 #+begin_src elisp :tangle (if (eq (doom-system-distro) 'ubuntu) "config.el" "no")
 (setq org-journal-dir "~/Dropbox/org/vispero/journal"
-      org-agenda-files (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$")
+      org-agenda-files (append (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$") (directory-files-recursively "~/Dropbox/org/vispero/journal" "\\.org$"))
       org-journal-date-format "%A, %d %B %Y\n#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:"
+      org-journal-file-type 'weekly
+      org-journal-file-format "%Y/%W_%m-%d.org"
+      +org-capture-todo-file "~/Dropbox/org/roam/vispero/vispero_agenda.org"
       )
+#+end_src
+* Testing functionality
+#+begin_src elisp :tangle no
+(defun do-nothing-carry-over (old_entries))
+(setq org-journal-handle-old-carryover 'do-nothing-carry-over
+      org-journal-skip-carryover-drawers (list "CLOCKING"))
+
+;; This doesn't work. NEed to add more parameters to satisfy defcustom
+(defcustom personal-agenda-files (append (seq-filter (lambda(x) (not (string-match "/vispero/"(file-name-directory x))))
+                                                     (directory-files-recursively "~/Dropbox/org/roam" "\\.org$")) (directory-files-recursively "~/Dropbox/org/journal" "\\.org$")))
 #+end_src
 * Things to add
 ** A way to make all roam captures go to vispero directory if on work PC
