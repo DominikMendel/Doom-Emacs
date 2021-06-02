@@ -41,10 +41,8 @@ Just some personal information and my doom-theme.
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/Dropbox/org"
       org-journal-date-prefix "* "
-      ;; org-journal-file-format "Journal %Y-%m.org"
       org-journal-enable-agenda-integration t
       org-journal-enable-cache t
-      ;; org-journal-file-type 'monthly
       org-roam-directory "~/Dropbox/org/roam"
       +org-roam-open-buffer-on-find-file nil)
 
@@ -192,6 +190,8 @@ text and copying to the killring."
                '(?a org-agenda-archive-to-archive-sibling)))
 #+end_src
 ** Org-super-agenda
+- Types of agenda custom command keywords: ([[https://orgmode.org/worg/org-tutorials/org-custom-agenda-commands.html][link]])
+  The desired agenda display/search. The options include agenda, todo, search, tags, alltodo, tags-todo, todo-tree, tags-tree, occur-tree, or a user-defined function.
 #+begin_src elisp
 (use-package! org-super-agenda
   :commands (org-super-agenda-mode))
@@ -219,7 +219,19 @@ text and copying to the killring."
                             :todo "TODAY"
                             :scheduled today
                             :order 1)))))
+            ;; (tags "question" ((org-agenda-overriding-header "")
+            (tags "." ((org-agenda-overriding-header "")
+                       (org-super-agenda-groups
+                        '((:name "Questions"
+                           ;; '((
+                           :tag "question"
+                           ;; :anything t
+                           ;; :auto-tags t
+                           :order 12)
+                          (:discard (:anything t))
+                          ))))
             (alltodo "" ((org-agenda-overriding-header "")
+                         ;; (tags-todo "question" ((org-agenda-overriding-header "")
                          (org-super-agenda-groups
                           '((:name "Next to do"
                              :todo "NEXT"
@@ -246,6 +258,9 @@ text and copying to the killring."
                              :todo "QUESTION"
                              :tag "question"
                              :order 10)
+                            (:name "Questions tags"
+                             :tag "question"
+                             :order 11)
                             (:name "Projects"
                              :tag "Project"
                              :order 15)
@@ -631,10 +646,22 @@ Functions used to swap focuses between personal and work.
 (setq org-journal-dir "~/Dropbox/org/vispero/journal"
       org-agenda-files (append (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$") (directory-files-recursively "~/Dropbox/org/vispero/journal" "\\.org$"))
       org-journal-date-format "%A, %d %B %Y\n#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:"
+      ;; org-journal-file-header "#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:"
       org-journal-file-type 'weekly
       org-journal-file-format "%Y/%W_%m-%d.org"
       +org-capture-todo-file "~/Dropbox/org/roam/vispero/vispero_agenda.org"
       )
+
+;; (defun org-journal-file-header-func (time)
+;;   "Custom function to create journal header."
+;;   (concat
+;;    (pcase org-journal-file-type
+;;      (`daily "#+TITLE: Daily Journal\n#+STARTUP: showeverything")
+;;      (`weekly "#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:\n")
+;;      (`monthly "#+TITLE: Monthly Journal\n#+STARTUP: folded")
+;;      (`yearly "#+TITLE: Yearly Journal\n#+STARTUP: folded"))))
+
+;; (setq org-journal-file-header 'org-journal-file-header-func)
 #+end_src
 * Testing functionality
 #+begin_src elisp :tangle no
@@ -658,3 +685,10 @@ Functions used to swap focuses between personal and work.
 ** Make org directory and org roam directory for work go straight to the vispero path
 *** :file-name cannot run a function I think
 ** Make a bug + swarmzilla hyperlink type
+** Figure out the org-journal-handle-old-carryover
+- Add a "tag" to the journal carry over = NOT "old"
+- Add the logic from the org-journal documentation to tag old entries as "old"
+  + Then just figure out some way to skip anything tagged "old"
+  + Need to make sure not to remove the old tags like "bluetooth" when doing so
+- Can maybe move away from using TODO states in journal and just use tags of the same representation
+  + This would mean that if I want an item to be carry overed it would tag it with "inprogress" instead of marking it with a todo state
