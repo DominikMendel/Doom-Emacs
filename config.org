@@ -231,7 +231,7 @@ text and copying to the killring."
                           (:discard (:anything t))
                           ))))
             (alltodo "" ((org-agenda-overriding-header "")
-                         ;; (tags-todo "question" ((org-agenda-overriding-header "")
+                         ;; (tags-todo "." ((org-agenda-overriding-header "")
                          (org-super-agenda-groups
                           '((:name "Next to do"
                              :todo "NEXT"
