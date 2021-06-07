@@ -66,6 +66,8 @@ This function is used in the ":match" parameter for an Org-clocktable. It will p
 - I usually follow the Org-clocktable with the corresponding tag associated with the project to filter all of my total work to the work in the project I want.
   #+begin_src elisp
 (defun vispero-journals() (directory-files-recursively "~/Dropbox/org/vispero/journal" "\\.org$"))
+
+(defun personal-journals() (directory-files-recursively "~/Dropbox/org/journal" "\\.org$"))
   #+end_src
 ** Create linkable UUID
 - Credit to Rainer König
@@ -621,11 +623,11 @@ Functions used to swap focuses between personal and work.
       ;; org-agenda-files (seq-filter (lambda(x) (not (string-match "/vispero/"(file-name-directory x))))
       ;;                              (directory-files-recursively "~/Dropbox/org" "\\.org$"))
 
-      org-journal-date-format "%A, %d %B %Y"
+      org-journal-date-format "%A, %d %B %Y\n"
       +org-capture-todo-file "~/Dropbox/org/roam/personal_agenda.org"
-      org-agenda-files 'personal-agenda-files
-      org-journal-file-format "Journal %Y-%m.org"
+      ;; org-agenda-files 'personal-agenda-files
       org-journal-file-type 'monthly
+      org-journal-file-format "Journal %Y-%m.org"
       )
 
 ;; (setq org-agenda-files (append (directory-files-recursively "~/Dropbox/org/roam" "\\.org$") (directory-files-recursively "~/Dropbox/org/journal" "\\.org$")))
