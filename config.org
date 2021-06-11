@@ -644,6 +644,8 @@ Functions used to swap focuses between personal and work.
   (concat "testDirectory/" a b c d))
 #+end_src
 * Work machine
+- You cannot put "\n\n" in org-journal-date format. It will cause your first entry to be on the previous date.
+  + However, now your first entry appears to be on the same line as your header, it isn't an is a visual bug at first.
 #+begin_src elisp :tangle (if (eq (doom-system-distro) 'ubuntu) "config.el" "no")
 (setq org-journal-dir "~/Dropbox/org/vispero/journal"
       org-agenda-files (append (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$") (directory-files-recursively "~/Dropbox/org/vispero/journal" "\\.org$"))
