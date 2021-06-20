@@ -148,6 +148,9 @@ text and copying to the killring."
           ("t" "General ToDo" entry (file+headline +org-capture-todo-file "Tasks")
            "* TODO %?\n %i\n")
 
+          ("i" "General Inprogress" entry (file+headline +org-capture-todo-file "Tasks")
+           "* INPROGRESS %?\n %i\n")
+
           ("p" "General Project" entry (file+headline +org-capture-todo-file "Projects")
            "* TODO %?\n %i\n%a\n")
 
@@ -309,6 +312,10 @@ text and copying to the killring."
                              :order 2)
                             (:discard (:anything t)))
                           )))))
+
+          ("w" "Weekly review"
+           ((alltodo "" ((org-agenda-overriding-header "")
+                        (org-agenda-skip-function '(org-agenda-skip-entry-if 'notregexpt "^\\*\\* DONE"))))))
           ;; ))))
           ))
 
@@ -601,7 +608,7 @@ Don't need anymore. It is included in org +pretty
     (org-reset-checkbox-state-subtree)))
 (add-hook 'org-after-todo-state-change-hook 'glasser-org-reset-check-on-repeat)
 #+end_src
-* Swamp focuses
+* Swap focuses
 Functions used to swap focuses between personal and work.
 #+begin_src elisp
 (defun my/org-focus-personal()
