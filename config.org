@@ -668,7 +668,7 @@ Functions used to swap focuses between personal and work.
 ;; (setq org-journal-dir "~/Dropbox/org/vispero/journalTest"
 (setq org-journal-dir "~/Dropbox/org/vispero/journal"
       org-agenda-files (append (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$") (directory-files-recursively "~/Dropbox/org/vispero/journal" "\\.org$"))
-      org-journal-date-format "%A, %d %B %Y\n:CLOCKTABLE:\n#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:\n:END:"
+      org-journal-date-format "%A, %d %B %Y\n:CLOCKTABLE:\n#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:\n:END:\n"
       ;; org-journal-file-header "#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:"
       org-journal-file-type 'weekly
       org-journal-file-format "%Y/%W_%m-%d.org"
