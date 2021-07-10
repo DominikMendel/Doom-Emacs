@@ -43,7 +43,7 @@ Just some personal information and my doom-theme.
       org-journal-date-prefix "* "
       org-journal-enable-agenda-integration t
       org-journal-enable-cache t
-      org-roam-directory "~/Dropbox/org/roam"
+      ;; org-roam-directory "~/Dropbox/org/roam"
       +org-roam-open-buffer-on-find-file nil)
 
 (setq! org-journal-time-format "")
@@ -201,7 +201,6 @@ text and copying to the killring."
 ** Org Agenda
 #+begin_src elisp
 (after! org-agenda
-  ;; (setq org-agenda-files (directory-files-recursively "~/Dropbox/org/" "\\.org$"))
   (add-to-list 'org-agenda-bulk-custom-functions
                '(?a org-agenda-archive-to-archive-sibling)))
 #+end_src
@@ -217,6 +216,9 @@ text and copying to the killring."
 
 (setq org-agenda-skip-scheduled-if-done t
       org-agenda-skip-deadline-if-done t
+      org-agenda-skip-timestamp-if-done t
+;; (setq org-agenda-skip-scheduled-if-done t
+;;       org-agenda-skip-deadline-if-done t
       org-agenda-include-deadlines t
       org-agenda-block-separator nil
       org-agenda-tags-column 100 ;; from testing this seems to be a good value
@@ -289,6 +291,9 @@ text and copying to the killring."
                             (:name "Some day"
                              :todo "SOMEDAY"
                              :order 25)
+                            (:name "Done"
+                             :todo "DONE"
+                             :order 26)
                             (:name "Trivial"
                              :priority<= "C"
                              :tag ("Trivial" "Unimportant")
@@ -424,7 +429,10 @@ text and copying to the killring."
 (after! org-roam
   (org-roam-db-build-cache ())
 
-  (setq org-roam-capture-templates
+  (setq
+
+      org-roam-directory "~/Dropbox/org/roam"
+                org-roam-capture-templates
         '(("d" "default" plain (function org-roam--capture-get-point)
            ;; "%?"
            :file-name "${slug}"
@@ -673,6 +681,15 @@ Functions used to swap focuses between personal and work.
       org-journal-file-format "%Y/%W_%m-%d.org"
       +org-capture-todo-file "~/Dropbox/org/roam/vispero/vispero_agenda.org"
       )
+
+;; For journal testing
+;; (setq! org-journal-dir "~/Dropbox/org/visperoJournal"
+;;       org-agenda-files (append (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$") (directory-files-recursively "~/Dropbox/org/visperoJournal" "\\.org$"))
+;;       org-journal-date-format "%A, %d %B %Y\n#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:\n"
+;;       org-journal-file-type 'weekly
+;;       org-journal-file-format "%Y_%W_%m-%d.org"
+;;       +org-capture-todo-file "~/Dropbox/org/roam/vispero/vispero_agenda.org"
+;;       )
 
 ;; (defun org-journal-file-header-func (time)
 ;;   "Custom function to create journal header."
