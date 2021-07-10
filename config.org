@@ -673,9 +673,10 @@ Functions used to swap focuses between personal and work.
 - You cannot put "\n\n" in org-journal-date format. It will cause your first entry to be on the previous date.
   + However, now your first entry appears to be on the same line as your header, it isn't an is a visual bug at first.
 #+begin_src elisp :tangle (if (eq (doom-system-distro) 'ubuntu) "config.el" "no")
+;; (setq org-journal-dir "~/Dropbox/org/vispero/journalTest"
 (setq org-journal-dir "~/Dropbox/org/vispero/journal"
       org-agenda-files (append (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$") (directory-files-recursively "~/Dropbox/org/vispero/journal" "\\.org$"))
-      org-journal-date-format "%A, %d %B %Y\n#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:\n"
+      org-journal-date-format "%A, %d %B %Y\n:CLOCKTABLE:\n#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:\n:END:\n"
       ;; org-journal-file-header "#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:"
       org-journal-file-type 'weekly
       org-journal-file-format "%Y/%W_%m-%d.org"
@@ -708,7 +709,7 @@ Functions used to swap focuses between personal and work.
 (setq org-journal-handle-old-carryover 'do-nothing-carry-over
       org-journal-skip-carryover-drawers (list "CLOCKING"))
 
-;; This doesn't work. NEed to add more parameters to satisfy defcustom
+;; This doesn't work. Need to add more parameters to satisfy defcustom
 (defcustom personal-agenda-files (append (seq-filter (lambda(x) (not (string-match "/vispero/"(file-name-directory x))))
                                                      (directory-files-recursively "~/Dropbox/org/roam" "\\.org$")) (directory-files-recursively "~/Dropbox/org/journal" "\\.org$")))
 #+end_src
@@ -716,11 +717,6 @@ Functions used to swap focuses between personal and work.
 ** A way to make all roam captures go to vispero directory if on work PC
 - Can make the captures the same but instead reference some variable directory
   + Then have the OS version tangles just change that variable
-** Make work journal weekly
-#+begin_src elisp :tangle no
-(setq org-journal-file-format "%Y/%W_%m-%d.org")
-(setq org-journal-file-type 'weekly)
-#+end_src
 ** Make org directory and org roam directory for work go straight to the vispero path
 *** :file-name cannot run a function I think
 ** Make a bug + swarmzilla hyperlink type
