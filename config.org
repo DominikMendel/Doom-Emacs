@@ -166,18 +166,52 @@ text and copying to the killring."
            "* TODO %?\n %i\n%a\n")
 
           ("j" "Journal")
+          ;; ("jj" "Journal New Entry" plain (function org-journal-find-location)
+          ;;  ;; "** %(format-time-string org-journal-time-format)%^{Title}%i%?"
+          ;;  "** %(format-time-string org-journal-time-format)%i%?"
+          ;;  :jump-to-captured nil
+          ;;  :immediate-finish nil
+          ;;  :unnarrowed nil)
+
+          ;; ("jt" "Journal New Clock Entry" plain (function org-journal-find-location)
+          ;;  "** %(format-time-string org-journal-time-format)%i%?"
+          ;;  :jump-to-captured nil
+          ;;  :immediate-finish nil
+          ;;  :clock-in t)
+
+          ;; Testing by removing %i
           ("jj" "Journal New Entry" plain (function org-journal-find-location)
            ;; "** %(format-time-string org-journal-time-format)%^{Title}%i%?"
-           "** %(format-time-string org-journal-time-format)%i%?"
+           "** %(format-time-string org-journal-time-format)%?"
            :jump-to-captured nil
            :immediate-finish nil
            :unnarrowed nil)
 
           ("jt" "Journal New Clock Entry" plain (function org-journal-find-location)
-           "** %(format-time-string org-journal-time-format)%i%?"
+           "** %(format-time-string org-journal-time-format)%?"
            :jump-to-captured nil
            :immediate-finish nil
            :clock-in t)
+
+          ("jm" "Journal New Meeting" plain (function org-journal-find-location)
+           "** %(format-time-string org-journal-time-format)%^{Select Meeting|Standup|Embedded Software Team|CAP Schedule Review|Embedded Software Knowledge Sharing|Technical Brief - One on One with Rob|Townhall}%? :meeting:"
+           :jump-to-captured nil
+           :immediate-finish nil
+           :clock-in t)
+
+          ("jr" "Journal Review" plain (function org-journal-find-location)
+           "** %(format-time-string org-journal-time-format)Review %^{prompt} for %^{prompt}%? :review:"
+           :jump-to-captured nil
+           :immediate-finish nil
+           :clock-in t)
+
+          ;; ("jm" "Journal Meetings")
+          ;; ("jme" "Embedded Software Team" plain (function org-journal-find-location)
+          ;;  "** %(format-time-string org-journal-time-format)Embedded Software Team :meeting:"
+          ;;  :jump-to-captured nil
+          ;;  :immediate-finish t
+          ;;  :clock-in t)
+
 
           ("s" "Specific location")
           ("sp" "Personal")
