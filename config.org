@@ -469,10 +469,8 @@ text and copying to the killring."
 (after! org-roam
   (org-roam-db-build-cache ())
 
-  (setq
-
-      org-roam-directory "~/Dropbox/org/roam"
-                org-roam-capture-templates
+  (setq org-roam-directory "~/Dropbox/org/roam"
+        org-roam-capture-templates
         '(("d" "default" plain (function org-roam--capture-get-point)
            ;; "%?"
            :file-name "${slug}"
