@@ -714,7 +714,6 @@ Functions used to swap focuses between personal and work.
 - You cannot put "\n\n" in org-journal-date format. It will cause your first entry to be on the previous date.
   + However, now your first entry appears to be on the same line as your header, it isn't an is a visual bug at first.
 #+begin_src elisp :tangle (if (eq (doom-system-distro) 'ubuntu) "config.el" "no")
-;; (setq org-journal-dir "~/Dropbox/org/vispero/journalTest"
 (setq org-journal-dir "~/Dropbox/org/vispero/journal"
       org-agenda-files (append (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$") (directory-files-recursively "~/Dropbox/org/vispero/journal" "\\.org$"))
       org-journal-date-format "%A, %d %B %Y\n:CLOCKTABLE:\n#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:\n:END:\n"
@@ -728,12 +727,12 @@ Functions used to swap focuses between personal and work.
       doom-variable-pitch-font (font-spec :family "Fira Code" :size 15)
       doom-big-font (font-spec :family "Fira Code" :size 24))
 ;; For journal testing
-;; (setq! org-journal-dir "~/Dropbox/org/visperoJournal"
-;;       org-agenda-files (append (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$") (directory-files-recursively "~/Dropbox/org/visperoJournal" "\\.org$"))
+;; (setq! org-journal-dir "/home/dominik/Dropbox/org/visperoJournal"
+;;       org-agenda-files (append (directory-files-recursively "/home/dominik/Dropbox/org/roam/vispero" "\\.org$") (directory-files-recursively "/home/dominik/Dropbox/org/visperoJournal" "\\.org$"))
 ;;       org-journal-date-format "%A, %d %B %Y\n#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:\n"
 ;;       org-journal-file-type 'weekly
 ;;       org-journal-file-format "%Y_%W_%m-%d.org"
-;;       +org-capture-todo-file "~/Dropbox/org/roam/vispero/vispero_agenda.org"
+;;       +org-capture-todo-file "/home/dominik/Dropbox/org/roam/vispero/vispero_agenda.org"
 ;;       )
 
 ;; (defun org-journal-file-header-func (time)
