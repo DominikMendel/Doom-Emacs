@@ -148,7 +148,7 @@
        ;;ocaml             ; an objective camel
        (org                                ; organize your plain life in plain text
         +dragndrop                         ; drag & drop files/images into org buffers
-        +roam
+        +roam2
         +journal
         +pretty
         +jupyter	; ipython/jupyter support for babel)       ;;php               ; perl's insecure younger brother
