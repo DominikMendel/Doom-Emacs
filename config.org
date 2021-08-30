@@ -492,7 +492,6 @@ text and copying to the killring."
            :if-new (file+head "${slug}.org" "#+TITLE: ${title}\n")
            :unnarrowed t)
 
-          ;; This doesn't work. Org-id returns an error
           ("E" "New Entry with ID" entry "* %?\nPROPERTIES:
 :ID:%(org-id-get-create t)
 :END:"
@@ -634,10 +633,6 @@ text and copying to the killring."
            :head "#+TITLE: ${title}\n#+roam_key: ${ref}\n- tags ::  "
            :unnarrowed t))))
 #+end_src
-
-#+RESULTS:
-| r | ref | plain | #'org-roam-capture--get-point | %? | :file-name | website/%(url-host (url-generic-parse-url "${ref}"))-${slug} | :head | #+TITLE: ${title} |
-
 * Org visuals
 ** Org Superstar
 Don't need anymore. It is included in org +pretty
@@ -716,6 +711,11 @@ Don't need anymore. It is included in org +pretty
 (map! :n "," (cmd! (push (cons t ?m) unread-command-events)
                    (push (cons t 32) unread-command-events)))
 
+(map!
+:leader
+:prefix "f"
+:desc "Find file in private config" "P" #'doom/find-file-in-private-config
+:desc "Browse private config" "p" #'doom/open-private-config)
 ;; (map! :localleader
 ;; "j j" #'(lambda () (interactive) (call-interactively) (outline-up-heading) (org/insert-item-below)))
 ;; "j j" #'(lambda () (interactive) (call-interactively #'outline-up-heading) (call-interactively #'org/insert-item-below))
