@@ -550,12 +550,12 @@ text and copying to the killring."
 
           ;; Need to add ":ROAM_REFS: http://bugzilla.fsi.local/show_bug.cgi?id=${slug}" to property
           ("vb" "Vispero Bug" plain "- tags :: [[roam:Vispero Bugzilla]] %?\n"
-           :if-new (file+head "vispero/bug${slug}.org" ":PROPERTIES:
+           :if-new (file+head "vispero/bugs/Bug ${slug}.org" ":PROPERTIES:
 :ROAM_REFS: http://bugzilla.fsi.local/show_bug.cgi?id=${slug}
-:END:#+TITLE: Bug ${title}\n")
+:END:
+,#+TITLE: Bug ${title}\n")
            :unnarrowed t)
           ))
-
 
         ;; Roam v1
         ;; '(("d" "default" plain (function org-roam--capture-get-point)
@@ -811,7 +811,7 @@ Functions used to swap focuses between personal and work.
       org-journal-date-format "%A, %d %B %Y\n:CLOCKTABLE:\n#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:\n:END:\n"
       ;; org-journal-file-header "#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:"
       org-journal-file-type 'weekly
-      org-journal-file-format "Vispero Journal %Y/%W_%m-%d.org"
+      org-journal-file-format "%Y/Vispero Journal %W_%m-%d.org"
       +org-capture-todo-file "~/Dropbox/org/roam/vispero/vispero_agenda.org"
       )
 
