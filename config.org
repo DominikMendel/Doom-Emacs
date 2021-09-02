@@ -215,7 +215,13 @@ text and copying to the killring."
           ("jl" "Journal Lunch" plain (function org-journal-find-location)
            "** %(format-time-string org-journal-time-format)Lunch :break:"
            :jump-to-captured nil
-           :immediate-finish nil
+           :immediate-finish t
+           :clock-in t)
+
+          ("js" "Journal Startup" plain (function org-journal-find-location)
+           "** %(format-time-string org-journal-time-format)Startup"
+           :jump-to-captured nil
+           :immediate-finish t
            :clock-in t)
 
           ;; ("jm" "Journal Meetings")
