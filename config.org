@@ -66,6 +66,8 @@ This function is used in the ":match" parameter for an Org-clocktable. It will p
   #+begin_src elisp
 (defun vispero-journals() (directory-files-recursively "~/Dropbox/org/roam/vispero/journal" "\\.org$"))
 
+(defun vispero-roam() (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$"))
+
 (defun personal-journals() (directory-files-recursively "~/Dropbox/org/roam/journal" "\\.org$"))
   #+end_src
 ** Create linkable UUID
@@ -555,13 +557,36 @@ text and copying to the killring."
            :unnarrowed t)
 
           ;; Need to add ":ROAM_REFS: http://bugzilla.fsi.local/show_bug.cgi?id=${slug}" to property
-          ("vb" "Vispero Bug" plain "- tags :: [[roam:Vispero Bugzilla]] %?\n"
+          ("vb" "Vispero Bug" plain "- tags :: [[roam:Vispero Bugzilla]] %?\n* Notes\n* Logging\n"
            :if-new (file+head "vispero/bugs/Bug ${slug}.org" ":PROPERTIES:
 :ROAM_REFS: http://bugzilla.fsi.local/show_bug.cgi?id=${slug}
 :END:
-,#+TITLE: Bug ${title}\n")
+,#+TITLE: Bug ${title}\n#+filetags: :bug:\n")
            :unnarrowed t)
           ))
+
+  (setq org-roam-capture-ref-templates
+        '(("e" "example" plain "- tags ::  %?\n* "
+           :if-new (file+head "website/%(url-host (url-generic-parse-url \"${ref}\"))-${slug}.org" ":PROPERTIES:
+:ROAM_REFS: ${ref}
+:END:
+,#+TITLE: ${title}\n")
+           :unnarrowed t)
+
+        ("b" "bug" plain "- tags ::  [[roam:Vispero Bugzilla]] %?\n* Notes\n* Logging\n"
+           :if-new (file+head "vispero/bugs/%(url-host (url-generic-parse-url \"${ref}\"))-${slug}.org" ":PROPERTIES:
+:ROAM_REFS: ${ref}
+:END:
+,#+TITLE: ${title}\n#+filetags: :bug:\n")
+           :unnarrowed t)
+
+                        )))
+
+  ;; (setq org-roam-capture-ref-templates
+  ;;       '(("r" "ref" plain #'org-roam-capture--get-point "%?"
+  ;;          :file-name "website/%(url-host (url-generic-parse-url \"${ref}\"))-${slug}"
+  ;;          :head "#+TITLE: ${title}\n#+roam_key: ${ref}\n- tags ::  "
+  ;;          :unnarrowed t))))
 
         ;; Roam v1
         ;; '(("d" "default" plain (function org-roam--capture-get-point)
@@ -632,12 +657,6 @@ text and copying to the killring."
         ;;    "%?"
         ;;    :unnarrowed t)
         ;;   ))
-
-  (setq org-roam-capture-ref-templates
-        '(("r" "ref" plain #'org-roam-capture--get-point "%?"
-           :file-name "website/%(url-host (url-generic-parse-url \"${ref}\"))-${slug}"
-           :head "#+TITLE: ${title}\n#+roam_key: ${ref}\n- tags ::  "
-           :unnarrowed t))))
 #+end_src
 * Org visuals
 ** Org Superstar
@@ -814,7 +833,8 @@ Functions used to swap focuses between personal and work.
 #+begin_src elisp :tangle (if (eq (doom-system-distro) 'ubuntu) "config.el" "no")
 (setq org-journal-dir "~/Dropbox/org/roam/vispero/journal"
       org-agenda-files (append (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$") (directory-files-recursively "~/Dropbox/org/roam/vispero/journal" "\\.org$"))
-      org-journal-date-format "%A, %d %B %Y\n:CLOCKTABLE:\n#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:\n:END:\n"
+      ;; org-journal-date-format "%A, %d %B %Y\n:CLOCKTABLE:\n#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:\n:END:\n"
+      org-journal-date-format "%A, %d %B %Y\n:CLOCKTABLE:\n#+BEGIN: clocktable :scope vispero-roam :block %Y-%m-%d :maxlevel 9\n#+END:\n:END:\n"
       ;; org-journal-file-header "#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:"
       org-journal-file-type 'weekly
       org-journal-file-format "%Y/Vispero Journal %W_%m-%d.org"
