@@ -606,11 +606,18 @@ text and copying to the killring."
            :unnarrowed t)
 
         ("b" "bug" plain "- tags ::  [[roam:Vispero Bugzilla]] %?\n* Notes\n* Logging\n"
-           :if-new (file+head "vispero/bugs/%(url-host (url-generic-parse-url \"${ref}\"))-${slug}.org" ":PROPERTIES:
+           :if-new (file+head "vispero/bugs/${title}.org" ":PROPERTIES:
 :ROAM_REFS: ${ref}
 :END:
 ,#+TITLE: ${title}\n#+filetags: :bug:\n")
            :unnarrowed t)
+
+;;         ("b" "bug" plain "- tags ::  [[roam:Vispero Bugzilla]] %?\n* Notes\n* Logging\n"
+;;            :if-new (file+head "vispero/bugs/%(url-host (url-generic-parse-url \"${ref}\"))-${slug}.org" ":PROPERTIES:
+;; :ROAM_REFS: ${ref}
+;; :END:
+;; ,#+TITLE: ${title}\n#+filetags: :bug:\n")
+;;            :unnarrowed t)
 
                         )))
 
