@@ -148,6 +148,16 @@ text and copying to the killring."
 - %a allows for a link inserted from the file/headline you are currently at and inserts it into the capture
 - %A is the same as %a but prompts for a description of the link
 #+begin_src elisp
+(defvar org-journal--date-location-scheduled-time nil)
+
+(defun org-journal-date-location (&optional scheduled-time)
+  (let ((scheduled-time (or scheduled-time (org-read-date nil nil nil "Date:"))))
+    (setq org-journal--date-location-scheduled-time scheduled-time)
+    (org-journal-new-entry t (org-time-string-to-time scheduled-time))
+    (unless (eq org-journal-file-type 'daily)
+      (org-narrow-to-subtree))
+    (goto-char (point-max))))
+
 (defun org-journal-find-location ()
   ;; Open today's journal, but specify a non-nil prefix argument in order to
   ;; inhibit inserting the heading; org-capture will insert the heading.
@@ -183,6 +193,10 @@ text and copying to the killring."
           ;;  :clock-in t)
 
           ;; Testing by removing %i
+          ("jf" "Journal Future" plain (function org-journal-date-location)
+                               "** TODO %?\n <%(princ org-journal--date-location-scheduled-time)>\n"
+                               :jump-to-captured t)
+
           ("jj" "Journal New Entry" plain (function org-journal-find-location)
            ;; "** %(format-time-string org-journal-time-format)%^{Title}%i%?"
            "** %(format-time-string org-journal-time-format)%?"
@@ -484,6 +498,24 @@ text and copying to the killring."
 (after! org-roam
   ;; (org-roam-db-build-cache ())
 
+  ;; "Vispero %A, %B %d %Y"
+  ;; REMOVE VISPERO AFTER TESTING
+;;         '(("d" "default" entry "** %?"
+;;            :if-new (file+head "Vispero %<%Y-%m-%d>.org" ":PROPERTIES:
+;; :ROAM_ALIASES: \"Vispero %<%A, %B %d %Y>\"
+;; :END:
+;; :CLOCKTABLE:\n#+BEGIN: clocktable :scope vispero-roam :block %<%Y-%m-%d> :maxlevel 9\n#+END:\n:END:\n#+TITLE: Vispero %<%Y-%m-%d>\n* %<%A, %d %B %Y>\n")
+;;            :prepend nil)
+;;           ))
+
+;;   (setq org-roam-dailies-capture-templates
+;;         '(("d" "default" plain "** %?" :target
+;;            (file+head "Vispero %<%Y-%m-%d>.org" ":PROPERTIES:
+;; :ROAM_ALIASES: \"Vispero %<%A, %B %d %Y>\"
+;; :END:
+;; ,#+TITLE: Vispero %<%Y-%m-%d>\n:CLOCKTABLE:\n#+BEGIN: clocktable :scope vispero-roam :block %<%Y-%m-%d> :maxlevel 9\n#+END:\n:END:\n* %<%A, %d %B %Y>\n"))
+;;           ))
+
   (setq org-roam-directory "~/Dropbox/org/roam"
         org-roam-capture-templates
 
@@ -658,6 +690,16 @@ text and copying to the killring."
         ;;    :unnarrowed t)
         ;;   ))
 #+end_src
+** Org-journal
+#+begin_src elisp
+(add-hook 'org-journal-after-header-create-hook 'org-create-new-id-journal)
+;; (add-hook 'org-journal-after-entry-create-hook 'org-create-new-id-journal)
+(defun org-create-new-id-journal ()
+  (goto-char (point-min))
+  (org-id-get-create)
+  (org-update-all-dblocks)
+  (goto-char (point-max)))
+#+end_src
 * Org visuals
 ** Org Superstar
 Don't need anymore. It is included in org +pretty
@@ -787,37 +829,87 @@ Functions used to swap focuses between personal and work.
 #+begin_src elisp
 (defun my/org-focus-personal()
   (interactive)
-  (setq org-agenda-files (append (seq-filter (lambda(x) (not (string-match "/vispero/"(file-name-directory x))))
-                                             (directory-files-recursively "~/Dropbox/org/roam" "\\.org$")) (directory-files-recursively "~/Dropbox/org/roam/journal" "\\.org$"))
+  (setq org-agenda-files (seq-filter (lambda(x) (not (string-match "/vispero/"(file-name-directory x))))
+                                             (directory-files-recursively "~/Dropbox/org/roam" "\\.org$"))
         +org-capture-todo-file "~/Dropbox/org/roam/personal_agenda.org"
+        org-roam-dailies-directory "daily"
         ))
 
 (defun my/org-focus-work()
   (interactive)
-  (setq org-agenda-files (append (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$") (directory-files-recursively "~/Dropbox/org/roam/vispero/journal" "\\.org$"))
+  (setq org-agenda-files (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$")
         +org-capture-todo-file "~/Dropbox/org/roam/vispero/vispero_agenda.org"
+        org-roam-dailies-directory "vispero/daily"
         ))
+
+;; Old journal method:
+;; (defun my/org-focus-personal()
+;;   (interactive)
+;;   (setq org-agenda-files (append (seq-filter (lambda(x) (not (string-match "/vispero/"(file-name-directory x))))
+;;                                              (directory-files-recursively "~/Dropbox/org/roam" "\\.org$")) (directory-files-recursively "~/Dropbox/org/roam/journal" "\\.org$"))
+;;         +org-capture-todo-file "~/Dropbox/org/roam/personal_agenda.org"
+;;         ))
+
+;; (defun my/org-focus-work()
+;;   (interactive)
+;;   (setq org-agenda-files (append (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$") (directory-files-recursively "~/Dropbox/org/roam/vispero/journal" "\\.org$"))
+;;         +org-capture-todo-file "~/Dropbox/org/roam/vispero/vispero_agenda.org"
+;;         ))
 #+end_src
 * Personal Machine
 #+begin_src elisp :tangle (if (eq (doom-system-distro) 'arch) "config.el" "no")
-(setq org-journal-dir "~/Dropbox/org/roam/journal"
+(setq org-journal-dir "~/Dropbox/org/roam/daily"
+      org-roam-dailies-directory "daily"
       ;; org-agenda-files (seq-filter (lambda(x) (not (string-match "/vispero/"(file-name-directory x))))
       ;;                              (directory-files-recursively "~/Dropbox/org" "\\.org$"))
 
-      org-journal-date-format "%A, %d %B %Y\n"
+      org-journal-date-format "%A, %d %B %Y"
       +org-capture-todo-file "~/Dropbox/org/roam/personal_agenda.org"
       ;; org-agenda-files 'personal-agenda-files
-      org-journal-file-type 'monthly
-      org-journal-file-format "Journal %Y-%m.org"
+      org-journal-file-header ":PROPERTIES:\n:ROAM_ALIASES: \"Personal %A, %B %d %Y\"\n:END:\n#+TITLE: Personal %Y-%m-%d\n"
+      org-journal-file-type 'daily
+      org-journal-file-format "Personal %Y-%m-%d.org"
       )
+
+(after! org-roam
+  (setq org-roam-dailies-capture-templates
+        ;; I have no idea why, but leave "entryy" mispelled.
+        ;; I am doing this to just open the buffer to edit. Might be vastly wrong.
+        '(("d" "default" entryy ""
+           :target (file+head "Personal %<%Y-%m-%d>.org" ":PROPERTIES:\n:ROAM_ALIASES: \"Personal %<%A, %B %d %Y>\"\n:END:\n#+TITLE: Personal %<%Y-%m-%d>\n* %<%A, %d %B %Y>\n")
+           :unarrowed t)
+
+;;   (setq org-roam-dailies-capture-templates
+;;         '(("d" "default" entry "** %?"
+;;            :target (file+head "Personal %<%Y-%m-%d>.org" ":PROPERTIES:
+;; :ROAM_ALIASES: \"Personal %<%A, %B %d %Y>\"
+;; :END:
+;; ,#+TITLE: Personal %<%Y-%m-%d>\n* %<%A, %d %B %Y>\n")
+;;            :prepend nil
+;;            :unarrowed nil)
+          )))
+
+;; (setq org-journal-dir "~/Dropbox/org/roam/journal"
+;;       ;; org-agenda-files (seq-filter (lambda(x) (not (string-match "/vispero/"(file-name-directory x))))
+;;       ;;                              (directory-files-recursively "~/Dropbox/org" "\\.org$"))
+
+;;       org-journal-date-format "%A, %d %B %Y\n"
+;;       +org-capture-todo-file "~/Dropbox/org/roam/personal_agenda.org"
+;;       ;; org-agenda-files 'personal-agenda-files
+;;       org-journal-file-type 'monthly
+;;       org-journal-file-format "Journal %Y-%m.org"
+;;       )
 
 (setq doom-font (font-spec :family "Fira Code Retina" :size 15)
       doom-variable-pitch-font (font-spec :family "JuliaMono Medium" :size 15)
       doom-big-font (font-spec :family "Fira Code Retina" :size 24))
 ;; (setq org-agenda-files (append (directory-files-recursively "~/Dropbox/org/roam" "\\.org$") (directory-files-recursively "~/Dropbox/org/journal" "\\.org$")))
 
-(setq org-agenda-files (append (seq-filter (lambda(x) (not (string-match "/vispero/"(file-name-directory x))))
-                                           (directory-files-recursively "~/Dropbox/org/roam" "\\.org$")) (directory-files-recursively "~/Dropbox/org/roam/journal" "\\.org$")))
+(setq org-agenda-files (seq-filter (lambda(x) (not (string-match "/vispero/"(file-name-directory x))))
+                                           (directory-files-recursively "~/Dropbox/org/roam" "\\.org$")))
+
+;; (setq org-agenda-files (append (seq-filter (lambda(x) (not (string-match "/vispero/"(file-name-directory x))))
+;;                                            (directory-files-recursively "~/Dropbox/org/roam" "\\.org$")) (directory-files-recursively "~/Dropbox/org/roam/journal" "\\.org$")))
 
 
 
@@ -831,15 +923,56 @@ Functions used to swap focuses between personal and work.
 - You cannot put "\n\n" in org-journal-date format. It will cause your first entry to be on the previous date.
   + However, now your first entry appears to be on the same line as your header, it isn't an is a visual bug at first.
 #+begin_src elisp :tangle (if (eq (doom-system-distro) 'ubuntu) "config.el" "no")
-(setq org-journal-dir "~/Dropbox/org/roam/vispero/journal"
-      org-agenda-files (append (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$") (directory-files-recursively "~/Dropbox/org/roam/vispero/journal" "\\.org$"))
+  (setq org-roam-dailies-directory "vispero/daily")
+(setq +org-capture-todo-file "~/Dropbox/org/roam/vispero/vispero_agenda.org"
+      org-agenda-files (append (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$")))
+
+(setq org-journal-dir "~/Dropbox/org/roam/vispero/daily"
       ;; org-journal-date-format "%A, %d %B %Y\n:CLOCKTABLE:\n#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:\n:END:\n"
-      org-journal-date-format "%A, %d %B %Y\n:CLOCKTABLE:\n#+BEGIN: clocktable :scope vispero-roam :block %Y-%m-%d :maxlevel 9\n#+END:\n:END:\n"
-      ;; org-journal-file-header "#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:"
-      org-journal-file-type 'weekly
-      org-journal-file-format "%Y/Vispero Journal %W_%m-%d.org"
-      +org-capture-todo-file "~/Dropbox/org/roam/vispero/vispero_agenda.org"
+      org-journal-date-format "%A, %d %B %Y"
+      org-journal-file-header ":PROPERTIES:
+:ROAM_ALIASES: \"Vispero %A, %B %d %Y\"
+:END:
+:CLOCKTABLE:\n#+BEGIN: clocktable :scope vispero-roam :block %Y-%m-%d :maxlevel 9 :fileskip0 t\n#+END:\n:END:\n#+TITLE: Vispero %Y-%m-%d"
+      org-journal-file-type 'daily
+      org-journal-file-format "Vispero %Y-%m-%d.org"
       )
+
+(after! org-roam
+  (setq org-roam-dailies-capture-templates
+        '(("d" "default" entry "** %?"
+           :target (file+head "Vispero %<%Y-%m-%d>.org" ":PROPERTIES:
+:ROAM_ALIASES: \"Vispero %<%A, %B %d %Y>\"
+:END:
+:CLOCKTABLE:\n#+BEGIN: clocktable :scope vispero-roam :block %<%Y-%m-%d> :maxlevel 9 :fileskip0 t\n#+END:\n:END:\n#+TITLE: Vispero %<%Y-%m-%d>\n* %<%A, %d %B %Y>\n")
+           :prepend nil)
+          )))
+
+
+
+;; (setq +org-capture-todo-file "~/Dropbox/org/roam/vispero/vispero_agenda.org"
+;;       org-agenda-files (append (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$") (directory-files-recursively "~/Dropbox/org/roam/vispero/daily" "\\.org$")))
+;; Old daily journals (unfinished)
+;; (setq org-journal-dir "~/Dropbox/org/roam/vispero/journal"
+;;       org-agenda-files (append (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$") (directory-files-recursively "~/Dropbox/org/roam/vispero/journal" "\\.org$"))
+;;       ;; org-journal-date-format "%A, %d %B %Y\n:CLOCKTABLE:\n#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:\n:END:\n"
+;;       org-journal-date-format "%A, %d %B %Y\n:CLOCKTABLE:\n#+BEGIN: clocktable :scope vispero-roam :block %Y-%m-%d :maxlevel 9\n#+END:\n:END:\n"
+;;       org-journal-file-header "#+TITLE: Vispero Journal %A %m %d %Y\n#+STARTUP: showeverything\n:CLOCKTABLE:\n#+BEGIN: clocktable :scope vispero-roam :block %Y-%m-%d :maxlevel 9\n#+END:\n:END:\n"
+;;       org-journal-file-type 'daily
+;;       org-journal-file-format "%Y/%B/Vispero Journal %A %m-%d-%Y.org"
+;;       +org-capture-todo-file "~/Dropbox/org/roam/vispero/vispero_agenda.org"
+;;       )
+
+;; Old weekly journals
+;; (setq org-journal-dir "~/Dropbox/org/roam/vispero/journal"
+;;       org-agenda-files (append (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$") (directory-files-recursively "~/Dropbox/org/roam/vispero/journal" "\\.org$"))
+;;       ;; org-journal-date-format "%A, %d %B %Y\n:CLOCKTABLE:\n#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:\n:END:\n"
+;;       org-journal-date-format "%A, %d %B %Y\n:CLOCKTABLE:\n#+BEGIN: clocktable :scope vispero-roam :block %Y-%m-%d :maxlevel 9\n#+END:\n:END:\n"
+;;       ;; org-journal-file-header "#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:"
+;;       org-journal-file-type 'weekly
+;;       org-journal-file-format "%Y/Vispero Journal %W_%m-%d.org"
+;;       +org-capture-todo-file "~/Dropbox/org/roam/vispero/vispero_agenda.org"
+;;       )
 
 (setq doom-font (font-spec :family "Fira Code" :size 15)
       doom-variable-pitch-font (font-spec :family "Fira Code" :size 15)
