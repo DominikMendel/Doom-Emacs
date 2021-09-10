@@ -110,7 +110,7 @@ text and copying to the killring."
       org-enforce-todo-checkbox-dependencies t)
 
 ;; Broken with Roam v2. It makes saves really slow
-;; (add-hook 'before-save-hook 'org-update-all-dblocks())
+(add-hook 'before-save-hook 'org-update-all-dblocks())
 #+end_src
 * Theme
 #+begin_src elisp
