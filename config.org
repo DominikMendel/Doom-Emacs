@@ -98,6 +98,8 @@ text and copying to the killring."
 #+begin_src elisp
 (setq deft-directory "~/Dropbox/org"
       deft-extensions '("org" "txt")
+      deft-use-filename-as-title t
+      deft-strip-summary-regexp ":PROPERTIES:\n\\(.+\n\\)+:END:\n"
       deft-recursive t)
 #+end_src
 * Logging
@@ -200,6 +202,12 @@ text and copying to the killring."
           ("jj" "Journal New Entry" plain (function org-journal-find-location)
            ;; "** %(format-time-string org-journal-time-format)%^{Title}%i%?"
            "** %(format-time-string org-journal-time-format)%?"
+           :jump-to-captured nil
+           :immediate-finish nil
+           :unnarrowed nil)
+
+          ("jJ" "Journal Inset Roam" plain (function org-journal-find-location)
+           "** %(format-time-string org-journal-time-format) %?"
            :jump-to-captured nil
            :immediate-finish nil
            :unnarrowed nil)
@@ -573,19 +581,19 @@ capture was not aborted."
       :if-new (file+head "${slug}.org" "#+TITLE: ${title}\n#+filetags: project\n- tags ::\n* Tasks\n** ARCHIVE :ARCHIVE:\n" ("Tasks"))
       :unnarrowed t))))
 
-(defun my/org-roam-capture-task ()
-  (interactive)
-  ;; Add the project file to the agenda after capture is finished
-  ;;(add-hook 'org-capture-after-finalize-hook #'my/org-roam-project-finalize-hook)
+;; (defun my/org-roam-capture-task ()
+;;   (interactive)
+;;   ;; Add the project file to the agenda after capture is finished
+;;   ;;(add-hook 'org-capture-after-finalize-hook #'my/org-roam-project-finalize-hook)
 
-  ;; Capture the new task, creating the project file if necessary
-  (org-roam-capture- :node (org-roam-node-read
-                            nil
-                            (my/org-roam-filter-by-tag "project"))
-                     :templates '(("p" "project" plain "** TODO %?"
-                                   :if-new (file+head+olp "${slug}.org"
-                                                          "#+TITLE: ${title}\n#+filetags: project\n- tags ::\n* Tasks\n** ARCHIVE :ARCHIVE:\n"
-                                                          ("Tasks"))))))
+;;   ;; Capture the new task, creating the project file if necessary
+;;   (org-roam-capture- :node (org-roam-node-read
+;;                             nil
+;;                             (my/org-roam-filter-by-tag "project"))
+;;                      :templates '(("p" "project" plain "** TODO %?"
+;;                                    :if-new (file+head+olp "${slug}.org"
+;;                                                           "#+TITLE: ${title}\n#+filetags: project\n- tags ::\n* Tasks\n** ARCHIVE :ARCHIVE:\n"
+;;                                                           ("Tasks"))))))
 
 ;; (defun my/org-roam-copy-todo-to-today ()
 ;;   (interactive)
@@ -703,7 +711,7 @@ capture was not aborted."
 ,#+TITLE: ${title}\n")
            :unnarrowed t)
 
-        ("r" "review" plain "- tags ::  [[roam:Vispero Swarm Review]] %?\n* Logging\n"
+        ("r" "review" plain "- tags ::  [[roam:Vispero Swarm Reviews]] %?\n* Logging\n"
            :if-new (file+head "vispero/reviews/${title}.org" ":PROPERTIES:
 :ROAM_REFS: ${ref}
 :END:
@@ -1056,10 +1064,37 @@ Functions used to swap focuses between personal and work.
 :ROAM_ALIASES: \"Vispero %<%A, %B %d %Y>\"
 :END:
 :CLOCKTABLE:\n#+BEGIN: clocktable :scope vispero-roam :block %<%Y-%m-%d> :maxlevel 9 :fileskip0 t\n#+END:\n:END:\n#+TITLE: Vispero %<%Y-%m-%d>\n* %<%A, %d %B %Y>\n")
-           :prepend nil)
+
+;; (defun my/testing-vispero (tag-name)
+;;   (lambda (node)
+;;     (memeber tag-name (my/org-roam-filter-by-tag "vispero"))))
+
+;; (defun my/testing-vispero-tag (tag-name)
+;;   (lambda (node)
+;;     (member tag-name (org-roam-node-tags node))))
+
           ;; ("t" "testing" entry "* %?"
           ;;  :target (file+head "%<%Y-%m-%d>.org" "#+TITLE: %<%Y-%m-%d>\n"))
           )))
+
+;; (setq some-vispero-variable "vispero/")
+(defun some-vispero-variable () (substring "vispero/" 0))
+
+(defun my/org-roam-capture-task ()
+  (interactive)
+  ;; Add the project file to the agenda after capture is finished
+  ;;(add-hook 'org-capture-after-finalize-hook #'my/org-roam-project-finalize-hook)
+
+  ;; Capture the new task, creating the project file if necessary
+  (org-roam-capture- :node (org-roam-node-read
+                            nil
+                            (my/org-roam-filter-by-tag "project"))
+                     :templates '(("p" "project" plain "** TODO %?"
+                                   :if-new (file+head+olp "vispero/${slug}.org"
+                                   ;; :if-new (file+head+olp "${some-vispero-variable}${slug}.org"
+                                                          "#+TITLE: ${title}\n#+filetags: project\n- tags :: [[roam:Vispero]] \n* Tasks\n** ARCHIVE :ARCHIVE:\n* Notes"
+                                                          ("Tasks"))))))
+           :prepend nil)
 
 
 
