@@ -533,10 +533,12 @@ text and copying to the killring."
 ;; :END:
 ;; ,#+TITLE: Vispero %<%Y-%m-%d>\n:CLOCKTABLE:\n#+BEGIN: clocktable :scope vispero-roam :block %<%Y-%m-%d> :maxlevel 9\n#+END:\n:END:\n* %<%A, %d %B %Y>\n"))
 ;;           ))
+(setq lexical-binding t)
+
 (after! roam
   (setq org-roam-directory "~/Dropbox/org/roam"))
 
-  (setq lexical-binding t)
+  ;; (setq lexical-binding t)
 
   (defun org-roam-node-insert-immediate (arg &rest args)
   (interactive "P")
@@ -576,10 +578,16 @@ capture was not aborted."
    nil
    nil
    (my/org-roam-filter-by-tag "project")
-   :templates
-   '(("p" "project" plain "** %?"
-      :if-new (file+head "${slug}.org" "#+TITLE: ${title}\n#+filetags: project\n- tags ::\n* Tasks\n** ARCHIVE :ARCHIVE:\n" ("Tasks"))
-      :unnarrowed t))))
+   :templates org-roam-capture-templates))
+
+  ;; (org-roam-node-find
+  ;;  nil
+  ;;  nil
+  ;;  (my/org-roam-filter-by-tag "project")
+  ;;  :templates
+  ;;  '(("p" "project" plain "** %?"
+  ;;     :if-new (file+head "${slug}.org" "#+TITLE: ${title}\n#+filetags: project\n- tags ::\n* Tasks\n** ARCHIVE :ARCHIVE:\n" ("Tasks"))
+  ;;     :unnarrowed t))))
 
 ;; (defun my/org-roam-capture-task ()
 ;;   (interactive)
@@ -595,12 +603,34 @@ capture was not aborted."
 ;;                                                           "#+TITLE: ${title}\n#+filetags: project\n- tags ::\n* Tasks\n** ARCHIVE :ARCHIVE:\n"
 ;;                                                           ("Tasks"))))))
 
+;; (after! org-roam
+;; (defun my/org-roam-copy-todo-to-today ()
+;;   (interactive)
+;;   (let ((org-refile-keep t) ;; Set this to nil to delete the original!
+;;         (org-roam-dailies-capture-templates
+          ;; '(("t" "tasks" entry "%?"
+          ;;    :if-new (file+head+olp Personal "Personal %<%Y-%m-%d>.org" ":PROPERTIES:\n:ROAM_ALIASES: \"Personal %<%A, %B %d %Y>\"\n:END:\n#+TITLE: Personal %<%Y-%m-%d>\n* %<%A, %d %B %Y>\n" ("Tasks")))))
+;;         (org-after-refile-insert-hook #'save-buffer)
+;;         today-file
+;;         pos)
+;;     (save-window-excursion
+;;       (org-roam-dailies--capture (current-time) t)
+;;       ;; (org-roam-dailies-capture-date (current-time) t)
+;;       ;; (org-roam-dailies-capture-today nil)
+;;       (setq today-file (buffer-file-name))
+;;       (setq pos (point)))
+
+;;     ;; Only refile if the target file is different than the current file
+;;     (unless (equal (file-truename today-file)
+;;                    (file-truename (buffer-file-name)))
+;;       (org-refile nil nil (list "Tasks" today-file nil pos)))))
+;; )
 ;; (defun my/org-roam-copy-todo-to-today ()
 ;;   (interactive)
 ;;   (let ((org-refile-keep t) ;; Set this to nil to delete the original!
 ;;         (org-roam-dailies-capture-templates
 ;;           '(("t" "tasks" entry "%?"
-;;              :if-new (file+head+olp Personal "Personal %<%Y-%m-%d>.org" ":PROPERTIES:\n:ROAM_ALIASES: \"Personal %<%A, %B %d %Y>\"\n:END:\n#+TITLE: Personal %<%Y-%m-%d>\n* %<%A, %d %B %Y>\n" ("Tasks")))))
+;;              :if-new (file+head+olp "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n" ("Tasks")))))
 ;;         (org-after-refile-insert-hook #'save-buffer)
 ;;         today-file
 ;;         pos)
@@ -614,10 +644,13 @@ capture was not aborted."
 ;;                    (file-truename (buffer-file-name)))
 ;;       (org-refile nil nil (list "Tasks" today-file nil pos)))))
 
+
+;; (after! org
 ;; (add-to-list 'org-after-todo-state-change-hook
 ;;              (lambda ()
 ;;                (when (equal org-state "DONE")
 ;;                  (my/org-roam-copy-todo-to-today))))
+;;   )
 
 #+end_src
 ** Capture templates
@@ -977,6 +1010,7 @@ Functions used to swap focuses between personal and work.
 #+end_src
 * Personal Machine
 #+begin_src elisp :tangle (if (eq (doom-system-distro) 'arch) "config.el" "no")
+(after! org-journal
 (setq org-journal-dir "~/Dropbox/org/roam/daily"
       org-roam-dailies-directory "daily"
       ;; org-agenda-files (seq-filter (lambda(x) (not (string-match "/vispero/"(file-name-directory x))))
@@ -988,7 +1022,7 @@ Functions used to swap focuses between personal and work.
       org-journal-file-header ":PROPERTIES:\n:ROAM_ALIASES: \"Personal %A, %B %d %Y\"\n:END:\n#+TITLE: Personal %Y-%m-%d\n"
       org-journal-file-type 'daily
       org-journal-file-format "Personal %Y-%m-%d.org"
-      )
+      ))
 
 (after! org-roam
   (setq org-roam-dailies-capture-templates
