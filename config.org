@@ -69,6 +69,8 @@ This function is used in the ":match" parameter for an Org-clocktable. It will p
 (defun vispero-roam() (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$"))
 
 (defun personal-journals() (directory-files-recursively "~/Dropbox/org/roam/journal" "\\.org$"))
+
+(defun all-roam() (directory-files-recursively "~/Dropbox/org/roam" "\\.org$"))
   #+end_src
 ** Create linkable UUID
 - Credit to Rainer König
