@@ -170,6 +170,13 @@ text and copying to the killring."
     (org-narrow-to-subtree))
   (goto-char (point-max)))
 
+(defun my/org-capture-plus-store-link()
+  (interactive)
+  (call-interactively 'org-store-link)
+  (org-capture))
+  ;; (org-capture nil "jT"))
+(global-set-key (kbd "<f4>") 'my/org-capture-plus-store-link)
+
 (after! org
   (setq org-capture-templates
         '(
@@ -249,6 +256,11 @@ text and copying to the killring."
            :jump-to-captured nil
            :immediate-finish t
            :clock-in t)
+
+          ("jT" "Journal Testing" plain (function org-journal-find-location)
+           "** %(format-time-string org-journal-time-format)Tesing : %a"
+           :jump-to-captured nil
+           :immediate-finish t)
 
           ;; ("jm" "Journal Meetings")
           ;; ("jme" "Embedded Software Team" plain (function org-journal-find-location)
