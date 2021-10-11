@@ -3,6 +3,7 @@
 (package! org-fancy-priorities)
 (package! org-superstar)
 (package! org-super-agenda)
+(package! mu4e-alert :disable t)
 
 (unpin! org-roam company-org-roam)
 ;;; $DOOMDIR/packages.el
