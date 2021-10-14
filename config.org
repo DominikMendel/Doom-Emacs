@@ -173,8 +173,8 @@ text and copying to the killring."
 (defun my/org-capture-plus-store-link()
   (interactive)
   (call-interactively 'org-store-link)
-  (org-capture))
-  ;; (org-capture nil "jT"))
+  ;; (org-capture))
+  (org-capture nil "jJ"))
 (global-set-key (kbd "<f4>") 'my/org-capture-plus-store-link)
 
 (after! org
@@ -215,11 +215,16 @@ text and copying to the killring."
            :immediate-finish nil
            :unnarrowed nil)
 
-          ("jJ" "Journal Inset Roam" plain (function org-journal-find-location)
-           "** %(format-time-string org-journal-time-format) %?"
+          ("jJ" "Journal Insert Roam" plain (function org-journal-find-location)
+           "** %(format-time-string org-journal-time-format)%a"
            :jump-to-captured nil
-           :immediate-finish nil
-           :unnarrowed nil)
+           :immediate-finish t)
+
+          ;; ("jJ" "Journal Inset Roam" plain (function org-journal-find-location)
+          ;;  "** %(format-time-string org-journal-time-format) %?"
+          ;;  :jump-to-captured nil
+          ;;  :immediate-finish nil
+          ;;  :unnarrowed nil)
 
           ("jt" "Journal New Clock Entry" plain (function org-journal-find-location)
            "** %(format-time-string org-journal-time-format)%?"
@@ -258,7 +263,7 @@ text and copying to the killring."
            :clock-in t)
 
           ("jT" "Journal Testing" plain (function org-journal-find-location)
-           "** %(format-time-string org-journal-time-format)Tesing : %a"
+           "** %(format-time-string org-journal-time-format)Testing : %a"
            :jump-to-captured nil
            :immediate-finish t)
 
@@ -898,136 +903,6 @@ Don't need anymore. It is included in org +pretty
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
 #+end_src
-* mu4e
-#+begin_src elisp
-;; (setq user-mail-address "dominikmendel95@gmail.com"
-;;       user-full-name  "Dominik Mendel"
-      ;; I have my mbsyncrc in a different folder on my system, to keep it separate from the
-      ;; mbsyncrc available publicly in my dotfiles. You MUST edit the following line.
-      ;; Be sure that the following command is: "mbsync -c ~/.config/mu4e/mbsyncrc -a"
-
-;; (setq mu4e-compose-org-msg-toggle-next nil)
-
-(after! mu4e
-
-  ;; Lastly added the "Default smtp" to try and help.
-    (set-email-account! "Gmail"
-    '((mu4e-sent-folder       . "/Gmail/[Gmail]/Sent Mail")
-        (mu4e-drafts-folder     . "/Gmail/[Gmail]/Drafts")
-        (mu4e-trash-folder      . "/Gmail/[Gmail]/Trash")
-        (mu4e-refile-folder     . "/Gmail/[Gmail]/All Mail")
-        (smtpmail-smtp-user     . "dominikmendel95@gmail.com")
-        (smtpmail-smtp-server  . "smtp.gmail.com")
-        (smtpmail-default-smtp-server  . "smtp.gmail.com")
-        (smtpmail-smtp-service . 465)
-        (smtpmail-stream-type  . ssl)
-        (user-mail-address      . "dominikmendel95@gmail.com")    ;; only needed for mu < 1.4
-        (mu4e-compose-signature . "Dominik Mendel"))
-    t)
-
-    (set-email-account! "Dominik@Mendel.family"
-    '((mu4e-sent-folder       . "/Dominik-Mendel/Sent")
-        (mu4e-drafts-folder     . "/Dominik-Mendel/Drafts")
-        (mu4e-trash-folder      . "/Dominik-Mendel/Trash")
-        (mu4e-refile-folder     . "/Dominik-Mendel/All Mail")
-        (smtpmail-smtp-user     . "dominik@mendel.family")
-        (smtpmail-smtp-server  . "smtp.migadu.com")
-        (smtpmail-default-smtp-server  . "smtp.migadu.com")
-        (smtpmail-smtp-service . 465)
-        (smtpmail-stream-type  . ssl)
-        (user-mail-address      . "dominik@mendel.family")    ;; only needed for mu < 1.4
-        (mu4e-compose-signature . "Dominik Mendel"))
-    t)
-
-    (setq
-        mu4e-get-mail-command "mbsync -c ~/.config/mu4e/mbsyncrc -a"
-        mu4e-update-interval  300
-        mu4e-main-buffer-hide-personal-addresses t
-        message-send-mail-function 'smtpmail-send-it
-        mu4e-compose-format-flowed t
-        mu4e-change-filenames-when-moving t
-
-        mu4e-maildir-shortcuts
-        '((:maildir "/Gmail/Inbox" :key ?i :hide-unread t)
-          (:maildir "/Gmail/[Gmail]/Sent Mail" :key ?s :hide-unread t))
-
-        mu4e-bookmarks
-        '((:name "Sent Dom"
-            :query "maildir:/Dominik-Mendel/ and testing"
-            :key ?d)
-        (:name  "Unread messages"
-            :query "flag:unread AND NOT flag:trashed"
-            :key ?u)
-        (:name "Today's messages"
-            :query "date:today..now"
-            :key ?t)
-        (:name "Last 7 days"
-            :query "date:7d..now"
-            :hide-unread t
-            :key ?w)
-        (:name "Messages with images"
-            :query "mime:image/*"
-            :key ?p))
-
-        ;; mu4e-maildir-shortcuts
-        ;; '(("Gmail/Inbox"             . ?i)
-        ;;     ("/Gmail/[Gmail]/Sent Mail" . ?s)
-        ;;     ("/Gmail/[Gmail]/Trash"     . ?t)
-        ;;     ("/Gmail/[Gmail]/Drafts"    . ?d)
-        ;;     ("/Gmail/[Gmail]/All Mail"  . ?a))
-
-                        ))
-
-        ;;starttls-use-gnutls t
-        ;;smtpmail-starttls-credentials '(("smtp.1and1.com" 587 nil nil))
-
-        ;; mu4e-contexts
-        ;;     (list
-        ;;     ;; Gmail account
-        ;;     (make-mu4e-context
-        ;;     :name "Gmail"
-        ;;     :match-func
-        ;;         (lambda (msg)
-        ;;         (when msg
-        ;;             (string-prefix-p "/Gmail" (mu4e-message-field msg :maildir))))
-        ;;     :vars '((user-mail-address . "dominikmendel@gmail.com")
-        ;;             (user-full-name    . "Dominik Mendel")
-        ;;             (smtpmail-smtp-server  . "smtp.gmail.com")
-        ;;             (smtpmail-smtp-service . 465)
-        ;;             (smtpmail-stream-type  . ssl)
-        ;;             (mu4e-compose-signature . "Dominik Mendel")
-        ;;             (mu4e-drafts-folder  . "/Gmail/[Gmail]/Drafts")
-        ;;             (mu4e-sent-folder  . "/Gmail/[Gmail]/Sent Mail")
-        ;;             (mu4e-refile-folder  . "/Gmail/[Gmail]/All Mail")
-        ;;             (mu4e-trash-folder  . "/Gmail/[Gmail]/Trash")))
-
-        ;;     ;; Personal account
-        ;;     (make-mu4e-context
-        ;;     :name "Dominik Mendel"
-        ;;     :match-func
-        ;;         (lambda (msg)
-        ;;         (when msg
-        ;;             (string-prefix-p "/Dominik-Mendel" (mu4e-message-field msg :maildir))))
-        ;;     :vars '((user-mail-address . "dominik@mendel.family")
-        ;;             (user-full-name    . "Dominik Mendel")
-        ;;             (smtpmail-smtp-server  . "smtp.migadu.com")
-        ;;             (smtpmail-smtp-service . 465)
-        ;;             (smtpmail-stream-type  . ssl)
-        ;;             (mu4e-compose-signature . "Dominik Mendel")
-        ;;             (mu4e-drafts-folder  . "/Dominik-Mendel/Drafts")
-        ;;             (mu4e-sent-folder  . "/Dominik-Mendel/Sent")
-        ;;             (mu4e-refile-folder  . "/Dominik-Mendel/Archive")
-        ;;             (mu4e-trash-folder  . "/Dominik-Mendel/Trash"))))
-
-        ;; mu4e-sent-folder "/account-1/Sent"
-        ;; mu4e-drafts-folder "/account-1/Drafts"
-        ;; mu4e-trash-folder "/account-1/Trash"
-        ;; mu4e-maildir-shortcuts
-        ;; '(("/account-1/Inbox"      . ?i)
-        ;;   ("/account-1/Sent Items" . ?s)
-        ;;   ("/account-1/Drafts"     . ?d)
-        ;;   ("/account-1/Trash"      . ?t)))
-#+end_src
 * Key mappings
 #+begin_src elisp
 (map! :leader
@@ -1215,6 +1090,136 @@ Functions used to swap focuses between personal and work.
 
 (defun test-directory-multiple (a b c d)
   (concat "testDirectory/" a b c d))
+#+end_src
+** mu4e
+#+begin_src elisp :tangle (if (eq (doom-system-distro) 'arch) "config.el" "no")
+;; (setq user-mail-address "dominikmendel95@gmail.com"
+;;       user-full-name  "Dominik Mendel"
+      ;; I have my mbsyncrc in a different folder on my system, to keep it separate from the
+      ;; mbsyncrc available publicly in my dotfiles. You MUST edit the following line.
+      ;; Be sure that the following command is: "mbsync -c ~/.config/mu4e/mbsyncrc -a"
+
+;; (setq mu4e-compose-org-msg-toggle-next nil)
+
+(after! mu4e
+
+  ;; Lastly added the "Default smtp" to try and help.
+    (set-email-account! "Gmail"
+    '((mu4e-sent-folder       . "/Gmail/[Gmail]/Sent Mail")
+        (mu4e-drafts-folder     . "/Gmail/[Gmail]/Drafts")
+        (mu4e-trash-folder      . "/Gmail/[Gmail]/Trash")
+        (mu4e-refile-folder     . "/Gmail/[Gmail]/All Mail")
+        (smtpmail-smtp-user     . "dominikmendel95@gmail.com")
+        (smtpmail-smtp-server  . "smtp.gmail.com")
+        (smtpmail-default-smtp-server  . "smtp.gmail.com")
+        (smtpmail-smtp-service . 465)
+        (smtpmail-stream-type  . ssl)
+        (user-mail-address      . "dominikmendel95@gmail.com")    ;; only needed for mu < 1.4
+        (mu4e-compose-signature . "Dominik Mendel"))
+    t)
+
+    (set-email-account! "Dominik@Mendel.family"
+    '((mu4e-sent-folder       . "/Dominik-Mendel/Sent")
+        (mu4e-drafts-folder     . "/Dominik-Mendel/Drafts")
+        (mu4e-trash-folder      . "/Dominik-Mendel/Trash")
+        (mu4e-refile-folder     . "/Dominik-Mendel/All Mail")
+        (smtpmail-smtp-user     . "dominik@mendel.family")
+        (smtpmail-smtp-server  . "smtp.migadu.com")
+        (smtpmail-default-smtp-server  . "smtp.migadu.com")
+        (smtpmail-smtp-service . 465)
+        (smtpmail-stream-type  . ssl)
+        (user-mail-address      . "dominik@mendel.family")    ;; only needed for mu < 1.4
+        (mu4e-compose-signature . "Dominik Mendel"))
+    t)
+
+    (setq
+        mu4e-get-mail-command "mbsync -c ~/.config/mu4e/mbsyncrc -a"
+        mu4e-update-interval  300
+        mu4e-main-buffer-hide-personal-addresses t
+        message-send-mail-function 'smtpmail-send-it
+        mu4e-compose-format-flowed t
+        mu4e-change-filenames-when-moving t
+
+        mu4e-maildir-shortcuts
+        '((:maildir "/Gmail/Inbox" :key ?i :hide-unread t)
+          (:maildir "/Gmail/[Gmail]/Sent Mail" :key ?s :hide-unread t))
+
+        mu4e-bookmarks
+        '((:name "Sent Dom"
+            :query "maildir:/Dominik-Mendel/ and testing"
+            :key ?d)
+        (:name  "Unread messages"
+            :query "flag:unread AND NOT flag:trashed"
+            :key ?u)
+        (:name "Today's messages"
+            :query "date:today..now"
+            :key ?t)
+        (:name "Last 7 days"
+            :query "date:7d..now"
+            :hide-unread t
+            :key ?w)
+        (:name "Messages with images"
+            :query "mime:image/*"
+            :key ?p))
+
+        ;; mu4e-maildir-shortcuts
+        ;; '(("Gmail/Inbox"             . ?i)
+        ;;     ("/Gmail/[Gmail]/Sent Mail" . ?s)
+        ;;     ("/Gmail/[Gmail]/Trash"     . ?t)
+        ;;     ("/Gmail/[Gmail]/Drafts"    . ?d)
+        ;;     ("/Gmail/[Gmail]/All Mail"  . ?a))
+
+                        ))
+
+        ;;starttls-use-gnutls t
+        ;;smtpmail-starttls-credentials '(("smtp.1and1.com" 587 nil nil))
+
+        ;; mu4e-contexts
+        ;;     (list
+        ;;     ;; Gmail account
+        ;;     (make-mu4e-context
+        ;;     :name "Gmail"
+        ;;     :match-func
+        ;;         (lambda (msg)
+        ;;         (when msg
+        ;;             (string-prefix-p "/Gmail" (mu4e-message-field msg :maildir))))
+        ;;     :vars '((user-mail-address . "dominikmendel@gmail.com")
+        ;;             (user-full-name    . "Dominik Mendel")
+        ;;             (smtpmail-smtp-server  . "smtp.gmail.com")
+        ;;             (smtpmail-smtp-service . 465)
+        ;;             (smtpmail-stream-type  . ssl)
+        ;;             (mu4e-compose-signature . "Dominik Mendel")
+        ;;             (mu4e-drafts-folder  . "/Gmail/[Gmail]/Drafts")
+        ;;             (mu4e-sent-folder  . "/Gmail/[Gmail]/Sent Mail")
+        ;;             (mu4e-refile-folder  . "/Gmail/[Gmail]/All Mail")
+        ;;             (mu4e-trash-folder  . "/Gmail/[Gmail]/Trash")))
+
+        ;;     ;; Personal account
+        ;;     (make-mu4e-context
+        ;;     :name "Dominik Mendel"
+        ;;     :match-func
+        ;;         (lambda (msg)
+        ;;         (when msg
+        ;;             (string-prefix-p "/Dominik-Mendel" (mu4e-message-field msg :maildir))))
+        ;;     :vars '((user-mail-address . "dominik@mendel.family")
+        ;;             (user-full-name    . "Dominik Mendel")
+        ;;             (smtpmail-smtp-server  . "smtp.migadu.com")
+        ;;             (smtpmail-smtp-service . 465)
+        ;;             (smtpmail-stream-type  . ssl)
+        ;;             (mu4e-compose-signature . "Dominik Mendel")
+        ;;             (mu4e-drafts-folder  . "/Dominik-Mendel/Drafts")
+        ;;             (mu4e-sent-folder  . "/Dominik-Mendel/Sent")
+        ;;             (mu4e-refile-folder  . "/Dominik-Mendel/Archive")
+        ;;             (mu4e-trash-folder  . "/Dominik-Mendel/Trash"))))
+
+        ;; mu4e-sent-folder "/account-1/Sent"
+        ;; mu4e-drafts-folder "/account-1/Drafts"
+        ;; mu4e-trash-folder "/account-1/Trash"
+        ;; mu4e-maildir-shortcuts
+        ;; '(("/account-1/Inbox"      . ?i)
+        ;;   ("/account-1/Sent Items" . ?s)
+        ;;   ("/account-1/Drafts"     . ?d)
+        ;;   ("/account-1/Trash"      . ?t)))
 #+end_src
 * Work machine
 - You cannot put "\n\n" in org-journal-date format. It will cause your first entry to be on the previous date.
