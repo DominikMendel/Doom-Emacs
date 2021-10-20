@@ -145,7 +145,8 @@ text and copying to the killring."
           (sequence "[ ](T)" "[-](I)" "[?](?)" "|" "[X](D)")))
   (setq org-log-done 'time)
   (setq org-refile-targets (quote ((org-agenda-files :maxlevel . 2))))
-
+  (setq org-list-demote-modify-bullet
+       '(("+" . "-") ("-" . "+") ("*" . "+") ("1." . "a.") ("a." . "-")))
   )
 #+end_src
 ** Org-capture-templates
