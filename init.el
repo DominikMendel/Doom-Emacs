@@ -14,6 +14,9 @@
 ;;      Alternatively, press 'gd' (or 'C-c c d') on a module to browse its
 ;;      directory (for easy access to its source code).
 
+
+(defvar native-comp-deferred-compilation-deny-list nil)
+
 (doom! :input
        ;;chinese
        ;;japanese
