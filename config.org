@@ -748,6 +748,11 @@ capture was not aborted."
            "%?"
            :unnarrowed t)
 
+          ("vp" "Vispero People" plain "- tags :: [[roam:Vispero People]] %?\n* Time off\n| Start    | End      | Total days | Description |\n|-------+-----+------------+-------------|\n"
+           :if-new (file+head "vispero/${slug}.org" "#+TITLE: ${title}\n")
+           "%?"
+           :unnarrowed t)
+
           ;; Need to add ":ROAM_REFS: http://bugzilla.fsi.local/show_bug.cgi?id=${slug}" to property
           ("vb" "Vispero Bug" plain "- tags :: [[roam:Vispero Bugzilla]] %?\n* Notes\n* Logging\n"
            :if-new (file+head "vispero/bugs/Bug ${slug}.org" ":PROPERTIES:
