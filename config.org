@@ -125,7 +125,8 @@ text and copying to the killring."
         doom-themes-enable-italic t))
 (custom-set-faces!
   '(font-lock-comment-face :slant italic)
-  '(font-lock-keyword-face :slant italic))
+  '(font-lock-keyword-face :slant italic)
+  '(region :background "DarkSlateBlue"))
 
 (defun my/next-theme ()
 "Switch to the next theme in ‘custom-known-themes’.
