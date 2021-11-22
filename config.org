@@ -168,7 +168,18 @@ the beginning of the list."
   (setq org-refile-targets (quote ((org-agenda-files :maxlevel . 2))))
   (setq org-list-demote-modify-bullet
        '(("+" . "-") ("-" . "+") ("*" . "+") ("1." . "a.") ("a." . "-")))
+  (setq org-log-redeadline 'note)
   )
+
+;; This doesn't work
+(defun my/org-buffer-restart()
+  (interactive)
+  (with-current-buffer buffer
+  (fundamental-mode))
+  ;; (with-current-buffer buffer
+  ;; (org-mode))
+  )
+
 #+end_src
 ** Org-capture-templates
 - %a allows for a link inserted from the file/headline you are currently at and inserts it into the capture
@@ -1105,8 +1116,9 @@ Functions used to swap focuses between personal and work.
       doom-big-font (font-spec :family "Fira Code Retina" :size 24))
 ;; (setq org-agenda-files (append (directory-files-recursively "~/Dropbox/org/roam" "\\.org$") (directory-files-recursively "~/Dropbox/org/journal" "\\.org$")))
 
-(setq org-agenda-files (seq-filter (lambda(x) (not (string-match "/vispero/"(file-name-directory x))))
-                                           (directory-files-recursively "~/Dropbox/org/roam" "\\.org$")))
+(after! org-agenda
+    (setq org-agenda-files (seq-filter (lambda(x) (not (string-match "/vispero/"(file-name-directory x))))
+                                            (directory-files-recursively "~/Dropbox/org/roam" "\\.org$"))))
 
 ;; (setq org-agenda-files (append (seq-filter (lambda(x) (not (string-match "/vispero/"(file-name-directory x))))
 ;;                                            (directory-files-recursively "~/Dropbox/org/roam" "\\.org$")) (directory-files-recursively "~/Dropbox/org/roam/journal" "\\.org$")))
@@ -1253,9 +1265,10 @@ Functions used to swap focuses between personal and work.
 - You cannot put "\n\n" in org-journal-date format. It will cause your first entry to be on the previous date.
   + However, now your first entry appears to be on the same line as your header, it isn't an is a visual bug at first.
 #+begin_src elisp :tangle (if (eq (doom-system-distro) 'ubuntu) "config.el" "no")
-  (setq org-roam-dailies-directory "vispero/daily")
-(setq +org-capture-todo-file "~/Dropbox/org/roam/vispero/vispero_agenda.org"
-      org-agenda-files (append (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$")))
+(setq org-roam-dailies-directory "vispero/daily")
+(after! org-agenda
+    (setq +org-capture-todo-file "~/Dropbox/org/roam/vispero/vispero_agenda.org"
+        org-agenda-files (append (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$"))))
 
 (setq org-journal-dir "~/Dropbox/org/roam/vispero/daily"
       ;; org-journal-date-format "%A, %d %B %Y\n:CLOCKTABLE:\n#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:\n:END:\n"
