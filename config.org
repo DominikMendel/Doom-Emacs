@@ -353,34 +353,38 @@ the beginning of the list."
       org-agenda-tags-column 100 ;; from testing this seems to be a good value
       org-agenda-compact-blocks t)
 
-(setq org-super-agenda-header-map (make-sparse-keymap)) ;;Needed for evil keys in org-super-agenda
-(after! org
-  (setq org-agenda-custom-commands
-        '(
-          ("ot" "Overview test"
-           ((agenda "" ((org-agenda-span 'day)
-                        (org-super-agenda-groups
-                         '((:name "Today"
-                            :time-grid t
-                            :date today
-                            :todo "TODAY"
-                            :scheduled today
-                            :order 1)))))
-            ;; (tags "question" ((org-agenda-overriding-header "")
-            (tags "." ((org-agenda-overriding-header "")
-                       (org-super-agenda-groups
-                        '((:name "Questions"
-                           ;; '((
-                           :tag "question"
-                           ;; :anything t
-                           ;; :auto-tags t
-                           :order 12)
-                          (:discard (:anything t))
-                          ))))
-            (alltodo "" ((org-agenda-overriding-header "")
-                         ;; (tags-todo "." ((org-agenda-overriding-header "")
-                         (org-super-agenda-groups
-                          '((:name "Next to do"
+(defun my-agenda-skip-work ()
+  "Skip tasks that are tagged as work related."
+  (save-restriction
+    (widen)
+    (let ((subtree-end (save-excursion (org-end-of-subtree t))))
+      (cond
+       ((seq-contains-p (org-get-tags) "vispero")
+        subtree-end)
+       (t
+        nil)))))
+
+(defun my-agenda-skip-non-work ()
+  "Skip tasks that are tagged as non-work related."
+  (save-restriction
+    (widen)
+    (let ((subtree-end (save-excursion (org-end-of-subtree t))))
+      (cond
+       ((not (seq-contains-p (org-get-tags) "vispero"))
+        subtree-end)
+       (t
+        nil)))))
+
+(setq my-agenda-work-cmd '(agenda
+                           ""
+                           ((org-agenda-span 'day)
+                            (org-agenda-skip-function 'my-agenda-skip-non-work)))
+      my-agenda-non-work-cmd '(agenda
+                               ""
+                               ((org-agenda-span 'day)
+                                (org-agenda-skip-function 'my-agenda-skip-work))))
+
+(setq my-agenda-super-group-alltodo '((:name "Next to do"
                              :todo "NEXT"
                              :order 4)
                             (:name "Due Today"
@@ -437,7 +441,65 @@ the beginning of the list."
                             ;;  :priority<= "C"
                             ;;  :order 89)
                             (:discard (:tag ("Chore" "Routine" "Daily")))
-                            ))))))
+                            ))
+
+(setq my-agenda-super-group-agenda '((:name "Today"
+                            :time-grid t
+                            :date today
+                            :todo "TODAY"
+                            :scheduled today
+                            :order 1)))
+
+(setq my-agenda-super-group-tags '((:name "Questions"
+                           ;; '((
+                           :tag "question"
+                           ;; :anything t
+                           ;; :auto-tags t
+                           :order 12)
+                          (:discard (:anything t))
+                          ))
+
+(setq org-super-agenda-header-map (make-sparse-keymap)) ;;Needed for evil keys in org-super-agenda
+(after! org
+  (setq org-agenda-custom-commands
+        '(
+          ("op" "Overview Personal"
+           ((agenda "" ((org-agenda-span 'day)
+            (org-agenda-skip-function 'my-agenda-skip-work)
+                        (org-super-agenda-groups
+                         my-agenda-super-group-agenda
+                         )))
+            ;; (tags "question" ((org-agenda-overriding-header "")
+            (tags "." ((org-agenda-overriding-header "")
+            (org-agenda-skip-function 'my-agenda-skip-work)
+                       (org-super-agenda-groups
+                        my-agenda-super-group-tags
+                       )))
+            (alltodo "" ((org-agenda-overriding-header "")
+            (org-agenda-skip-function 'my-agenda-skip-work)
+                         ;; (tags-todo "." ((org-agenda-overriding-header "")
+                         (org-super-agenda-groups
+                          my-agenda-super-group-alltodo)))
+            ))
+
+          ("ow" "Overview Work"
+           ((agenda "" ((org-agenda-span 'day)
+            (org-agenda-skip-function 'my-agenda-skip-non-work)
+                        (org-super-agenda-groups
+                         my-agenda-super-group-agenda
+                         )))
+            ;; (tags "question" ((org-agenda-overriding-header "")
+            (tags "." ((org-agenda-overriding-header "")
+            (org-agenda-skip-function 'my-agenda-skip-non-work)
+                       (org-super-agenda-groups
+                        my-agenda-super-group-tags
+                       )))
+            (alltodo "" ((org-agenda-overriding-header "")
+            (org-agenda-skip-function 'my-agenda-skip-non-work)
+                         ;; (tags-todo "." ((org-agenda-overriding-header "")
+                         (org-super-agenda-groups
+                          my-agenda-super-group-alltodo)))
+            ))
 
 
           ("p" "Projects"
@@ -457,6 +519,9 @@ the beginning of the list."
                              :order 2)
                             (:discard (:anything t)))
                           )))))
+
+          ("P" "Personal test"
+           (,my-agenda-non-work-cmd))
 
           ("w" "Weekly review"
            ((alltodo "" ((org-agenda-overriding-header "")
@@ -589,6 +654,8 @@ the beginning of the list."
 
 (after! roam
   (setq org-roam-directory "~/Dropbox/org/roam"))
+
+(setq org-roam-node-default-sort nil)
 
   ;; (setq lexical-binding t)
 
@@ -831,6 +898,23 @@ capture was not aborted."
 
                         )))
 #+end_src
+** Vulpea
+- [[https://github.com/d12frosted/vulpea][GitHub]]
+- A wrapper around org roam which adds extra functionality
+#+begin_src elisp
+(use-package! vulpea
+  :ensure t
+  ;; hook into org-roam-db-autosync-mode you wish to enable
+  ;; persistence of meta values (see respective section in README to
+  ;; find out what meta means)
+  :hook ((org-roam-db-autosync-mode . vulpea-db-autosync-enable)))
+
+(defun vulpea-agenda-files ()
+  "Return a list of note files that are part of `org-agenda'."
+  (seq-map
+   #'vulpea-note-path
+   (vulpea-db-query-by-tags-some '("project" "agenda" "vispero"))))
+#+end_src
 ** Old version 1
 #+begin_src elisp :tangle no
         ;; Roam v1
@@ -940,6 +1024,12 @@ Don't need anymore. It is included in org +pretty
 ;;
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
+#+end_src
+* Vertico
+- Search and auto-complete
+#+begin_src elisp
+;; (after! vertico
+;;   (setq vertico-sort-function 'vertico-sort-alpha))
 #+end_src
 * Key mappings
 #+begin_src elisp
@@ -1114,11 +1204,13 @@ Functions used to swap focuses between personal and work.
 (setq doom-font (font-spec :family "Fira Code Retina" :size 15)
       doom-variable-pitch-font (font-spec :family "JuliaMono Medium" :size 15)
       doom-big-font (font-spec :family "Fira Code Retina" :size 24))
-;; (setq org-agenda-files (append (directory-files-recursively "~/Dropbox/org/roam" "\\.org$") (directory-files-recursively "~/Dropbox/org/journal" "\\.org$")))
 
 (after! org-agenda
-    (setq org-agenda-files (seq-filter (lambda(x) (not (string-match "/vispero/"(file-name-directory x))))
-                                            (directory-files-recursively "~/Dropbox/org/roam" "\\.org$"))))
+(setq org-agenda-files (append (directory-files-recursively "~/Dropbox/org/roam" "\\.org$"))))
+
+;; (after! org-agenda
+;;     (setq org-agenda-files (seq-filter (lambda(x) (not (string-match "/vispero/"(file-name-directory x))))
+;;                                             (directory-files-recursively "~/Dropbox/org/roam" "\\.org$"))))
 
 ;; (setq org-agenda-files (append (seq-filter (lambda(x) (not (string-match "/vispero/"(file-name-directory x))))
 ;;                                            (directory-files-recursively "~/Dropbox/org/roam" "\\.org$")) (directory-files-recursively "~/Dropbox/org/roam/journal" "\\.org$")))
@@ -1181,8 +1273,11 @@ Functions used to swap focuses between personal and work.
         mu4e-change-filenames-when-moving t
 
         mu4e-maildir-shortcuts
-        '((:maildir "/Gmail/Inbox" :key ?i :hide-unread t)
-          (:maildir "/Gmail/[Gmail]/Sent Mail" :key ?s :hide-unread t))
+          '((:maildir "/Dominik-Mendel/Inbox" :key ?I :hide-unread t)
+            (:maildir "/Dominik-Mendel/Sent" :key ?S :hide-unread t)
+            (:maildir "/Dominik-Mendel/spam" :key ?p :hide-unread nil)
+            (:maildir "/Gmail/Inbox" :key ?i :hide-unread t)
+            (:maildir "/Gmail/[Gmail]/Sent Mail" :key ?s :hide-unread t))
 
         mu4e-bookmarks
         '((:name "Sent Dom"
