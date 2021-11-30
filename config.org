@@ -295,6 +295,12 @@ the beginning of the list."
            :immediate-finish t
            :clock-in t)
 
+          ("jS" "Journal Startup jump to" plain (function org-journal-find-location)
+           "** %(format-time-string org-journal-time-format)Startup"
+           :jump-to-captured t
+           :immediate-finish t
+           :clock-in t)
+
           ("jT" "Journal Testing" plain (function org-journal-find-location)
            "** %(format-time-string org-journal-time-format)Testing : %a"
            :jump-to-captured nil
