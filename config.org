@@ -1053,6 +1053,7 @@ Don't need anymore. It is included in org +pretty
       :desc "Insert Immediate" "n r I" #'org-roam-node-insert-immediate
       :desc "Roam Refile Header" "n r !" #'org-roam-refile
       :desc "Journal Schedule View" "n j S" #'org-journal-schedule-view
+      :desc "Journal Reschedule Scheduled Entry" "n j r" #'org-journal-reschedule-scheduled-entry
       )
 
 (map! :after org-journal
