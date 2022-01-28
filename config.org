@@ -1318,6 +1318,9 @@ Don't need anymore. It is included in org +pretty
 (map! :n "," (cmd! (push (cons t ?m) unread-command-events)
                    (push (cons t 32) unread-command-events)))
 
+(map! :v "J" #'drag-stuff-down)
+(map! :v "K" #'drag-stuff-up)
+
 (map!
 :leader
 :prefix "f"
