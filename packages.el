@@ -5,6 +5,7 @@
 (package! org-super-agenda)
 (package! mu4e-alert :disable t)
 (package! vulpea)
+(package! harpoon)
 
 (unpin! org-roam company-org-roam)
 ;;; $DOOMDIR/packages.el
