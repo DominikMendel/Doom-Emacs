@@ -365,7 +365,8 @@ the beginning of the list."
     (widen)
     (let ((subtree-end (save-excursion (org-end-of-subtree t))))
       (cond
-       ((seq-contains-p (org-get-tags) "vispero")
+       ;; ((seq-contains-p (org-get-tags) "vispero")
+       ((string-match-p "vispero" (buffer-file-name))
         subtree-end)
        (t
         nil)))))
@@ -376,7 +377,8 @@ the beginning of the list."
     (widen)
     (let ((subtree-end (save-excursion (org-end-of-subtree t))))
       (cond
-       ((not (seq-contains-p (org-get-tags) "vispero"))
+       ;; ((not (seq-contains-p (org-get-tags) "vispero"))
+       ((not (string-match-p "vispero" (buffer-file-name)))
         subtree-end)
        (t
         nil)))))
@@ -904,7 +906,79 @@ capture was not aborted."
 
                         )))
 #+end_src
-** Vulpea
+** Old version 1
+#+begin_src elisp :tangle no
+        ;; Roam v1
+        ;; '(("d" "default" plain (function org-roam--capture-get-point)
+        ;;    ;; "%?"
+        ;;    :file-name "${slug}"
+        ;;    ;; added a double space at the end for the double-space insert link issue.
+        ;;    :head "#+TITLE: ${title}\n- tags ::  %?\n* "
+        ;;    :unnarrowed t)
+
+        ;;   ("a" "New Area" plain (function org-roam--capture-get-point)
+        ;;    "%?"
+        ;;    :file-name "${slug}"
+        ;;    ;; added a double space at the end for the double-space insert link issue.
+        ;;    :head "#+TITLE: ${title}\n- tags :: [[file:../../../Dropbox/org/roam/indexes.org][Indexes]]"
+        ;;    :unnarrowed t)
+
+        ;;   ("r" "Reading General")
+        ;;   ("rr" "Reading" plain (function org-roam--capture-get-point)
+        ;;    :file-name "${slug}"
+        ;;    ;; added a double space at the end for the double-space insert link issue.
+        ;;    :head "#+TITLE: ${title}\n- tags ::  %?\n* Notes\n* Overview"
+        ;;    :unnarrowed t)
+
+        ;;   ("rc" "Reading Character" plain (function org-roam--capture-get-point)
+        ;;    :file-name "${slug}"
+        ;;    ;; added a double space at the end for the double-space insert link issue.
+        ;;    :head "#+TITLE: ${title}\n- tags ::  %?\n* Notes\n* Mentions"
+        ;;    :unnarrowed t)
+
+        ;;   ("j" "Japanese")
+        ;;   ("jj" "Japanese Vocabulary" plain (function org-roam--capture-get-point)
+        ;;    :file-name "${slug}"
+        ;;    :head "#+TITLE: ${title}\n#+roam_tags: %^{prompt}\n- tags :: [[file:../../../Dropbox/org/roam/japanese.org][Japanese]]\n* Definition"
+        ;;    "%?"
+        ;;    :unnarrowed t)
+
+        ;;   ("jk" "Japanese Kanji" plain (function org-roam--capture-get-point)
+        ;;    :file-name "${slug}"
+        ;;    :head "#+TITLE: ${title}\n#+roam_tags: %^{prompt}\n- tags :: [[file:../../../Dropbox/org/roam/japanese.org][Japanese]]\n* Readings\n** onyomi %?\n** kunyomi"
+        ;;    :unnarrowed t)
+
+        ;;   ("t" "Test")
+        ;;   ("tt" "Test test" plain (function org-roam--capture-get-point)
+        ;;    ;; :file-name (test-directory-string "testingbuhhNameDontMatter")
+        ;;    ;; :file-name (test-directory-string "${slug}")
+        ;;    ;; :file-name (test-directory-multiple "%y" "%m" "%d" "${slug}")
+        ;;    :function (test-directory-multiple "y" "m" "d" "slug")
+        ;;    ;; added a double space at the end for the double-space insert link issue.
+        ;;    :head "#+TITLE: ${title}\n- tags ::  %?"
+        ;;    :unnarrowed t)
+
+
+        ;;   ("v" "Vispero")
+        ;;   ("vv" "Vispero Default" plain (function org-roam--capture-get-point)
+        ;;    :file-name "vispero/${slug}"
+        ;;    ;; added a double space at the end for the double-space insert link issue.
+        ;;    :head "#+TITLE: ${title}\n- tags ::  %?"
+        ;;    :unnarrowed t)
+        ;;   ("vt" "Vispero Tagged" plain (function org-roam--capture-get-point)
+        ;;    "%?"
+        ;;    :file-name "vispero/${slug}"
+        ;;    ;; added a double space at the end for the double-space insert link issue.
+        ;;    :head "#+TITLE: ${title}\n- tags :: [[file:~/Dropbox/org/roam/vispero.org][Vispero]] "
+        ;;    :unnarrowed t)
+        ;;   ("vb" "Vispero Bug" plain (function org-roam--capture-get-point)
+        ;;    :file-name "vispero/Bug ${slug}"
+        ;;    :head "#+TITLE: Bug ${title}\n#+roam_key: http://bugzilla.fsi.local/show_bug.cgi?id=${slug}\n#+roam_alias: ${slug}\n- tags :: [[file:~/Dropbox/org/roam/vispero_bugzilla.org][Vispero Bugzilla]] \n"
+        ;;    "%?"
+        ;;    :unnarrowed t)
+        ;;   ))
+#+end_src
+* Vulpea
 - [[https://github.com/d12frosted/vulpea][GitHub]]
 - A wrapper around org roam which adds extra functionality
 #+begin_src elisp
@@ -916,7 +990,7 @@ capture was not aborted."
   :hook ((org-roam-db-autosync-mode . vulpea-db-autosync-enable)))
 
 #+end_src
-*** My version
+** My version
 #+begin_src elisp :tangle no
 ;; This replaces vulpea-project-files
 (defun vulpea-agenda-files ()
@@ -924,6 +998,24 @@ capture was not aborted."
   (seq-map
    #'vulpea-note-path
    (vulpea-db-query-by-tags-some '("project" "agenda" "vispero"))))
+
+;; (defun vulpea-project-files ()
+;;   "Return a list of note files that are part of `org-agenda'."
+;;   (seq-map
+;;    #'vulpea-note-path
+;;    (vulpea-db-query-by-tags-some '("project"))))
+
+;; (defun vulpea-agenda-files ()
+;;   "Return a list of note files that are part of `org-agenda'."
+;;   (seq-map
+;;    #'vulpea-note-path
+;;    (vulpea-db-query-by-tags-some '("agenda"))))
+
+;; (defun vulpea-journal-files ()
+;;   "Return a list of note files that are part of `org-agenda'."
+;;   (seq-map
+;;    #'vulpea-note-path
+;;    (vulpea-db-query-by-tags-some '("journal"))))
 
 ;; This replaces vulpea-project-update-tag
 (defun my-update-filetags ()
@@ -941,9 +1033,9 @@ capture was not aborted."
             (setq tags (cons "project" tags))
           (setq tags (remove "project" tags)))
 
-        (if (seq-contains-p tags "[[id:c0a1e283-0329-4546-b391-18ac52099f01][Vispero]]")
-            (setq tags (cons "vispero" tags))
-          (setq tags (remove "vispero" tags)))
+        ;; (if (seq-contains-p tags "[[id:c0a1e283-0329-4546-b391-18ac52099f01][Vispero]]")
+        ;;     (setq tags (cons "vispero" tags))
+        ;;   (setq tags (remove "vispero" tags)))
 
         ;; cleanup duplicates
         (setq tags (seq-uniq tags))
@@ -955,26 +1047,26 @@ capture was not aborted."
 
 ;; Function to convert files to add a tag
 ;; But I don't know how to use
-(defun my-update-files-with-tags ()
-(interactive)
-(seq-do
- (lambda (note)
-   ;; do something with buffer visiting note
-   (vulpea-utils-with-note note
-     ;; just add a single tag (it handles duplication etc)
-     (vulpea-buffer-tags-add "vispero")
-     ;; save buffer
-     (save-buffer)))
- (vulpea-db-query
-  (lambda (note)
-    (seq-contains-p
-     (vulpea-note-meta-get-list
-      note
-      "tags"
-      ;; you could use note here, but (a) it does unnecessary db
-      ;; call and (b) all we care about is id
-      'link)
-     "[[id:c0a1e283-0329-4546-b391-18ac52099f01][Vispero]]")))))
+;; (defun my-update-files-with-tags ()
+;; (interactive)
+;; (seq-do
+;;  (lambda (note)
+;;    ;; do something with buffer visiting note
+;;    (vulpea-utils-with-note note
+;;      ;; just add a single tag (it handles duplication etc)
+;;      (vulpea-buffer-tags-add "vispero")
+;;      ;; save buffer
+;;      (save-buffer)))
+;;  (vulpea-db-query
+;;   (lambda (note)
+;;     (seq-contains-p
+;;      (vulpea-note-meta-get-list
+;;       note
+;;       "tags"
+;;       ;; you could use note here, but (a) it does unnecessary db
+;;       ;; call and (b) all we care about is id
+;;       'link)
+;;      "[[id:c0a1e283-0329-4546-b391-18ac52099f01][Vispero]]")))))
 
 (defun vulpea-project-p ()
   "Return non-nil if current buffer has any todo entry.
@@ -1006,8 +1098,12 @@ tasks."
 (add-hook 'before-save-hook #'my-update-filetags)
 
 (advice-add 'org-agenda :before #'vulpea-agenda-files-update)
+(advice-add 'org-todo-list :before #'vulpea-agenda-files-update)
 #+end_src
-*** Required Vulpea functions
+
+#+RESULTS:
+
+** Required Vulpea functions
 #+begin_src elisp
 ;; functions borrowed from `vulpea' library
 ;; https://github.com/d12frosted/vulpea/blob/6a735c34f1f64e1f70da77989e9ce8da7864e5ff/vulpea-buffer.el
@@ -1093,9 +1189,9 @@ If nil it defaults to `split-string-default-separators', normally
                              (point-max) t)
       (replace-match ""))))
 #+end_src
-*** Original
+** Original
 - This is the original implementation from [[https://d12frosted.io/posts/2020-07-07-task-management-with-roam-vol4.html][d12frosted]]
-#+begin_src elisp :tangle no
+#+begin_src elisp :tangle yes
 (defun vulpea-project-p ()
   "Return non-nil if current buffer has any todo entry.
 
@@ -1158,78 +1254,7 @@ tasks."
 (add-hook 'before-save-hook #'vulpea-project-update-tag)
 
 (advice-add 'org-agenda :before #'vulpea-agenda-files-update)
-#+end_src
-** Old version 1
-#+begin_src elisp :tangle no
-        ;; Roam v1
-        ;; '(("d" "default" plain (function org-roam--capture-get-point)
-        ;;    ;; "%?"
-        ;;    :file-name "${slug}"
-        ;;    ;; added a double space at the end for the double-space insert link issue.
-        ;;    :head "#+TITLE: ${title}\n- tags ::  %?\n* "
-        ;;    :unnarrowed t)
-
-        ;;   ("a" "New Area" plain (function org-roam--capture-get-point)
-        ;;    "%?"
-        ;;    :file-name "${slug}"
-        ;;    ;; added a double space at the end for the double-space insert link issue.
-        ;;    :head "#+TITLE: ${title}\n- tags :: [[file:../../../Dropbox/org/roam/indexes.org][Indexes]]"
-        ;;    :unnarrowed t)
-
-        ;;   ("r" "Reading General")
-        ;;   ("rr" "Reading" plain (function org-roam--capture-get-point)
-        ;;    :file-name "${slug}"
-        ;;    ;; added a double space at the end for the double-space insert link issue.
-        ;;    :head "#+TITLE: ${title}\n- tags ::  %?\n* Notes\n* Overview"
-        ;;    :unnarrowed t)
-
-        ;;   ("rc" "Reading Character" plain (function org-roam--capture-get-point)
-        ;;    :file-name "${slug}"
-        ;;    ;; added a double space at the end for the double-space insert link issue.
-        ;;    :head "#+TITLE: ${title}\n- tags ::  %?\n* Notes\n* Mentions"
-        ;;    :unnarrowed t)
-
-        ;;   ("j" "Japanese")
-        ;;   ("jj" "Japanese Vocabulary" plain (function org-roam--capture-get-point)
-        ;;    :file-name "${slug}"
-        ;;    :head "#+TITLE: ${title}\n#+roam_tags: %^{prompt}\n- tags :: [[file:../../../Dropbox/org/roam/japanese.org][Japanese]]\n* Definition"
-        ;;    "%?"
-        ;;    :unnarrowed t)
-
-        ;;   ("jk" "Japanese Kanji" plain (function org-roam--capture-get-point)
-        ;;    :file-name "${slug}"
-        ;;    :head "#+TITLE: ${title}\n#+roam_tags: %^{prompt}\n- tags :: [[file:../../../Dropbox/org/roam/japanese.org][Japanese]]\n* Readings\n** onyomi %?\n** kunyomi"
-        ;;    :unnarrowed t)
-
-        ;;   ("t" "Test")
-        ;;   ("tt" "Test test" plain (function org-roam--capture-get-point)
-        ;;    ;; :file-name (test-directory-string "testingbuhhNameDontMatter")
-        ;;    ;; :file-name (test-directory-string "${slug}")
-        ;;    ;; :file-name (test-directory-multiple "%y" "%m" "%d" "${slug}")
-        ;;    :function (test-directory-multiple "y" "m" "d" "slug")
-        ;;    ;; added a double space at the end for the double-space insert link issue.
-        ;;    :head "#+TITLE: ${title}\n- tags ::  %?"
-        ;;    :unnarrowed t)
-
-
-        ;;   ("v" "Vispero")
-        ;;   ("vv" "Vispero Default" plain (function org-roam--capture-get-point)
-        ;;    :file-name "vispero/${slug}"
-        ;;    ;; added a double space at the end for the double-space insert link issue.
-        ;;    :head "#+TITLE: ${title}\n- tags ::  %?"
-        ;;    :unnarrowed t)
-        ;;   ("vt" "Vispero Tagged" plain (function org-roam--capture-get-point)
-        ;;    "%?"
-        ;;    :file-name "vispero/${slug}"
-        ;;    ;; added a double space at the end for the double-space insert link issue.
-        ;;    :head "#+TITLE: ${title}\n- tags :: [[file:~/Dropbox/org/roam/vispero.org][Vispero]] "
-        ;;    :unnarrowed t)
-        ;;   ("vb" "Vispero Bug" plain (function org-roam--capture-get-point)
-        ;;    :file-name "vispero/Bug ${slug}"
-        ;;    :head "#+TITLE: Bug ${title}\n#+roam_key: http://bugzilla.fsi.local/show_bug.cgi?id=${slug}\n#+roam_alias: ${slug}\n- tags :: [[file:~/Dropbox/org/roam/vispero_bugzilla.org][Vispero Bugzilla]] \n"
-        ;;    "%?"
-        ;;    :unnarrowed t)
-        ;;   ))
+(advice-add 'org-todo-list :before #'vulpea-agenda-files-update)
 #+end_src
 * Org visuals
 ** Org Superstar
@@ -1468,8 +1493,8 @@ Functions used to swap focuses between personal and work.
       doom-variable-pitch-font (font-spec :family "JuliaMono Medium" :size 15)
       doom-big-font (font-spec :family "Fira Code Retina" :size 24))
 
-(after! org-agenda
-(setq org-agenda-files (append (directory-files-recursively "~/Dropbox/org/roam" "\\.org$"))))
+;; (after! org-agenda
+;; (setq org-agenda-files (append (directory-files-recursively "~/Dropbox/org/roam" "\\.org$"))))
 
 ;; (after! org-agenda
 ;;     (setq org-agenda-files (seq-filter (lambda(x) (not (string-match "/vispero/"(file-name-directory x))))
@@ -1626,7 +1651,8 @@ Functions used to swap focuses between personal and work.
 (setq org-roam-dailies-directory "vispero/daily")
 (after! org-agenda
     (setq +org-capture-todo-file "~/Dropbox/org/roam/vispero/vispero_agenda.org"
-        org-agenda-files (append (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$"))))
+        ;; org-agenda-files (append (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$"))
+        ))
 
 (setq org-journal-dir "~/Dropbox/org/roam/vispero/daily"
       ;; org-journal-date-format "%A, %d %B %Y\n:CLOCKTABLE:\n#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:\n:END:\n"
