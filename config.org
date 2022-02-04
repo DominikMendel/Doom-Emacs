@@ -126,8 +126,9 @@ text and copying to the killring."
 (custom-set-faces!
   '(font-lock-comment-face :slant italic)
   '(font-lock-keyword-face :slant italic)
-  ;; '(region :background "DarkSlateBlue"))
-  '(region :background "#094959"))
+  '(region :background "DarkSlateBlue")
+  '(vertico-current :background "DarkSlateBlue"))
+  ;; '(region :background "#094959"))
 
 (defun my/next-theme ()
 "Switch to the next theme in ‘custom-known-themes’.
