@@ -115,7 +115,7 @@ text and copying to the killring."
       org-enforce-todo-checkbox-dependencies t)
 
 ;; Broken with Roam v2. It makes saves really slow
-(add-hook 'before-save-hook 'org-update-all-dblocks())
+;; (add-hook 'before-save-hook 'org-update-all-dblocks())
 #+end_src
 * Theme
 #+begin_src elisp
@@ -629,12 +629,22 @@ the beginning of the list."
 #+end_src
 ** Org-journal
 #+begin_src elisp
+;; (add-hook 'org-journal-after-header-create-hook #'org-id-get-create)
+(add-hook 'org-journal-after-entry-create-hook #'org-roam-db-autosync--setup-file-h)
+(add-hook 'org-journal-after-entry-create-hook #'org-journal-restore-hooks)
+
+(defun org-journal-restore-hooks ()
+  (add-hook 'find-file-hook #'vulpea-project-update-tag)
+  (add-hook 'before-save-hook #'vulpea-project-update-tag))
+
 (add-hook 'org-journal-after-header-create-hook 'org-create-new-id-journal)
-;; (add-hook 'org-journal-after-entry-create-hook 'org-create-new-id-journal)
 (defun org-create-new-id-journal ()
   (goto-char (point-min))
   (org-id-get-create)
-  (org-update-all-dblocks)
+  ;; (save-buffer)
+  ;; (org-roam-db-update-file)
+  ;; (org-roam-db-sync)
+  ;; (org-update-all-dblocks)
   (goto-char (point-max)))
 #+end_src
 * Org-roam
@@ -783,6 +793,7 @@ capture was not aborted."
 #+end_src
 ** Capture templates
 #+begin_src elisp
+
 (after! org-roam
 (setq org-roam-capture-templates
 
@@ -989,7 +1000,6 @@ capture was not aborted."
   ;; persistence of meta values (see respective section in README to
   ;; find out what meta means)
   :hook ((org-roam-db-autosync-mode . vulpea-db-autosync-enable)))
-
 #+end_src
 ** My version
 #+begin_src elisp :tangle no
@@ -1246,6 +1256,23 @@ tasks."
         :left-join nodes
         :on (= tags:node-id nodes:id)
         :where (like tag (quote "%\"project\"%"))]))))
+
+;; Testing functions for debugging
+;; (defun vulpea-project-files ()
+;;   "Return a list of note files that are part of `org-agenda'."
+;;   (seq-map
+;;    #'vulpea-note-path
+;;    (vulpea-db-query-by-tags-every '("project"))))
+
+;; (org-roam-db-query
+;;  [:select *
+;;   :from tags
+;;   :where (= node-id "905bd73e-2588-4b42-9a04-b8f69549ceb0")])
+
+;; (org-roam-db-query
+;;  [:select [id file title]
+;;   :from nodes
+;;   :where (= id "905bd73e-2588-4b42-9a04-b8f69549ceb0")])
 
 (defun vulpea-agenda-files-update (&rest _)
   "Update the value of `org-agenda-files'."
