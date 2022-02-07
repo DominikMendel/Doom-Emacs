@@ -217,7 +217,10 @@ the beginning of the list."
           ("t" "General ToDo" entry (file+headline +org-capture-todo-file "Tasks")
            "* TODO %?\n %i\n")
 
-          ("i" "General Inprogress" entry (file+headline +org-capture-todo-file "Tasks")
+          ("i" "General New Idea" entry (file+headline +org-capture-todo-file "Ideas")
+           "* %?\n %i\n")
+
+          ("I" "General Inprogress" entry (file+headline +org-capture-todo-file "Tasks")
            "* INPROGRESS %?\n %i\n")
 
           ("p" "General Project" entry (file+headline +org-capture-todo-file "Projects")
@@ -1445,15 +1448,19 @@ Functions used to swap focuses between personal and work.
 #+begin_src elisp
 (defun my/org-focus-personal()
   (interactive)
-  (setq org-agenda-files (seq-filter (lambda(x) (not (string-match "/vispero/"(file-name-directory x))))
-                                             (directory-files-recursively "~/Dropbox/org/roam" "\\.org$"))
+  (setq
+   ;; org-agenda-files (seq-filter (lambda(x) (not (string-match "/vispero/"(file-name-directory x))))
+   ;;                                           (directory-files-recursively "~/Dropbox/org/roam" "\\.org$"))
+        dm--my-focus "personal"
         +org-capture-todo-file "~/Dropbox/org/roam/personal_agenda.org"
         org-roam-dailies-directory "daily"
         ))
 
-(defun my/org-focus-work()
+(defun my/org-focus-vispero()
   (interactive)
-  (setq org-agenda-files (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$")
+  (setq
+   ;; org-agenda-files (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$")
+        dm--my-focus "vispero"
         +org-capture-todo-file "~/Dropbox/org/roam/vispero/vispero_agenda.org"
         org-roam-dailies-directory "vispero/daily"
         ))
@@ -1474,6 +1481,7 @@ Functions used to swap focuses between personal and work.
 #+end_src
 * Personal Machine
 #+begin_src elisp :tangle (if (eq (doom-system-distro) 'arch) "config.el" "no")
+(setq dm--my-focus "personal")
 (after! org-journal
 (setq org-journal-dir "~/Dropbox/org/roam/daily"
       org-roam-dailies-directory "daily"
@@ -1676,6 +1684,7 @@ Functions used to swap focuses between personal and work.
 - You cannot put "\n\n" in org-journal-date format. It will cause your first entry to be on the previous date.
   + However, now your first entry appears to be on the same line as your header, it isn't an is a visual bug at first.
 #+begin_src elisp :tangle (if (eq (doom-system-distro) 'ubuntu) "config.el" "no")
+(setq dm--my-focus "vispero")
 (setq org-roam-dailies-directory "vispero/daily")
 (after! org-agenda
     (setq +org-capture-todo-file "~/Dropbox/org/roam/vispero/vispero_agenda.org"
