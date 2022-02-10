@@ -800,8 +800,14 @@ capture was not aborted."
 (after! org-roam
 (setq org-roam-capture-templates
 
-        '(("d" "default" plain "- tags ::  %?\n* "
-           :if-new (file+head "${slug}.org" "#+TITLE: ${title}\n")
+        ;; '(("d" "default" plain "- tags ::  %?\n* "
+        ;;    :if-new (file+head "${slug}.org" "#+TITLE: ${title}\n")
+        ;;    :unnarrowed t)
+
+        ;; '(("d" "default" plain (file ,dm--org-roam-default-template)
+        '(("d" "default" plain (file "/home/dominik/.doom.d/templates/default-roam.org")
+           ;; :target (file ,(expand-file-name "${slug}.org" org-roam-directory))
+           :target (file "/home/dominik/Dropbox/org/roam/${slug}.org")
            :unnarrowed t)
 
           ("a" "New Area" plain "- tags :: [[roam:Indexes]] %?\n* "
