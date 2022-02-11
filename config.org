@@ -44,7 +44,8 @@ Just some personal information and my doom-theme.
       org-journal-enable-cache t
       ;; org-roam-directory "~/Dropbox/org/roam"
       +org-roam-open-buffer-on-find-file nil
-      +snippets-dir "~/Dropbox/snippets")
+      +snippets-dir "~/Dropbox/snippets"
+      display-line-numbers-type 'visual)
 
 (setq! org-journal-time-format "")
 
@@ -109,7 +110,6 @@ text and copying to the killring."
 #+begin_src elisp
 
 (setq org-startup-indented t           ;; Indent according to section
-      display-line-numbers-type t
       org-log-reschedule t
       org-log-into-drawer t
       org-enforce-todo-checkbox-dependencies t)
@@ -796,22 +796,31 @@ capture was not aborted."
 #+end_src
 ** Capture templates
 #+begin_src elisp
-
 (after! org-roam
+
+    (setq dm--org-templates-dir (expand-file-name "templates" doom-private-dir))
+    (setq dm--org-roam-vispero-dir (expand-file-name "vispero" org-roam-directory))
+    (setq dm--org-roam-default-template (expand-file-name "roam-default.org" dm--org-templates-dir))
+    (setq dm--org-roam-new-area-template (expand-file-name "roam-new-area.org" dm--org-templates-dir))
+    (setq dm--org-roam-reading-template (expand-file-name "roam-reading.org" dm--org-templates-dir))
+    (setq dm--org-roam-reading-character-template (expand-file-name "roam-reading-character.org" dm--org-templates-dir))
+    (setq dm--org-roam-vispero-default-template (expand-file-name "roam-vispero-default.org" dm--org-templates-dir))
+    (setq dm--org-roam-vispero-tagged-template (expand-file-name "roam-vispero-tagged.org" dm--org-templates-dir))
+
+    (setq dm--org-roam-test-dir (expand-file-name "testing" org-roam-directory))
+    (defun dm/get-test-filename (name)
+        (expand-file-name
+        (format "%.org" (s-snake-case)) dm--org-roam-test-dir))
+
+
 (setq org-roam-capture-templates
-
-        ;; '(("d" "default" plain "- tags ::  %?\n* "
-        ;;    :if-new (file+head "${slug}.org" "#+TITLE: ${title}\n")
-        ;;    :unnarrowed t)
-
-        ;; '(("d" "default" plain (file ,dm--org-roam-default-template)
-        '(("d" "default" plain (file "/home/dominik/.doom.d/templates/default-roam.org")
-           ;; :target (file ,(expand-file-name "${slug}.org" org-roam-directory))
-           :target (file "/home/dominik/Dropbox/org/roam/${slug}.org")
+        ;; Backtick function
+        `(("d" "default" plain (file ,dm--org-roam-default-template)
+           :target (file ,(expand-file-name "${slug}.org" org-roam-directory))
            :unnarrowed t)
 
-          ("a" "New Area" plain "- tags :: [[roam:Indexes]] %?\n* "
-           :if-new (file+head "${slug}.org" "#+TITLE: ${title}\n")
+          ("a" "New Area" plain (file ,dm--org-roam-new-area-template)
+           :target (file ,(expand-file-name "${slug}.org" org-roam-directory))
            :unnarrowed t)
 
           ;; Doesn't work with Roam v2 atm.
@@ -830,12 +839,12 @@ capture was not aborted."
           ;;  :unnarrowed t)
 
           ("r" "Reading General")
-          ("rr" "Reading" plain "- tags ::  %?\n* Notes\n* Overview"
-           :if-new (file+head "${slug}.org" "#+TITLE: ${title}\n")
+          ("rr" "Reading" plain (file ,dm--org-roam-reading-template)
+           :target (file ,(expand-file-name "${slug}.org" org-roam-directory))
            :unnarrowed t)
 
-          ("rc" "Reading Character" plain "- tags ::  %?\n* Notes\n* Mentions"
-           :if-new (file+head "${slug}.org" "#+TITLE: ${title}\n")
+          ("rc" "Reading Character" plain (file ,dm--org-roam-reading-character-template)
+           :target (file ,(expand-file-name "${slug}.org" org-roam-directory))
            :unnarrowed t)
 
           ("j" "Japanese")
@@ -866,13 +875,12 @@ capture was not aborted."
 
 
           ("v" "Vispero")
-          ("vv" "Vispero Default" plain "- tags ::  %?\n* "
-           :if-new (file+head "vispero/${slug}.org" "#+TITLE: ${title}\n")
+          ("vv" "Vispero Default" plain (file ,dm--org-roam-vispero-default-template)
+           :target (file ,(expand-file-name "${slug}.org" dm--org-roam-vispero-dir))
            :unnarrowed t)
 
-          ("vt" "Vispero Tagged" plain "- tags :: [[roam:Vispero]] %?\n* "
-           :if-new (file+head "vispero/${slug}.org" "#+TITLE: ${title}\n")
-           "%?"
+          ("vt" "Vispero Tagged" plain (file ,dm--org-roam-vispero-tagged-template)
+           :target (file ,(expand-file-name "${slug}.org" dm--org-roam-vispero-dir))
            :unnarrowed t)
 
           ("vp" "Vispero People" plain "- tags :: [[roam:Vispero People]] %?\n* Time off\n| Start    | End      | Total days | Description |\n|-------+-----+------------+-------------|\n"
