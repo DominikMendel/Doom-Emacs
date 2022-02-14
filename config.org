@@ -152,6 +152,11 @@ the beginning of the list."
 ** Generl org
 #+begin_src elisp
 (after! org
+  ;; Testing new archive
+  ;; (setq org-archive-location "%s_archive::datetree/")
+  ;; This doesn't work. Idk how to do an "olp" style
+  ;; (setq org-archive-location "::* Tasks\n** ARCHIVE :ARCHIVE:")
+
   (setq org-startup-folded t)
   (setq org-ellipsis " ▼ ")
   (setq org-hide-emphasis-markers t)
@@ -213,7 +218,15 @@ the beginning of the list."
 
 (after! org
   (setq org-capture-templates
-        '(
+        ;; Backtick list
+        `(
+          ("l" "Japanese")
+          ("lv" "Vocabulary" plain
+           (file (lambda () (dm/get-japanese-filename (dm/prompt-string "English alias:" 'dm--org-capture-area))))
+           (file ,dm--org-roam-japanese-vocabulary-template)
+           :unnarrowed t)
+
+
           ("t" "General ToDo" entry (file+headline +org-capture-todo-file "Tasks")
            "* TODO %?\n %i\n")
 
@@ -796,8 +809,25 @@ capture was not aborted."
 #+end_src
 ** Capture templates
 #+begin_src elisp
-(after! org-roam
+;; Remapping functions to default to the default template
+(defun my/org-roam-dailies-goto-today ()
+  (interactive)
+  (org-roam-dailies-goto-today "d"))
 
+(defun my/org-roam-dailies-goto-date (&optional prefer-future)
+  (interactive)
+  (org-roam-dailies-goto-date prefer-future "d"))
+
+(defun my/org-roam-dailies-goto-tomorrow (n)
+  (interactive "p")
+  (org-roam-dailies-goto-tomorrow n "d"))
+
+(defun my/org-roam-dailies-goto-yesterday (n)
+  (interactive "p")
+  (org-roam-dailies-goto-yesterday n "d"))
+
+(after! org-roam
+    ;; Template and directory locations
     (setq dm--org-templates-dir (expand-file-name "templates" doom-private-dir))
     (setq dm--org-roam-vispero-dir (expand-file-name "vispero" org-roam-directory))
     (setq dm--org-roam-default-template (expand-file-name "roam-default.org" dm--org-templates-dir))
@@ -806,15 +836,51 @@ capture was not aborted."
     (setq dm--org-roam-reading-character-template (expand-file-name "roam-reading-character.org" dm--org-templates-dir))
     (setq dm--org-roam-vispero-default-template (expand-file-name "roam-vispero-default.org" dm--org-templates-dir))
     (setq dm--org-roam-vispero-tagged-template (expand-file-name "roam-vispero-tagged.org" dm--org-templates-dir))
+    (setq dm--org-roam-vispero-people-template (expand-file-name "roam-vispero-people.org" dm--org-templates-dir))
+    (setq dm--org-roam-japanese-vocabulary-template (expand-file-name "roam-japanese-vocabulary.org" dm--org-templates-dir))
+    ;; Dailies file name and templates
+    (setq dm--org-personal-daily-template (expand-file-name "personal-daily.org" dm--org-templates-dir))
+    (setq dm--org-vispero-daily-template (expand-file-name "vispero-daily.org" dm--org-templates-dir))
+    (setq dm--org-personal-file-name "Personal %<%Y-%m-%d>.org")
+    (setq dm--org-vispero-file-name "Vispero %<%Y-%m-%d>.org")
 
-    (setq dm--org-roam-test-dir (expand-file-name "testing" org-roam-directory))
-    (defun dm/get-test-filename (name)
-        (expand-file-name
-        (format "%.org" (s-snake-case)) dm--org-roam-test-dir))
+    (setq dm--org-roam-japanese-dir (expand-file-name "japanese" org-roam-directory))
+
+    (defun dm/prompt-string (prompt variable)
+      (set variable (read-string prompt)))
+
+    (defun dm/get-japanese-filename (name)
+      (expand-file-name
+       (format "%s.org" (s-dashed-words name)) dm--org-roam-japanese-dir))
+
+    (defun my/set-org-roam-dailies-capture-templates ()
+      "Sets the org-roam-dailies-capture-templates value based on what my current focus is. If my focus is 'personal' then the template, file name, and file path will be set to what I have defined as my personal journal. This applies for all other defined focuses."
+        (setq org-roam-dailies-capture-templates
+            ;; Testing new template system
+            (let ((head
+                (with-temp-buffer
+                (cond ((string-equal dm--my-focus "vispero") (insert-file-contents dm--org-vispero-daily-template))
+                        (t (insert-file-contents dm--org-personal-daily-template)))
+                    (buffer-string)))
+                  (file-name
+                   (cond ((string-equal dm--my-focus "vispero") dm--org-vispero-file-name)
+                         (t dm--org-personal-file-name))))
+
+            ;; Backtick list
+            `(("d" "default" plain "%?"
+                :target (file+head ,file-name ,head)
+                :unarrowed t)
+                ("j" "journal" entry "** %<%H:%M> %?"
+                :target (file+head+olp ,file-name ,head ("Journal")))
+                ("t" "ToDo" item "[ ] %?"
+                :target (file+head+olp ,file-name ,head ("Test"))))
+                )))
+
+    (my/set-org-roam-dailies-capture-templates)
 
 
 (setq org-roam-capture-templates
-        ;; Backtick function
+        ;; Backtick list
         `(("d" "default" plain (file ,dm--org-roam-default-template)
            :target (file ,(expand-file-name "${slug}.org" org-roam-directory))
            :unnarrowed t)
@@ -848,13 +914,23 @@ capture was not aborted."
            :unnarrowed t)
 
           ("j" "Japanese")
-          ("jj" "Japanese Vocabulary" plain "- tags :: [[roam:Japanese]]\n* Definition %?"
-           :if-new (file+head "${slug}.org" ":PROPERTIES:
-:ROAM_ALIASES: %^{prompt}
-:END:
-,#+TITLE: ${title}\n")
-           :unnarrowed t)
+          ;; ("jj" "Japanese Vocabulary" plain
+          ;;  (file (lambda () (dm/get-japanese-filename (dm/prompt-string "Test input:" 'dm--org-capture-area))))
+          ;;  (file ,dm--org-roam-japanese-vocabulary-template)
+          ;;  :unnarrowed t)
 
+          ;; ("jj" "Japanese Vocabulary" plain (file ,dm--org-roam-japanese-vocabulary-template)
+          ;;  :target (file ,(expand-file-name "${slug}.org" org-roam-directory))
+          ;;  :unnarrowed t)
+
+;;           ("jj" "Japanese Vocabulary" plain "- tags :: [[roam:Japanese]]\n* Definition %?"
+;;            :if-new (file+head "${slug}.org" ":PROPERTIES:
+;; :ROAM_ALIASES: %^{prompt}
+;; :END:
+;; ,#+TITLE: ${title}\n")
+;;            :unnarrowed t)
+
+          ;; TODO refactor this to normal org capture
           ("jk" "Japanese Kanji" plain "- tags :: [[roam:Japanese]]\n* Readings\n** onyomi %?\n** kunyomi"
            :if-new (file+head "${slug}.org" ":PROPERTIES:
 :ROAM_ALIASES: %^{prompt}
@@ -875,7 +951,7 @@ capture was not aborted."
 
 
           ("v" "Vispero")
-          ("vv" "Vispero Default" plain (file ,dm--org-roam-vispero-default-template)
+          ("vv" "Vispero Default" plain (file ,dm--org-roam-default-template)
            :target (file ,(expand-file-name "${slug}.org" dm--org-roam-vispero-dir))
            :unnarrowed t)
 
@@ -883,9 +959,8 @@ capture was not aborted."
            :target (file ,(expand-file-name "${slug}.org" dm--org-roam-vispero-dir))
            :unnarrowed t)
 
-          ("vp" "Vispero People" plain "- tags :: [[roam:Vispero People]] %?\n* Time off\n| Start    | End      | Total days | Description |\n|-------+-----+------------+-------------|\n"
-           :if-new (file+head "vispero/${slug}.org" "#+TITLE: ${title}\n")
-           "%?"
+          ("vp" "Vispero People" plain (file ,dm--org-roam-vispero-people-template)
+           :target (file ,(expand-file-name "${slug}.org" dm--org-roam-vispero-dir))
            :unnarrowed t)
 
           ;; Need to add ":ROAM_REFS: http://bugzilla.fsi.local/show_bug.cgi?id=${slug}" to property
@@ -1362,6 +1437,11 @@ Don't need anymore. It is included in org +pretty
       :desc "Roam Refile Header" "n r !" #'org-roam-refile
       :desc "Journal Schedule View" "n j S" #'org-journal-schedule-view
       :desc "Journal Reschedule Scheduled Entry" "n j r" #'org-journal-reschedule-scheduled-entry
+      ;; Org-roam-dailies key-remapping :
+      :desc "Goto today" "n r d t" #'my/org-roam-dailies-goto-today
+      :desc "Goto date" "n r d d" #'my/org-roam-dailies-goto-date
+      :desc "Goto tomorrow" "n r d m" #'my/org-roam-dailies-goto-tomorrow
+      :desc "Goto yesterday" "n r d y" #'my/org-roam-dailies-goto-yesterday
       )
 
 (map! :after org-journal
@@ -1467,8 +1547,8 @@ Functions used to swap focuses between personal and work.
    ;;                                           (directory-files-recursively "~/Dropbox/org/roam" "\\.org$"))
         dm--my-focus "personal"
         +org-capture-todo-file "~/Dropbox/org/roam/personal_agenda.org"
-        org-roam-dailies-directory "daily"
-        ))
+        org-roam-dailies-directory "daily")
+  (my/set-org-roam-dailies-capture-templates))
 
 (defun my/org-focus-vispero()
   (interactive)
@@ -1476,8 +1556,8 @@ Functions used to swap focuses between personal and work.
    ;; org-agenda-files (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$")
         dm--my-focus "vispero"
         +org-capture-todo-file "~/Dropbox/org/roam/vispero/vispero_agenda.org"
-        org-roam-dailies-directory "vispero/daily"
-        ))
+        org-roam-dailies-directory "vispero/daily")
+  (my/set-org-roam-dailies-capture-templates))
 
 ;; Old journal method:
 ;; (defun my/org-focus-personal()
@@ -1496,37 +1576,64 @@ Functions used to swap focuses between personal and work.
 * Personal Machine
 #+begin_src elisp :tangle (if (eq (doom-system-distro) 'arch) "config.el" "no")
 (setq dm--my-focus "personal")
-(after! org-journal
-(setq org-journal-dir "~/Dropbox/org/roam/daily"
-      org-roam-dailies-directory "daily"
-      ;; org-agenda-files (seq-filter (lambda(x) (not (string-match "/vispero/"(file-name-directory x))))
-      ;;                              (directory-files-recursively "~/Dropbox/org" "\\.org$"))
+(setq +org-capture-todo-file "~/Dropbox/org/roam/personal_agenda.org")
+(setq org-roam-dailies-directory "daily")
 
-      org-journal-date-format "%A, %d %B %Y"
-      +org-capture-todo-file "~/Dropbox/org/roam/personal_agenda.org"
-      ;; org-agenda-files 'personal-agenda-files
-      org-journal-file-header ":PROPERTIES:\n:ROAM_ALIASES: \"Personal %A, %B %d %Y\"\n:END:\n#+TITLE: Personal %Y-%m-%d\n"
-      org-journal-file-type 'daily
-      org-journal-file-format "Personal %Y-%m-%d.org"
-      ))
+;; (after! org-journal
+    (setq org-journal-dir "~/Dropbox/org/roam/daily"
+        ;; org-agenda-files (seq-filter (lambda(x) (not (string-match "/vispero/"(file-name-directory x))))
+        ;;                              (directory-files-recursively "~/Dropbox/org" "\\.org$"))
 
-(after! org-roam
-  (setq org-roam-dailies-capture-templates
-        ;; I have no idea why, but leave "entryy" mispelled.
-        ;; I am doing this to just open the buffer to edit. Might be vastly wrong.
-        '(("d" "default" entryy ""
-           :target (file+head "Personal %<%Y-%m-%d>.org" ":PROPERTIES:\n:ROAM_ALIASES: \"Personal %<%A, %B %d %Y>\"\n:END:\n#+TITLE: Personal %<%Y-%m-%d>\n* %<%A, %d %B %Y>\n")
-           :unarrowed t)
+        org-journal-date-format "%A, %d %B %Y"
+        ;; org-agenda-files 'personal-agenda-files
+        org-journal-file-header ":PROPERTIES:\n:ROAM_ALIASES: \"Personal %A, %B %d %Y\"\n:END:\n#+TITLE: Personal %Y-%m-%d\n"
+        org-journal-file-type 'daily
+        org-journal-file-format "Personal %Y-%m-%d.org"
+        )
+;;)
+
+;; This works!
+;; (defun my/org-roam-daily-test()
+;;   (interactive)
+;;   (org-roam-dailies-capture-today nil "t"))
+;; (global-set-key (kbd "<f3>") 'my/org-roam-daily-test)
+
+
+
+;; (after! org-roam
+
+;;     )
 
 ;;   (setq org-roam-dailies-capture-templates
-;;         '(("d" "default" entry "** %?"
-;;            :target (file+head "Personal %<%Y-%m-%d>.org" ":PROPERTIES:
-;; :ROAM_ALIASES: \"Personal %<%A, %B %d %Y>\"
-;; :END:
-;; ,#+TITLE: Personal %<%Y-%m-%d>\n* %<%A, %d %B %Y>\n")
-;;            :prepend nil
-;;            :unarrowed nil)
-          )))
+;;         ;; Testing new template system
+;;         (let ((head
+;;             (with-temp-buffer
+;;                 ;; (insert-file-contents dm--org-personal-daily-template)
+;;               (cond ((string-equal dm--my-focus "vispero") (insert-file-contents dm--org-vispero-daily-template))
+;;                     (t (insert-file-contents dm--org-personal-daily-template)))
+;;                 (buffer-string))))
+;;           ;; Backtick list
+;;         `(("d" "default" plain "%?"
+;;            :target (file+head "Personal %<%Y-%m-%d>.org" ,dm/get-daily-template)
+;;            :unarrowed t)
+;;           ("j" "journal" entry "** %<%H:%M> %?"
+;;            :target (file+head+olp "Personal %<%Y-%m-%d>.org" ,head ("Journal")))
+;;           ("t" "ToDo" item "[ ] %?"
+;;            :target (file+head+olp "Personal %<%Y-%m-%d>.org" ,head ("Test"))))
+
+;;         ;; '(("d" "default" entryy ""
+;;         ;;    :target (file+head "Personal %<%Y-%m-%d>.org" ":PROPERTIES:\n:ROAM_ALIASES: \"Personal %<%A, %B %d %Y>\"\n:END:\n#+TITLE: Personal %<%Y-%m-%d>\n* %<%A, %d %B %Y>\n")
+;;         ;;    :unarrowed t)
+
+;; ;;   (setq org-roam-dailies-capture-templates
+;; ;;         '(("d" "default" entry "** %?"
+;; ;;            :target (file+head "Personal %<%Y-%m-%d>.org" ":PROPERTIES:
+;; ;; :ROAM_ALIASES: \"Personal %<%A, %B %d %Y>\"
+;; ;; :END:
+;; ;; ,#+TITLE: Personal %<%Y-%m-%d>\n* %<%A, %d %B %Y>\n")
+;; ;;            :prepend nil
+;; ;;            :unarrowed nil)
+;;           )))
 
 ;; (setq org-journal-dir "~/Dropbox/org/roam/journal"
 ;;       ;; org-agenda-files (seq-filter (lambda(x) (not (string-match "/vispero/"(file-name-directory x))))
@@ -1700,10 +1807,10 @@ Functions used to swap focuses between personal and work.
 #+begin_src elisp :tangle (if (eq (doom-system-distro) 'ubuntu) "config.el" "no")
 (setq dm--my-focus "vispero")
 (setq org-roam-dailies-directory "vispero/daily")
+(setq +org-capture-todo-file "~/Dropbox/org/roam/vispero/vispero_agenda.org")
 (after! org-agenda
-    (setq +org-capture-todo-file "~/Dropbox/org/roam/vispero/vispero_agenda.org"
         ;; org-agenda-files (append (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$"))
-        ))
+        )
 
 (setq org-journal-dir "~/Dropbox/org/roam/vispero/daily"
       ;; org-journal-date-format "%A, %d %B %Y\n:CLOCKTABLE:\n#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:\n:END:\n"
