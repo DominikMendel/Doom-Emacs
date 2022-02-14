@@ -1,0 +1,6 @@
+:PROPERTIES:
+:ROAM_ALIASES: "Personal %<%A, %B %d %Y>"
+:END:
+#+TITLE: Personal %<%Y-%m-%d>
+#+filetags: :journal:
+* %<%A, %d %B %Y>

@@ -1,0 +1,8 @@
+:PROPERTIES:
+:ID:       %(org-id-new)
+:ROAM_ALIASES: "Japanese : %^{prompt}"
+:END:
+Testing something : %(progn dm--org-capture-area)
+#+TITLE: %(progn dm--org-capture-area)
+- tags :: [[roam:Japanese]]
+* Definition : %?

@@ -1,0 +1,5 @@
+#+TITLE: ${title}
+- tags :: [[roam:Vispero People]]  %?
+* Time off
+| Start | End | Total days | Description |
+|-------+-----+------------+-------------|
