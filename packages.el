@@ -6,6 +6,7 @@
 (package! mu4e-alert :disable t)
 (package! vulpea)
 (package! harpoon)
+(package! origami)
 
 (unpin! org-roam company-org-roam)
 ;;; $DOOMDIR/packages.el

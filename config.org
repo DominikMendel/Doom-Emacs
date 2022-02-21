@@ -156,6 +156,7 @@ the beginning of the list."
   ;; (setq org-archive-location "%s_archive::datetree/")
   ;; This doesn't work. Idk how to do an "olp" style
   ;; (setq org-archive-location "::* Tasks\n** ARCHIVE :ARCHIVE:")
+  (setq org-archive-location "::* ARCHIVE :ARCHIVE:")
 
   (setq org-startup-folded t)
   (setq org-ellipsis " ▼ ")
@@ -168,6 +169,7 @@ the beginning of the list."
   (setq org-todo-keywords
         '((sequence  "TODO(t)" "INPROGRESS(i!)" "IN-REVIEW(r!)" "NEXT(n!)" "WAITING(w@/!)" "BLOCKED(b@/!)" "SOMEDAY(s!)" "|" "DONE(d@)" "CANCELLED(c!)" "ABANDONED(a@)")
           (sequence "QUESTION(q)" "|" "ANSWERED(@/!)")
+          (sequence "GOAL(G)" "|" "ACHIEVED(A@)" "MISSED(M@)")
           (sequence "REPEAT" "|" "COMPLETED")
           (sequence "[ ](T)" "[-](I)" "[?](?)" "|" "[X](D)")))
   (setq org-log-done 'time)
@@ -228,16 +230,27 @@ the beginning of the list."
 
 
           ("t" "General ToDo" entry (file+headline +org-capture-todo-file "Tasks")
-           "* TODO %?\n %i\n")
+           "* TODO %? :new:\n %i\n")
 
           ("i" "General New Idea" entry (file+headline +org-capture-todo-file "Ideas")
-           "* %?\n %i\n")
+           "* %? :new:\n %i\n")
 
           ("I" "General Inprogress" entry (file+headline +org-capture-todo-file "Tasks")
            "* INPROGRESS %?\n %i\n")
 
           ("p" "General Project" entry (file+headline +org-capture-todo-file "Projects")
-           "* TODO %?\n %i\n%a\n")
+           "* TODO %? :new:\n From : %i\n%a\n")
+
+          ("g" "New Goal" entry (file+headline +org-capture-todo-file "Goals")
+           "* GOAL %^{Describe your goal} %? :new:
+Added on %U - Last reviewed on %U
+:SMART:
+:Sense: %^{What is the sense of this goal? Or why?}
+:Measurable: %^{How do you measure it?}
+:Actions: %^{What actions are needed?}
+:Resources: %^{Which resources do you need?}
+:Timebox: %^{How much time are you spending for it?}
+:END:")
 
           ("j" "Journal")
           ;; ("jj" "Journal New Entry" plain (function org-journal-find-location)
@@ -355,16 +368,72 @@ the beginning of the list."
 (after! org-agenda
   (add-to-list 'org-agenda-bulk-custom-functions
                '(?a org-agenda-archive-to-archive-sibling)))
+
+;; Doing this to clean up my org-agenda to view since ALL of my org-agenda-files
+;; are tagged with "project", so it is redundant.
+(after! org
+    (add-to-list 'org-tags-exclude-from-inheritance "project"))
 #+end_src
 ** Org-super-agenda
 - Types of agenda custom command keywords: ([[https://orgmode.org/worg/org-tutorials/org-custom-agenda-commands.html][link]])
   The desired agenda display/search. The options include agenda, todo, search, tags, alltodo, tags-todo, todo-tree, tags-tree, occur-tree, or a user-defined function.
 #+begin_src elisp
+(after! org-agenda
+  (add-hook 'org-agenda-mode-hook #'origami-mode))
+
+;; (use-package origami
+;;     ;; :general (:keymaps 'org-super-agenda-header-map
+;;     ;;                  "TAB" #'origami-toggle-node)
+;;     :hook ((org-agenda-mode . origami-mode)))
+
 (use-package! org-super-agenda
   :commands (org-super-agenda-mode))
 
 (after! org-agenda
   (org-super-agenda-mode))
+
+;; Vulpea functions to help with naming view
+(setq org-agenda-prefix-format
+      '((agenda . " %i %(vulpea-agenda-category 20)%?-20t% s")
+        (todo . " %i %(vulpea-agenda-category 20) ")
+        (tags . " %i %(vulpea-agenda-category 20) ")
+        (search . " %i %(vulpea-agenda-category 20) ")))
+
+(defun vulpea-agenda-category (&optional len)
+  "Get category of item at point for agenda.
+
+Category is defined by one of the following items:
+
+- CATEGORY property
+- TITLE keyword
+- TITLE property
+- filename without directory and extension
+
+When LEN is a number, resulting string is padded right with
+spaces and then truncated with ... on the right if result is
+longer than LEN.
+
+Usage example:
+
+  (setq org-agenda-prefix-format
+        '((agenda . \" %(vulpea-agenda-category) %?-12t %12s\")))
+
+Refer to `org-agenda-prefix-format' for more information."
+  (let* ((file-name (when buffer-file-name
+                      (file-name-sans-extension
+                       (file-name-nondirectory buffer-file-name))))
+         (title (vulpea-buffer-prop-get "title"))
+         (category (org-get-category))
+         (result
+          (or (if (and
+                   title
+                   (string-equal category file-name))
+                  title
+                category)
+              "")))
+    (if (numberp len)
+        (s-truncate len (s-pad-right len " " result))
+      result)))
 
 (setq org-agenda-skip-scheduled-if-done t
       org-agenda-skip-deadline-if-done t
@@ -385,6 +454,9 @@ the beginning of the list."
        ;; ((seq-contains-p (org-get-tags) "vispero")
        ((string-match-p "vispero" (buffer-file-name))
         subtree-end)
+       ;; New: Doesn't work for some reason
+       ;; ((seq-contains-p (org-get-tags) "ssg")
+       ;;  subtree-end)
        (t
         nil)))))
 
@@ -409,64 +481,209 @@ the beginning of the list."
                                ((org-agenda-span 'day)
                                 (org-agenda-skip-function 'my-agenda-skip-work))))
 
-(setq my-agenda-super-group-alltodo '((:name "Next to do"
-                             :todo "NEXT"
-                             :order 4)
-                            (:name "Due Today"
-                             :deadline today
-                             :order 2)
-                            (:name "Important"
-                             :tag "Important"
-                             :priority "A"
-                             :order 6)
-                            (:name "Due Soon"
-                             :deadline future
-                             :order 8)
-                            (:name "Overdue"
-                             :deadline past
-                             :face error
-                             :order 7)
-                            (:name "Inprogress"
-                             :todo "INPROGRESS"
-                             :order 3)
-                            (:name "Questions"
-                             ;; :regexp (:todo "QUESTION" :tag "question")
-                             :todo "QUESTION"
-                             :tag "question"
-                             :order 10)
-                            (:name "Questions tags"
-                             :tag "question"
-                             :order 11)
-                            (:name "Projects"
-                             :tag "Project"
-                             :order 15)
-                            (:name "In review"
-                             :todo "IN-REVIEW"
-                             :order 14)
-                            (:name "Waiting"
-                             :todo "WAITING"
-                             :order 20)
-                            (:name "Some day"
-                             :todo "SOMEDAY"
-                             :order 25)
-                            (:name "Done"
-                             :todo "DONE"
-                             :order 26)
-                            (:name "Trivial"
-                             :priority<= "C"
-                             :tag ("Trivial" "Unimportant")
-                             :todo ("SOMEDAY")
-                             :order 90)
-                            (:name "Everything else"
-                             :anything t
-                             :auto-tags t
-                             :order 89)
-                            ;; (:name "Random shit"
-                            ;;  :auto-tags t
-                            ;;  :priority<= "C"
-                            ;;  :order 89)
-                            (:discard (:tag ("Chore" "Routine" "Daily")))
-                            ))
+(setq my-super-group-agenda-today
+      '(
+        (:name "Clocked today"
+         :log t)
+        (:name "Scheduled Today"
+         :time-grid t
+         :date today
+         :order 1)
+        (:name "Habbits"
+         :habit t
+         :date today
+         :order 2)
+        (:name "Overdue"
+         :face error
+         :deadline past
+         :order 3)
+        (:name "Ongoing"
+         :scheduled past
+         :order 4)
+        (:discard (:anything t))))
+
+(setq my-super-group-alltodo-today
+      '(
+        ;; (:auto-category t)
+        ;; You will see scheduled items from the agenda view, so discard any extras.
+        (:discard (:scheduled today))
+        (:name "Important"
+         :priority "A"
+         :order 1)
+        (:name "Currently Open"
+         :todo "INPROGRESS"
+         :order 2)
+        (:name "Reviews ToDo"
+         :tag "review"
+         :order 3)
+        (:name "Bugs Todo"
+         :tag "bug"
+         :order 4)
+        (:name "My Reviews"
+         :todo "IN-REVIEW"
+         :order 5)
+        (:name "Pending"
+         :todo "WAITING"
+         :order 6)
+        (:name "Blocked"
+         :todo "BLOCKED"
+         :order 7)
+        (:discard (:anything t))))
+
+(setq my-super-group-alltodo-week
+      '(
+        ;; (:auto-category t)
+        ;; You will see scheduled items from the agenda view, so discard any extras.
+        ;; (:discard (:scheduled today))
+        (:name "Overdue (Past scheduled/deadline)"
+         :face warning
+         :deadline past
+         :scheduled past
+         :order 1)
+        (:name "Inprogress"
+         :todo "INPROGRESS"
+         :order 2)
+        (:name "In Review"
+         :todo "IN-REVIEW"
+         :order 3)
+        (:order-multi (4 (:name "Waiting Tasks"
+                          :todo "WAITING")
+                         (:name "Blocked Tasks"
+                          :todo "BLOCKED")))
+        (:name "Next Tasks"
+         :todo "NEXT"
+         :order 5)
+        (:discard (:not (:todo "TODO")))
+        (:auto-category t
+         :order 6)
+        ;; (:order-multi (6 (:todo "TODO") (:auto-category t)))
+        ;; (:todo "TODO"
+        ;;  :order 6)
+        ;;  (:auto-category t
+        ;;  ;;:todo "TODO"
+        ;;  :order 6)
+        ;; (:order-multi (5 (:auto-category t)
+        ;;                (:name "Current Tasks"
+        ;;                   :todo ("INPROGRESS" "IN-REVIEW"))
+        ;;                  (:name "Open Tasks"
+        ;;                   :todo "TODO")))
+
+        ;; (:order-multi (3 (:name "Current Tasks"
+        ;;                   :todo ("INPROGRESS" "IN-REVIEW"))
+        ;;                  (:name "Open Tasks"
+        ;;                   :todo "TODO")))
+        (:discard (:anything t))))
+
+(setq my-super-group-agenda-planning
+      '(
+        (:discard (:todo "GOAL"))
+        (:discard (:todo "REPEAT"))
+         (:scheduled t)))
+
+(setq my-super-group-todo-planning
+      '((:name "High Priority"
+         :priority>= "B")
+        (:name "Inprogress"
+         :todo "INPROGRESS"
+         :order 1)
+        (:name "In Review"
+         :todo "IN-REVIEW"
+         :order 2)
+        (:order-multi (3 (:name "Waiting Tasks"
+                          :todo "WAITING")
+                         (:name "Blocked Tasks"
+                          :todo "BLOCKED")))
+        (:name "Next Tasks"
+         :todo "NEXT"
+         :order 4)
+        ;; Specifically doing this out of order
+        (:name "Some Day Tasks"
+         :todo "SOMEDAY"
+         :order 6)
+        (:discard (:todo ("REPEAT" "GOAL")))
+        (:name "Individual Tasks"
+         :auto-todo t
+         ;; :todo t
+         ;;:auto-category t
+         :order 5)
+        (:discard (:anything t))))
+
+(setq my-super-group-alltodo-week-new
+      '((:name "Remove new tag and assign TODO states and priorities"
+         :tag "new")
+        (:discard (:anything t))))
+
+(setq my-super-group-alltodo-week-done
+      '((:name "Remove new tag and assign TODO states and priorities"
+         :log closed)
+         ;; :todo "DONE")
+         ;; :and (:todo "DONE"
+         ;;       :scheduled t
+         ;; :not (:log closed)))
+         ;; :todo ("DONE" "CANCELLED" "ABANDONED" "ANSWERED" "MISSED" "ACHIEVED" "COMPLETED"))
+        (:discard (:anything t))))
+
+(setq my-agenda-super-group-alltodo
+      '(
+        ;; Discarding the file path works and I don't need the functions anymore
+        ;; (:discard (:file-path "vispero"))
+        (:name "Next to do"
+            :todo "NEXT"
+            :order 4)
+        (:name "Due Today"
+            :deadline today
+            :order 2)
+        (:name "Important"
+            :tag "Important"
+            :priority "A"
+            :order 6)
+        (:name "Due Soon"
+            :deadline future
+            :order 8)
+        (:name "Overdue"
+            :deadline past
+            :face error
+            :order 7)
+        (:name "Inprogress"
+            :todo "INPROGRESS"
+            :order 3)
+        (:name "Questions"
+            ;; :regexp (:todo "QUESTION" :tag "question")
+            :todo "QUESTION"
+            :tag "question"
+            :order 10)
+        (:name "Questions tags"
+            :tag "question"
+            :order 11)
+        (:name "Projects"
+            :tag "Project"
+            :order 15)
+        (:name "In review"
+            :todo "IN-REVIEW"
+            :order 14)
+        (:name "Waiting"
+            :todo "WAITING"
+            :order 20)
+        (:name "Some day"
+            :todo "SOMEDAY"
+            :order 25)
+        (:name "Done"
+            :todo "DONE"
+            :order 26)
+        (:name "Trivial"
+            :priority<= "C"
+            :tag ("Trivial" "Unimportant")
+            :todo ("SOMEDAY")
+            :order 90)
+        (:name "Everything else"
+            :anything t
+            :auto-tags t
+            :order 89)
+        ;; (:name "Random shit"
+        ;;  :auto-tags t
+        ;;  :priority<= "C"
+        ;;  :order 89)
+        (:discard (:tag ("Chore" "Routine" "Daily")))))
 
 (setq my-agenda-super-group-agenda '((:name "Today"
                             :time-grid t
@@ -475,14 +692,14 @@ the beginning of the list."
                             :scheduled today
                             :order 1)))
 
-(setq my-agenda-super-group-tags '((:name "Questions"
-                           ;; '((
-                           :tag "question"
-                           ;; :anything t
-                           ;; :auto-tags t
-                           :order 12)
-                          (:discard (:anything t))
-                          ))
+(setq my-agenda-super-group-tags
+      '((:name "Questions"
+        ;; '((
+        :tag "question"
+        ;; :anything t
+        ;; :auto-tags t
+        :order 12)
+        (:discard (:anything t))))
 
 (setq org-super-agenda-header-map (make-sparse-keymap)) ;;Needed for evil keys in org-super-agenda
 (after! org
@@ -545,12 +762,100 @@ the beginning of the list."
                             (:discard (:anything t)))
                           )))))
 
-          ("P" "Personal test"
-           (,my-agenda-non-work-cmd))
+          ;; ("P" "Personal test"
+           ;; (,my-agenda-non-work-cmd))
 
-          ("w" "Weekly review"
+          ("T" "Test Today view"
+           ((agenda "" ((org-agenda-overriding-header "")
+                        (org-agenda-span 'day)
+                        (org-agenda-start-day nil)
+                        (org-agenda-time-grid '((daily today) (800 1000 1200 1400 1600 1800 2000) "" "----------------"))
+                        (org-super-agenda-groups my-super-group-agenda-today)
+                        ))
+            (alltodo "" ((org-agenda-overriding-header "")
+                         (org-super-agenda-groups my-super-group-alltodo-today)))))
+
+          ("Pw" "Planning Week"
+          ((tags-todo "goal" ((org-agenda-overriding-header "Goals")))
+           (agenda "" ((org-agenda-overriding-header "Month Planner")
+                       (org-agenda-span 14)
+                        ;; (org-agenda-start-day "01")
+                        (org-agenda-start-day nil)
+                        (org-super-agenda-groups my-super-group-agenda-planning)
+                        ;; (org-agenda-time-grid '(nil (800 1000 1200 1400 1600 1800 2000) "" "----------------"))
+                        ;; (org-agenda-prefix-format '((agenda . " %i %?-12t%-6e% s")))
+                        )
+                    )
+            (todo "" ((org-agenda-overriding-header "Things to schedule")
+                         (org-super-agenda-groups my-super-group-todo-planning)))))
+
+          ("Pm" "Planning Month"
+          ((tags-todo "goal" ((org-agenda-overriding-header "Goals")))
+           (agenda "" ((org-agenda-overriding-header "Month Planner")
+                       (org-agenda-span 'month)
+                        ;; (org-agenda-start-day "01")
+                        (org-agenda-start-day nil)
+                        (org-super-agenda-groups my-super-group-agenda-planning)
+                        ;; (org-agenda-time-grid '(nil (800 1000 1200 1400 1600 1800 2000) "" "----------------"))
+                        ;; (org-agenda-prefix-format '((agenda . " %i %?-12t%-6e% s")))
+                        )
+                    )
+            (todo "" ((org-agenda-overriding-header "Things to schedule")
+                         (org-super-agenda-groups my-super-group-todo-planning)))))
+
+          ("w" "Weekly Overview"
+          ((agenda "" ((org-agenda-overriding-header "Week view")
+                        (org-agenda-span 'week)
+                        (org-agenda-start-on-weekday 1)
+                        (org-agenda-time-grid '(nil (800 1000 1200 1400 1600 1800 2000) "" "----------------"))
+                        ;; (org-agenda-prefix-format '((agenda . " %i %?-12t%-6e% s")))
+                        )
+                    )
+            (alltodo "" ((org-agenda-overriding-header "")
+                         (org-super-agenda-groups my-super-group-alltodo-week)))))
+
+          ("W" . "Weekly Review Helper")
+          ("Wn" "New Tasks"
            ((alltodo "" ((org-agenda-overriding-header "")
-                        (org-agenda-skip-function '(org-agenda-skip-entry-if 'notregexpt "^\\*\\* DONE"))))))
+                         (org-super-agenda-groups my-super-group-alltodo-week-new)))))
+          ("Wd" "Done Tasks"
+           ((todo "DONE|CANCELLED|ABANDONED|ANSWERED|ACHIEVED|MISSED" ((org-agenda-overriding-header "Archive all DONE items")
+                         ;; (org-super-agenda-groups my-super-group-alltodo-week-done)
+                         ))))
+          ;; From m-dwyer
+          ;; ("W" "Weekly review TEST"
+          ;; ((agenda "" ((org-agenda-overriding-header "Week view")
+          ;;               (org-agenda-span 'week)
+          ;;               (org-agenda-start-on-weekday 1)
+          ;;               (org-agenda-time-grid '(nil (800 1000 1200 1400 1600 1800 2000) "" "----------------"))
+          ;;               (org-agenda-prefix-format '((agenda . " %i %?-12t%-6e% s")))
+          ;;               )
+          ;;           )
+          ;;   (alltodo "" ((org-agenda-overriding-header "")
+          ;;                (org-super-agenda-groups
+          ;;                 '((:name "Overdue (past scheduled/deadline)"
+          ;;                    :deadline past
+          ;;                    :scheduled past
+          ;;                    :order 1
+          ;;                    )
+          ;;                   (:name "Individual Tasks"
+          ;;                    :file-path "task"
+          ;;                    :order 2
+          ;;                    )
+          ;;                   (:name "Next tasks"
+          ;;                    :todo "NEXT"
+          ;;                    :order 3)
+          ;;                   (:discard (:anything t))
+          ;;                   )
+          ;;                 )
+          ;;                )
+          ;;            )
+          ;;   )
+          ;; )
+
+          ;; ("w" "Weekly review"
+          ;;  ((alltodo "" ((org-agenda-overriding-header "")
+          ;;               (org-agenda-skip-function '(org-agenda-skip-entry-if 'notregexpt "^\\*\\* DONE"))))))
           ;; ))))
           ))
 
@@ -980,14 +1285,14 @@ capture was not aborted."
 ,#+TITLE: ${title}\n")
            :unnarrowed t)
 
-        ("r" "review" plain "- tags ::  [[roam:Vispero Swarm Reviews]] %?\n* Logging\n"
+        ("r" "review" plain "- tags :: [[roam:Vispero Swarm Reviews]] %?\n* Logging\n"
            :if-new (file+head "vispero/reviews/${title}.org" ":PROPERTIES:
 :ROAM_REFS: ${ref}
 :END:
 ,#+TITLE: ${title} for %^{prompt}\n#+filetags: :review:\n")
            :unnarrowed t)
 
-        ("b" "bug" plain "- tags ::  [[roam:Vispero Bugzilla]] %?\n* Notes\n* Logging\n"
+        ("b" "bug" plain "- tags :: [[roam:Vispero Bugzilla]] %?\n* Notes\n* Logging\n"
            :if-new (file+head "vispero/bugs/${title}.org" ":PROPERTIES:
 :ROAM_REFS: ${ref}
 :END:
@@ -1295,6 +1600,19 @@ If nil it defaults to `split-string-default-separators', normally
 ** Original
 - This is the original implementation from [[https://d12frosted.io/posts/2020-07-07-task-management-with-roam-vol4.html][d12frosted]]
 #+begin_src elisp :tangle yes
+;; (defun vulpea-project-p ()
+;;   "Return non-nil if current buffer has any todo entry."
+;;   (org-element-map
+;;       (org-element-parse-buffer 'headline)
+;;       'headline
+;;     (lambda (h)
+;;       (and (org-element-property :todo-type h)
+;;            (not (org-element-property :archivedp h))))
+;;            ;; (not (org-in-archived-heading-p h))))
+;;            ;; (not (seq-contains-p (org-element-property :tags h)
+;;            ;;                      "ARCHIVE"))))
+;;     nil 'first-match))
+
 (defun vulpea-project-p ()
   "Return non-nil if current buffer has any todo entry.
 
@@ -1376,6 +1694,81 @@ tasks."
 (advice-add 'org-agenda :before #'vulpea-agenda-files-update)
 (advice-add 'org-todo-list :before #'vulpea-agenda-files-update)
 #+end_src
+** Automatic tagging people
+#+begin_src elisp
+(defun vulpea-ensure-filetag ()
+"Add respective file tag if it's missing in the current note."
+(interactive)
+(let ((tags (vulpea-buffer-tags-get))
+        (tag (vulpea--title-as-tag)))
+    (when (and (seq-contains-p tags "people")
+            (not (seq-contains-p tags tag)))
+    (vulpea-buffer-tags-add tag))))
+
+(defun vulpea--title-as-tag ()
+"Return title of the current note as tag."
+(vulpea--title-to-tag (vulpea-buffer-title-get)))
+
+(defun vulpea--title-to-tag (title)
+"Convert TITLE to tag."
+(concat "@" (s-replace " " "" title)))
+
+(defun vulpea-tags-add ()
+  "Add a tag to current note."
+  (interactive)
+  ;; since https://github.com/org-roam/org-roam/pull/1515
+  ;; `org-roam-tag-add' returns added tag, we could avoid reading tags
+  ;; in `vulpea-ensure-filetag', but this way it can be used in
+  ;; different contexts while having simple implementation.
+  (when (call-interactively #'org-roam-tag-add)
+    (vulpea-ensure-filetag)))
+
+;; This doesn't work
+;; (defun org-roam-node-insert-wrapper (fn)
+;;   "Insert a link to the note using FN.
+
+;; If inserted node has PEOPLE tag on it, tag the current outline
+;; accordingly."
+;;   (interactive)
+;;   (when-let*
+;;       ((node (funcall fn))
+;;        (title (org-roam-node-title node))
+;;        (tags (org-roam-node-tags node)))
+;;     (when (seq-contains-p tags "people")
+;;       (save-excursion
+;;         (ignore-errors
+;;           (org-back-to-heading)
+;;           (org-set-tags
+;;            (seq-uniq
+;;             (cons
+;;              (vulpea--title-to-tag title)
+;;              (org-get-tags nil t)))))))))
+
+;; (advice-add
+;;  #'org-roam-node-insert
+;;  :around
+;;  #'org-roam-node-insert-wrapper)
+
+(defun my-vulpea-insert-handle (note)
+  "Hook to be called on NOTE after `vulpea-insert'."
+  (when-let* ((title (vulpea-note-title note))
+              (tags (vulpea-note-tags note)))
+    (when (seq-contains-p tags "people")
+      (save-excursion
+        (ignore-errors
+          (org-back-to-heading)
+          (when (eq 'todo (org-element-property
+                           :todo-type
+                           (org-element-at-point)))
+            (org-set-tags
+             (seq-uniq
+              (cons
+               (vulpea--title-to-tag title)
+               (org-get-tags nil t))))))))))
+
+(add-hook 'vulpea-insert-handle-functions
+          #'my-vulpea-insert-handle)
+#+end_src
 * Org visuals
 ** Org Superstar
 Don't need anymore. It is included in org +pretty
@@ -1422,6 +1815,12 @@ Don't need anymore. It is included in org +pretty
 #+end_src
 * Key mappings
 #+begin_src elisp
+(defun my/org-next-parent-heading ()
+  "Jumps to the next parent heading."
+    (interactive)
+    (org-up-element)
+    (org-forward-element))
+
 (map! :leader
       "w /" #'evil-window-vsplit
       "w -" #'evil-window-split
@@ -1429,9 +1828,9 @@ Don't need anymore. It is included in org +pretty
       "k" #'org-previous-visible-heading
       "K" #'outline-up-heading
       "j" #'org-next-visible-heading
+      "J" #'my/org-next-parent-heading
       ;; "J" #'(lambda () (interactive) (call-interactively #'outline-up-heading) (call-interactively #'org/insert-item-below))
       ;; "J" #'(lambda () (interactive) (call-interactively #'outline-up-heading) (#'org/insert-item-below 1))
-      "J" #'outline-back-to-heading
       "I" #'org-roam-insert
       :desc "Insert Immediate" "n r I" #'org-roam-node-insert-immediate
       :desc "Roam Refile Header" "n r !" #'org-roam-refile
@@ -1443,6 +1842,12 @@ Don't need anymore. It is included in org +pretty
       :desc "Goto tomorrow" "n r d m" #'my/org-roam-dailies-goto-tomorrow
       :desc "Goto yesterday" "n r d y" #'my/org-roam-dailies-goto-yesterday
       )
+
+;; Make Tab to fold groups and Shift-Tab to default back to org-agenda-goto
+(map! :after evil-org-agenda
+      :map evil-org-agenda-mode-map
+      :m [tab] #'origami-toggle-node
+      :m [backtab] #'org-agenda-goto)
 
 (map! :after org-journal
       :map org-journal-mode-map
@@ -1465,6 +1870,7 @@ Don't need anymore. It is included in org +pretty
   "t" #'org-evaluate-time-range
   ))
 
+;; Could instead set doom-localleader-key to ","
 (map! :n "," (cmd! (push (cons t ?m) unread-command-events)
                    (push (cons t 32) unread-command-events)))
 
