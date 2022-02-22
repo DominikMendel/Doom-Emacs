@@ -472,6 +472,14 @@ Refer to `org-agenda-prefix-format' for more information."
        (t
         nil)))))
 
+(defun my-agenda-skip-function-selector ()
+  (cond ((string-equal dm--my-focus "vispero") (funcall #'my-agenda-skip-non-work))
+        ((string-equal dm--my-focus "personal") (funcall #'my-agenda-skip-work))
+        ((string-equal dm--my-focus "all") nil)
+        (t nil)))
+
+(setq org-agenda-skip-function 'my-agenda-skip-function-selector)
+
 (setq my-agenda-work-cmd '(agenda
                            ""
                            ((org-agenda-span 'day)
