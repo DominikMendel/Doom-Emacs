@@ -1309,14 +1309,14 @@ capture was not aborted."
 ,#+TITLE: ${title}\n")
            :unnarrowed t)
 
-        ("r" "review" plain "- tags :: [[roam:Vispero Swarm Reviews]] %?\n* Logging\n"
+        ("r" "review" plain "- tags :: [[roam:Vispero Swarm Reviews]] %?\n* ${title}\n"
            :if-new (file+head "vispero/reviews/${title}.org" ":PROPERTIES:
 :ROAM_REFS: ${ref}
 :END:
 ,#+TITLE: ${title} for %^{prompt}\n#+filetags: :review:\n")
            :unnarrowed t)
 
-        ("b" "bug" plain "- tags :: [[roam:Vispero Bugzilla]] %?\n* Notes\n* Logging\n"
+        ("b" "bug" plain "- tags :: [[roam:Vispero Bugzilla]] %?\n* ${title}\n** Notes\n"
            :if-new (file+head "vispero/bugs/${title}.org" ":PROPERTIES:
 :ROAM_REFS: ${ref}
 :END:
