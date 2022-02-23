@@ -1309,7 +1309,7 @@ capture was not aborted."
 ,#+TITLE: ${title}\n")
            :unnarrowed t)
 
-        ("r" "review" plain "- tags :: [[roam:Vispero Swarm Reviews]] %?\n* ${title}\n"
+        ("r" "review" plain "- tags :: [[roam:Vispero Swarm Reviews]] %?\n* TODO ${title}\nSCHEDULED: %^{Schedule}t"
            :if-new (file+head "vispero/reviews/${title}.org" ":PROPERTIES:
 :ROAM_REFS: ${ref}
 :END:
