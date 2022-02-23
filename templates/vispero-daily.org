@@ -2,7 +2,7 @@
 :ROAM_ALIASES: "Vispero %<%A, %B %d %Y>"
 :END:
 :CLOCKTABLE:
-#+BEGIN: clocktable :scope vispero-roam :block %Y-%m-%d :maxlevel 9 :fileskip0 t
+#+BEGIN: clocktable :scope vispero-roam :block %<%Y-%m-%d> :maxlevel 9 :fileskip0 t
 #+END:
 :END:
 #+TITLE: Vispero %<%Y-%m-%d>
