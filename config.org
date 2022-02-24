@@ -1199,7 +1199,10 @@ capture was not aborted."
             `(("d" "default" plain "%?"
                 :target (file+head ,file-name ,head)
                 :unarrowed t)
-                ("j" "journal" entry "** %<%H:%M> %?"
+                ;; ("c" "Clocking" entry "** %<%H:%M> Current clock : %k . Link : %K %?"
+                ("c" "Clocking" entry "** %<%H:%M> Current clock %(azr/print-node-link \"%k\")"
+                :target (file+head+olp ,file-name ,head ("Journal")))
+                ("j" "Journal" entry "** %<%H:%M> %?"
                 :target (file+head+olp ,file-name ,head ("Journal")))
                 ("t" "ToDo" item "[ ] %?"
                 :target (file+head+olp ,file-name ,head ("Test"))))
@@ -1207,6 +1210,14 @@ capture was not aborted."
 
     (my/set-org-roam-dailies-capture)
 
+(defun azr/print-node-link (title)
+  "Insert a org-roam-node-link to a title if the file is found, if not print the title as it is"
+  (let* ((nd (org-roam-node-from-title-or-alias title)) )
+  (if nd
+        (let* ((ID (org-roam-node-id nd)))
+        (print (format " [[id:%s][%s]]" ID title)))
+    (print title))
+))
 
 (setq org-roam-capture-templates
         ;; Backtick list
