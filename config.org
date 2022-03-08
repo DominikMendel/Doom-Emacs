@@ -1081,8 +1081,8 @@ capture was not aborted."
 ;;   (interactive)
 ;;   (let ((org-refile-keep t) ;; Set this to nil to delete the original!
 ;;         (org-roam-dailies-capture-templates
-          ;; '(("t" "tasks" entry "%?"
-          ;;    :if-new (file+head+olp Personal "Personal %<%Y-%m-%d>.org" ":PROPERTIES:\n:ROAM_ALIASES: \"Personal %<%A, %B %d %Y>\"\n:END:\n#+TITLE: Personal %<%Y-%m-%d>\n* %<%A, %d %B %Y>\n" ("Tasks")))))
+;;           '(("t" "tasks" entry "%?"
+;;              :if-new (file+head+olp Personal "Personal %<%Y-%m-%d>.org" ":PROPERTIES:\n:ROAM_ALIASES: \"Personal %<%A, %B %d %Y>\"\n:END:\n#+TITLE: Personal %<%Y-%m-%d>\n* %<%A, %d %B %Y>\n" ("Tasks")))))
 ;;         (org-after-refile-insert-hook #'save-buffer)
 ;;         today-file
 ;;         pos)
@@ -1098,32 +1098,51 @@ capture was not aborted."
 ;;                    (file-truename (buffer-file-name)))
 ;;       (org-refile nil nil (list "Tasks" today-file nil pos)))))
 ;; )
-;; (defun my/org-roam-copy-todo-to-today ()
-;;   (interactive)
-;;   (let ((org-refile-keep t) ;; Set this to nil to delete the original!
-;;         (org-roam-dailies-capture-templates
-;;           '(("t" "tasks" entry "%?"
-;;              :if-new (file+head+olp "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n" ("Tasks")))))
-;;         (org-after-refile-insert-hook #'save-buffer)
-;;         today-file
-;;         pos)
-;;     (save-window-excursion
-;;       (org-roam-dailies--capture (current-time) t)
-;;       (setq today-file (buffer-file-name))
-;;       (setq pos (point)))
+#+end_src
+** Attempting automatic done logging
+#+begin_src elisp :tangle no
+(defun my/org-roam-copy-todo-to-today ()
+  (interactive)
+  (let ((org-refile-keep t) ;; Set this to nil to delete the original!
+        (head
+            (with-temp-buffer
+            (cond ((string-equal dm--my-focus "vispero") (insert-file-contents dm--org-vispero-daily-template))
+                    (t (insert-file-contents dm--org-personal-daily-template)))
+                (buffer-string)))
+                (file-name
+                (cond ((string-equal dm--my-focus "vispero") dm--org-vispero-file-name)
+                        (t dm--org-personal-file-name)))
+        (org-roam-dailies-capture-templates
+          '(
+            ("t" "tasks" entry "%?"
+             :if-new (file+head+olp "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n" ("Tasks")))
+            ;; ("c" "Clocking" entry "** %<%H:%M> %k %K Current clock %(azr/print-node-link \"%k\")"
+            ;;     :target (file+head+olp ,file-name ,head ("Journal")))
+            ))
+        (org-after-refile-insert-hook #'save-buffer)
+        today-file
+        pos)
+    (save-window-excursion
+    ;; (save-excursion
+      ;; (org-roam-dailies--capture (current-time) t)
+      (org-roam-dailies-capture-today nil "c")
+      (setq today-file (buffer-file-name))
+      (setq pos (point)))
 
-;;     ;; Only refile if the target file is different than the current file
-;;     (unless (equal (file-truename today-file)
-;;                    (file-truename (buffer-file-name)))
-;;       (org-refile nil nil (list "Tasks" today-file nil pos)))))
+    ;; Only refile if the target file is different than the current file
+    ;; (unless (equal (file-truename today-file)
+    ;;                (file-truename (buffer-file-name)))
+    ;;   (org-refile nil nil (list "Tasks" today-file nil pos)))
+    ))
 
 
+(after! (:and org org-roam)
 ;; (after! org
-;; (add-to-list 'org-after-todo-state-change-hook
-;;              (lambda ()
-;;                (when (equal org-state "DONE")
-;;                  (my/org-roam-copy-todo-to-today))))
-;;   )
+(add-to-list 'org-after-todo-state-change-hook
+             (lambda ()
+               (when (equal org-state "DONE")
+                 (my/org-roam-copy-todo-to-today))))
+  )
 
 #+end_src
 ** Capture templates
