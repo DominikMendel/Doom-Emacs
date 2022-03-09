@@ -1101,7 +1101,7 @@ capture was not aborted."
 #+end_src
 ** Attempting automatic done logging
 #+begin_src elisp :tangle no
-(defun my/org-roam-copy-todo-to-today ()
+(defun my/test-org-roam-copy-todo-to-today ()
   (interactive)
   (let ((org-refile-keep t) ;; Set this to nil to delete the original!
         (head
@@ -1115,7 +1115,8 @@ capture was not aborted."
         (org-roam-dailies-capture-templates
           '(
             ("t" "tasks" entry "%?"
-             :if-new (file+head+olp "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n" ("Tasks")))
+             ;; :if-new (file+head+olp "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n" ("Tasks")))
+             (file+head+olp "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n" ("Tasks")))
             ;; ("c" "Clocking" entry "** %<%H:%M> %k %K Current clock %(azr/print-node-link \"%k\")"
             ;;     :target (file+head+olp ,file-name ,head ("Journal")))
             ))
@@ -1135,15 +1136,38 @@ capture was not aborted."
     ;;   (org-refile nil nil (list "Tasks" today-file nil pos)))
     ))
 
+(defun my/org-roam-copy-todo-to-today ()
+  (interactive)
+  (let ((org-refile-keep t) ;; Set this to nil to delete the original!
+        (org-after-refile-insert-hook #'save-buffer))
+    (save-window-excursion
+      (call-interactively 'org-store-link)
+      (org-roam-dailies-capture-today nil "!D"))))
+
+(defun my/org-roam-capture-plus-store-link()
+  (interactive)
+  (call-interactively 'org-store-link)
+  (org-roam-dailies-capture-today nil "!D"))
 
 (after! (:and org org-roam)
-;; (after! org
-(add-to-list 'org-after-todo-state-change-hook
-             (lambda ()
-               (when (equal org-state "DONE")
-                 (my/org-roam-copy-todo-to-today))))
-  )
+    (add-to-list 'org-after-todo-state-change-hook
+                (lambda ()
+                (when (equal org-state "DONE")
+                    ;; (my/org-roam-capture-plus-store-link)))))
+                    (my/org-roam-copy-todo-to-today)))))
 
+(defun my/org-roam-capture-clock-in()
+  (interactive)
+  (call-interactively 'org-store-link)
+  (org-roam-dailies-capture-today nil "!CI"))
+
+(defun my/org-roam-capture-clock-out()
+  (interactive)
+  (call-interactively 'org-store-link)
+  (org-roam-dailies-capture-today nil "!CO"))
+
+(add-hook 'org-clock-in-hook #'my/org-roam-capture-clock-in)
+(add-hook 'org-clock-out-hook #'my/org-roam-capture-clock-out)
 #+end_src
 ** Capture templates
 #+begin_src elisp
@@ -1218,9 +1242,16 @@ capture was not aborted."
             `(("d" "default" plain "%?"
                 :target (file+head ,file-name ,head)
                 :unarrowed t)
-                ;; ("c" "Clocking" entry "** %<%H:%M> Current clock : %k . Link : %K %?"
-                ("c" "Clocking" entry "** %<%H:%M> Current clock %(azr/print-node-link \"%k\")"
-                :target (file+head+olp ,file-name ,head ("Journal")))
+                ;; ("C" "Clocking" item "1. %<%H:%M> %(azr/print-node-link \"%k\")"
+                ("!CI" "Clocking" item "1. %<%H:%M> %a"
+                :immediate-finish t
+                :target (file+head+olp ,file-name ,head ("Clock History" "Clock In")))
+                ("!CO" "Clocking" item "1. %<%H:%M> %a"
+                :immediate-finish t
+                :target (file+head+olp ,file-name ,head ("Clock History" "Clock Out")))
+                ("!D" "Done Log" item "1. %<%H:%M> %a"
+                :immediate-finish t
+                :target (file+head+olp ,file-name ,head ("Closed Tasks")))
                 ("j" "Journal" entry "** %<%H:%M> %?"
                 :target (file+head+olp ,file-name ,head ("Journal")))
                 ("t" "ToDo" item "[ ] %?"
