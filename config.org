@@ -234,6 +234,18 @@ the beginning of the list."
            (file ,dm--org-roam-japanese-vocabulary-template)
            :unnarrowed t)
 
+          ("T" "Testing clock in" plain (file+olp +org-capture-todo-file "Testing" "Startup")
+          ;; ("T" "Testing clock in" plain (file+olp +org-capture-todo-file "Testing" "%^{Select Meeting|Standup|Embedded Software Team|CAP Schedule Review|Embedded Software Knowledge Sharing|Technical Brief - One on One with Rob|Townhall}")
+          ;; ("T" "Testing clock in" plain (id "edb8e933-ad45-4ba9-a28c-74b439d989f1")
+           ;; "** %^{Select Meeting|Standup|Embedded Software Team|CAP Schedule Review|Embedded Software Knowledge Sharing|Technical Brief - One on One with Rob|Townhall}%? :meeting:"
+           "%?"
+           :jump-to-captured nil
+           :immediate-finish t
+           :clock-in t
+           :clock-keep t)
+
+          ;; TODO add meetings section with meetings by ID and one for a "new" meeting not specified
+          ;; ("m" "Meetings")
 
           ("t" "General ToDo" entry (file+headline +org-capture-todo-file "Tasks")
            "* TODO %? :new:\n %i\n")
@@ -1151,8 +1163,15 @@ capture was not aborted."
 
 (after! (:and org org-roam)
     (add-to-list 'org-after-todo-state-change-hook
+                 ;; (lambda (type)
+                 ;;   (when (eq type 'done)
                 (lambda ()
                 (when (equal org-state "DONE")
+                ;; (when (equal (org-element-property :todo-type 'done))
+                ;; (when (equal (:todo-type 'done))
+                ;; (when (org-element-map
+                ;;           (org-element-at-point 'headline)
+                ;;           'headline)
                     ;; (my/org-roam-capture-plus-store-link)))))
                     (my/org-roam-copy-todo-to-today)))))
 
@@ -1245,9 +1264,11 @@ capture was not aborted."
                 ;; ("C" "Clocking" item "1. %<%H:%M> %(azr/print-node-link \"%k\")"
                 ("!CI" "Clocking" item "1. %<%H:%M> %a"
                 :immediate-finish t
+                :clock-keep t
                 :target (file+head+olp ,file-name ,head ("Clock History" "Clock In")))
                 ("!CO" "Clocking" item "1. %<%H:%M> %a"
                 :immediate-finish t
+                :clock-keep t
                 :target (file+head+olp ,file-name ,head ("Clock History" "Clock Out")))
                 ("!D" "Done Log" item "1. %<%H:%M> %a"
                 :immediate-finish t
