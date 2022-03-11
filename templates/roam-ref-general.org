@@ -1,0 +1,3 @@
+#+TITLE: ${title}
+- tags :: [[id:c6a59321-5052-453b-a3d3-b774b3bde1f1][Readings]]
+* Notes %?

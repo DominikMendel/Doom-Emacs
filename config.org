@@ -1212,6 +1212,7 @@ capture was not aborted."
     (setq dm--org-templates-dir (expand-file-name "templates" doom-private-dir))
     (setq dm--org-roam-vispero-dir (expand-file-name "vispero" org-roam-directory))
     (setq dm--org-personal-inbox-file-name (expand-file-name "personal_agenda.org" org-roam-directory))
+    (setq dm--org-roam-website-dir (expand-file-name "website" org-roam-directory))
     (setq dm--org-vispero-inbox-file-name (expand-file-name "vispero_agenda.org" dm--org-roam-vispero-dir))
     (setq dm--org-roam-default-template (expand-file-name "roam-default.org" dm--org-templates-dir))
     (setq dm--org-roam-new-area-template (expand-file-name "roam-new-area.org" dm--org-templates-dir))
@@ -1226,6 +1227,7 @@ capture was not aborted."
     (setq dm--org-roam-vispero-dailies-dir (expand-file-name "daily" dm--org-roam-vispero-dir))
     (setq dm--org-personal-daily-template (expand-file-name "personal-daily.org" dm--org-templates-dir))
     (setq dm--org-vispero-daily-template (expand-file-name "vispero-daily.org" dm--org-templates-dir))
+    (setq dm--org-roam-ref-general-template (expand-file-name "roam-ref-general.org" dm--org-templates-dir))
     (setq dm--org-personal-file-name "Personal %<%Y-%m-%d>.org")
     (setq dm--org-vispero-file-name "Vispero %<%Y-%m-%d>.org")
 
@@ -1384,11 +1386,8 @@ capture was not aborted."
           ))
 
   (setq org-roam-capture-ref-templates
-        '(("e" "example" plain "- tags ::  %?\n* "
-           :if-new (file+head "website/%(url-host (url-generic-parse-url \"${ref}\"))-${slug}.org" ":PROPERTIES:
-:ROAM_REFS: ${ref}
-:END:
-,#+TITLE: ${title}\n")
+        `(("g" "general" plain (file ,dm--org-roam-ref-general-template)
+           :target (file ,(expand-file-name "%(url-host (url-generic-parse-url \"${ref}\"))-${slug}.org" dm--org-roam-website-dir))
            :unnarrowed t)
 
         ("r" "review" plain "- tags :: [[roam:Vispero Swarm Reviews]] %?\n* TODO ${title}\nSCHEDULED: %^{Schedule}t"
