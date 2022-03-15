@@ -101,7 +101,7 @@ text and copying to the killring."
 * Deft
 #+begin_src elisp
 (setq deft-directory "~/Dropbox/org"
-      deft-extensions '("org" "txt")
+      deft-extensions '("org" "txt" "org_archive")
       deft-use-filename-as-title t
       deft-strip-summary-regexp ":PROPERTIES:\n\\(.+\n\\)+:END:\n"
       deft-recursive t)
@@ -151,12 +151,29 @@ the beginning of the list."
 * Org
 ** Generl org
 #+begin_src elisp
+
+(after! (:and org org-roam)
+  (setq dm--org-archive-type "%s_archive::datetree/")
+  (setq dm--org-archive-location-personal (concat (expand-file-name "archive" org-roam-directory) "/" dm--org-archive-type))
+  (setq dm--org-archive-location-vispero (concat (expand-file-name "archive" dm--org-roam-vispero-dir) "/" dm--org-archive-type))
+
+  (defun my/set-org-variables ()
+        (cond ((string-equal dm--my-focus "vispero") (setq org-archive-location dm--org-archive-location-vispero))
+            ((string-equal dm--my-focus "personal") (setq org-archive-location dm--org-archive-location-personal))
+            ((string-equal dm--my-focus "all") (setq org-archive-location dm--org-archive-location-personal))
+            (t (setq org-archive-location dm--org-archive-location-personal))))
+
+  (my/set-org-variables)
+  )
+
 (after! org
   ;; Testing new archive
   ;; (setq org-archive-location "%s_archive::datetree/")
   ;; This doesn't work. Idk how to do an "olp" style
   ;; (setq org-archive-location "::* Tasks\n** ARCHIVE :ARCHIVE:")
-  (setq org-archive-location "::* ARCHIVE :ARCHIVE:")
+  ;; (setq org-archive-location "::* ARCHIVE :ARCHIVE:")
+  ;; (setq org-archive-location "testing_archive.org_archive::datetree/* From %s")
+  ;; (setq org-archive-location "~/Dropbox/org/roam/archive/%s_archive::datetree/")
 
   (setq org-startup-folded t)
   (setq org-ellipsis " ▼ ")
@@ -177,6 +194,7 @@ the beginning of the list."
   (setq org-list-demote-modify-bullet
        '(("+" . "-") ("-" . "+") ("*" . "+") ("1." . "a.") ("a." . "-")))
   (setq org-log-redeadline 'note)
+  (setq org-cycle-open-archived-trees t)
   )
 
 ;; This doesn't work
@@ -2070,6 +2088,7 @@ Functions used to swap focuses between personal and work.
 
 (defun my/call-focus-function-setters ()
   "Reset templates to their new values"
+  (my/set-org-variables)
   (my/set-org-roam-dailies-capture)
   (my/set-org-capture-templates))
 
