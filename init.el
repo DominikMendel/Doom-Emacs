@@ -17,6 +17,8 @@
 
 (defvar native-comp-deferred-compilation-deny-list nil)
 
+(setq evil-respect-visual-line-mode t)
+
 (doom! :input
        ;;chinese
        ;;japanese

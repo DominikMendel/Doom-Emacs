@@ -49,6 +49,8 @@ Just some personal information and my doom-theme.
 
 (setq! org-journal-time-format "")
 
+;; PDF auto-refresh after changes
+(add-hook 'pdf-view-mode-hook (lambda () (auto-revert-mode 1)))
 
 (after! org-journal
   (setq! org-journal-carryover-items "TODO=\"TODO\"|TODO=\"INPROGRESS\"|TODO=\"WAITING\"|TODO=\"BLOCKED\"|TODO=\"QUESTION\""))
