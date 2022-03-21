@@ -654,11 +654,6 @@ Refer to `org-agenda-prefix-format' for more information."
          :order 5)
         (:discard (:anything t))))
 
-(setq my-super-group-alltodo-week-new
-      '((:name "Remove new tag and assign TODO states and priorities"
-         :tag "new")
-        (:discard (:anything t))))
-
 (setq my-super-group-alltodo-week-done
       '((:name "Remove new tag and assign TODO states and priorities"
          :log closed)
@@ -862,8 +857,7 @@ Refer to `org-agenda-prefix-format' for more information."
 
           ("W" . "Weekly Review Helper")
           ("Wn" "New Tasks"
-           ((alltodo "" ((org-agenda-overriding-header "")
-                         (org-super-agenda-groups my-super-group-alltodo-week-new)))))
+           ((tags "new" ((org-agenda-overriding-header "Remove new tag and assign TODO states and priorities")))))
           ("Wd" "Done Tasks"
            ((todo "DONE|CANCELLED|ABANDONED|ANSWERED|ACHIEVED|MISSED" ((org-agenda-overriding-header "Archive all DONE items")
                          ;; (org-super-agenda-groups my-super-group-alltodo-week-done)
@@ -1854,6 +1848,11 @@ tasks."
   (interactive)
   (let ((dm--ignore-vulpea-agenda-files-update-for-done-state t))
     (org-agenda nil "Wd")))
+
+(defun my/org-agenda-view-all-new-tags ()
+  (interactive)
+  (let ((dm--ignore-vulpea-agenda-files-update-for-done-state t))
+    (org-agenda nil "Wn")))
 #+end_src
 ** Automatic tagging people
 #+begin_src elisp
