@@ -1809,15 +1809,51 @@ tasks."
 ;;   :from nodes
 ;;   :where (= id "905bd73e-2588-4b42-9a04-b8f69549ceb0")])
 
+;; (defun vulpea-agenda-files-update (&rest _)
+;;   "Update the value of `org-agenda-files'."
+;;   (setq org-agenda-files (vulpea-project-files)))
+#+end_src
+** Custom functions to see DONE files
+#+begin_src elisp
+(defun my/set-agenda-files-personal ()
+  "Sets the org-agenda-files to personal non journal/dailies"
+  (setq org-agenda-files (seq-filter (lambda(x) (not (string-match "/\\(vispero\\|journal\\|daily\\)/" (file-name-directory x))))
+        (directory-files-recursively "~/Dropbox/org/roam" "\\.org$"))))
+
+(defun my/set-agenda-files-vispero ()
+  "Sets the org-agenda-files to Vispero non journal/dailies/bugs/reviews"
+  (setq org-agenda-files (seq-filter (lambda(x) (not (string-match "/\\(journal\\|daily\\|bugs\\|reviews\\)/" (file-name-directory x))))
+        (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$"))))
+
+(defun my/set-agenda-files-all ()
+  "Sets the org-agenda-files to everything except journal/dailies"
+  (setq org-agenda-files (seq-filter (lambda(x) (not (string-match "/\\(journal\\|daily\\)/" (file-name-directory x))))
+        (directory-files-recursively "~/Dropbox/org/roam" "\\.org$"))))
+
 (defun vulpea-agenda-files-update (&rest _)
   "Update the value of `org-agenda-files'."
-  (setq org-agenda-files (vulpea-project-files)))
+  (message "vulpea-agenda-files-updated called. Should ignore = %s" dm--ignore-vulpea-agenda-files-update-for-done-state)
+  (if dm--ignore-vulpea-agenda-files-update-for-done-state
+        (cond
+                ((string-equal dm--my-focus "vispero") (funcall #'my/set-agenda-files-vispero))
+                ((string-equal dm--my-focus "personal") (funcall #'my/set-agenda-files-personal))
+                ((string-equal dm--my-focus "all") (funcall #'my/set-agenda-files-all))
+                (t (funcall #'my/set-org-agenda-files-all)))
+    (setq org-agenda-files (vulpea-project-files))))
+
+(defvar dm--ignore-vulpea-agenda-files-update-for-done-state nil
+  "If this is set to 't' org-agenda-files will be set to a custom filter on what I want to see for DONE org items. If nil, normally call what vulpea-agenda-files-update would use.")
 
 (add-hook 'find-file-hook #'vulpea-project-update-tag)
 (add-hook 'before-save-hook #'vulpea-project-update-tag)
 
 (advice-add 'org-agenda :before #'vulpea-agenda-files-update)
 (advice-add 'org-todo-list :before #'vulpea-agenda-files-update)
+
+(defun my/org-agenda-view-all-done ()
+  (interactive)
+  (let ((dm--ignore-vulpea-agenda-files-update-for-done-state t))
+    (org-agenda nil "Wd")))
 #+end_src
 ** Automatic tagging people
 #+begin_src elisp
