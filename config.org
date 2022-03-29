@@ -70,11 +70,11 @@ This function is used in the ":match" parameter for an Org-clocktable. It will p
   #+begin_src elisp
 (defun vispero-journals() (directory-files-recursively "~/Dropbox/org/roam/vispero/journal" "\\.org$"))
 
-(defun vispero-roam() (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$"))
+(defun vispero-roam() (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.\\(org\\|org_archive\\)$"))
 
 (defun personal-journals() (directory-files-recursively "~/Dropbox/org/roam/journal" "\\.org$"))
 
-(defun all-roam() (directory-files-recursively "~/Dropbox/org/roam" "\\.org$"))
+(defun all-roam() (directory-files-recursively "~/Dropbox/org/roam" "\\.\\(org\\|org_archive\\)$"))
   #+end_src
 ** Create linkable UUID
 - Credit to Rainer König
