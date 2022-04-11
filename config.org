@@ -151,8 +151,29 @@ the beginning of the list."
       (message "All themes disabled"))))
 #+end_src
 * Org
-** Generl org
+** General org
 #+begin_src elisp
+;; Marks a ToDo entry as done but makes the "LAST_REPEAT" the day of the schedule
+(defun willdo-naggins--mark-done ()
+  (interactive)
+  (let* ((sched-ts (org-timestamp-from-string
+                    (org-entry-get nil "SCHEDULED")))
+         (thetime (org-timestamp-to-time sched-ts)))
+    ;trick org-store-note into thinking the task was done when scheduled
+    (define-advice org-add-log-setup (:after (&rest _) trick-store-note)
+      (setq org-log-note-effective-time thetime))
+    (org-todo 'done)
+    (advice-remove 'org-add-log-setup #'org-add-log-setup@trick-store-note)
+    ;set LAST_REPEAT to reflect the latest scheduling of task
+    (org-add-planning-info 'closed (format-time-string
+                    (org-time-stamp-format t t)
+                    thetime))
+    ;; (org-entry-put nil "LAST_REPEAT"
+    ;; (org-entry-put nil "CLOSED"
+    ;;                (format-time-string
+    ;;                 (org-time-stamp-format t t)
+    ;;                 thetime))
+    ))
 
 (after! (:and org org-roam)
   (setq dm--org-archive-type "%s_archive::datetree/")
@@ -180,8 +201,10 @@ the beginning of the list."
   (setq org-startup-folded t)
   (setq org-ellipsis " ▼ ")
   (setq org-hide-emphasis-markers t)
-  (add-to-list 'org-modules 'org-checklist)
-  (require 'org-checklist)
+  ;; (add-to-list 'org-modules 'org-checklist)
+  ;; (require 'org-checklist)
+  ;; (add-to-list 'org-modules 'org-habits)
+  ;; (require 'org-habits)
   (setq org-sparse-tree-open-archived-trees t) ;;For finding archived headings
   (setq org-clock-into-drawer "CLOCKING")
   (org-add-link-type "yt" #'make-youtube-time-link)
