@@ -215,12 +215,25 @@ the beginning of the list."
           (sequence "REPEAT" "|" "COMPLETED")
           (sequence "[ ](T)" "[-](I)" "[?](?)" "|" "[X](D)")))
   (setq org-log-done 'time)
-  (setq org-refile-targets (quote ((org-agenda-files :maxlevel . 2))))
+  (setq org-refile-targets '((+org/opened-buffer-files :maxlevel . 9)))
+  ;; (setq org-refile-targets (quote ((org-agenda-files :maxlevel . 2))))
   (setq org-list-demote-modify-bullet
        '(("+" . "-") ("-" . "+") ("*" . "+") ("1." . "a.") ("a." . "-")))
   (setq org-log-redeadline 'note)
   (setq org-cycle-open-archived-trees t)
+  ;; (setq org-id-link-to-org-use-id t)
   )
+
+  (defun +org/opened-buffer-files ()
+    "Return the list of files currently opened in emacs"
+    (delq nil
+          (mapcar (lambda (x)
+                    (if (and (buffer-file-name x)
+                             (string-match "\\.org$"
+                                           (buffer-file-name x)))
+                        (buffer-file-name x)))
+                  (buffer-list))))
+
 
 ;; This doesn't work
 (defun my/org-buffer-restart()
@@ -257,6 +270,7 @@ the beginning of the list."
 (defun my/org-capture-plus-store-link()
   (interactive)
   (call-interactively 'org-store-link)
+  ;; (call-interactively 'org-id-copy)
   ;; (org-capture))
   (org-capture nil "jJ"))
 (global-set-key (kbd "<f4>") 'my/org-capture-plus-store-link)
@@ -277,30 +291,33 @@ the beginning of the list."
            (file ,dm--org-roam-japanese-vocabulary-template)
            :unnarrowed t)
 
-          ("T" "Testing clock in" plain (file+olp +org-capture-todo-file "Testing" "Startup")
+          ;; ("T" "Testing clock in" plain (file+olp +org-capture-todo-file "Testing" "Startup")
           ;; ("T" "Testing clock in" plain (file+olp +org-capture-todo-file "Testing" "%^{Select Meeting|Standup|Embedded Software Team|CAP Schedule Review|Embedded Software Knowledge Sharing|Technical Brief - One on One with Rob|Townhall}")
           ;; ("T" "Testing clock in" plain (id "edb8e933-ad45-4ba9-a28c-74b439d989f1")
            ;; "** %^{Select Meeting|Standup|Embedded Software Team|CAP Schedule Review|Embedded Software Knowledge Sharing|Technical Brief - One on One with Rob|Townhall}%? :meeting:"
-           "%?"
-           :jump-to-captured nil
-           :immediate-finish t
-           :clock-in t
-           :clock-keep t)
+          ;; "%?"
+          ;; :jump-to-captured nil
+          ;; :immediate-finish t
+          ;; :clock-in t
+          ;; :clock-keep t)
 
           ;; TODO add meetings section with meetings by ID and one for a "new" meeting not specified
           ;; ("m" "Meetings")
 
           ("t" "General ToDo" entry (file+headline +org-capture-todo-file "Tasks")
-           "* TODO %? :new:\n %i\n")
+           "* TODO %^{What ToDo?}%? :new:")
+
+          ("T" "Scheduled ToDo" entry (file+headline +org-capture-todo-file "Tasks")
+           "* TODO %^{What Todo?}%?\nSCHEDULED: %^{Schedule}t")
 
           ("i" "General New Idea" entry (file+headline +org-capture-todo-file "Ideas")
-           "* %? :new:\n %i\n")
+           "* %^{What's your idea?}%? :new:\n%i")
 
           ("I" "General Inprogress" entry (file+headline +org-capture-todo-file "Tasks")
-           "* INPROGRESS %?\n %i\n")
+           "* INPROGRESS %?")
 
           ("p" "General Project" entry (file+headline +org-capture-todo-file "Projects")
-           "* TODO %? :new:\n From : %i\n%a\n")
+           "* TODO %^{What ToDo?}%? :new:\n%i\nFrom : %a\n")
 
           ("g" "New Goal" entry (file+headline +org-capture-todo-file "Goals")
            "* GOAL %^{Describe your goal} %? :new:
@@ -426,9 +443,9 @@ Added on %U - Last reviewed on %U
 #+end_src
 ** Org Agenda
 #+begin_src elisp
-(after! org-agenda
-  (add-to-list 'org-agenda-bulk-custom-functions
-               '(?a org-agenda-archive-to-archive-sibling)))
+;; (after! org-agenda
+;;   (add-to-list 'org-agenda-bulk-custom-functions
+;;                '(?a org-agenda-archive-to-archive-sibling)))
 
 ;; Doing this to clean up my org-agenda to view since ALL of my org-agenda-files
 ;; are tagged with "project", so it is redundant.
@@ -769,67 +786,67 @@ Refer to `org-agenda-prefix-format' for more information."
 (after! org
   (setq org-agenda-custom-commands
         '(
-          ("op" "Overview Personal"
-           ((agenda "" ((org-agenda-span 'day)
-            (org-agenda-skip-function 'my-agenda-skip-work)
-                        (org-super-agenda-groups
-                         my-agenda-super-group-agenda
-                         )))
-            ;; (tags "question" ((org-agenda-overriding-header "")
-            (tags "." ((org-agenda-overriding-header "")
-            (org-agenda-skip-function 'my-agenda-skip-work)
-                       (org-super-agenda-groups
-                        my-agenda-super-group-tags
-                       )))
-            (alltodo "" ((org-agenda-overriding-header "")
-            (org-agenda-skip-function 'my-agenda-skip-work)
-                         ;; (tags-todo "." ((org-agenda-overriding-header "")
-                         (org-super-agenda-groups
-                          my-agenda-super-group-alltodo)))
-            ))
+          ;; ("op" "Overview Personal"
+          ;;  ((agenda "" ((org-agenda-span 'day)
+          ;;   (org-agenda-skip-function 'my-agenda-skip-work)
+          ;;               (org-super-agenda-groups
+          ;;                my-agenda-super-group-agenda
+          ;;                )))
+          ;;   ;; (tags "question" ((org-agenda-overriding-header "")
+          ;;   (tags "." ((org-agenda-overriding-header "")
+          ;;   (org-agenda-skip-function 'my-agenda-skip-work)
+          ;;              (org-super-agenda-groups
+          ;;               my-agenda-super-group-tags
+          ;;              )))
+          ;;   (alltodo "" ((org-agenda-overriding-header "")
+          ;;   (org-agenda-skip-function 'my-agenda-skip-work)
+          ;;                ;; (tags-todo "." ((org-agenda-overriding-header "")
+          ;;                (org-super-agenda-groups
+          ;;                 my-agenda-super-group-alltodo)))
+          ;;   ))
 
-          ("ow" "Overview Work"
-           ((agenda "" ((org-agenda-span 'day)
-            (org-agenda-skip-function 'my-agenda-skip-non-work)
-                        (org-super-agenda-groups
-                         my-agenda-super-group-agenda
-                         )))
-            ;; (tags "question" ((org-agenda-overriding-header "")
-            (tags "." ((org-agenda-overriding-header "")
-            (org-agenda-skip-function 'my-agenda-skip-non-work)
-                       (org-super-agenda-groups
-                        my-agenda-super-group-tags
-                       )))
-            (alltodo "" ((org-agenda-overriding-header "")
-            (org-agenda-skip-function 'my-agenda-skip-non-work)
-                         ;; (tags-todo "." ((org-agenda-overriding-header "")
-                         (org-super-agenda-groups
-                          my-agenda-super-group-alltodo)))
-            ))
+          ;; ("ow" "Overview Work"
+          ;;  ((agenda "" ((org-agenda-span 'day)
+          ;;   (org-agenda-skip-function 'my-agenda-skip-non-work)
+          ;;               (org-super-agenda-groups
+          ;;                my-agenda-super-group-agenda
+          ;;                )))
+          ;;   ;; (tags "question" ((org-agenda-overriding-header "")
+          ;;   (tags "." ((org-agenda-overriding-header "")
+          ;;   (org-agenda-skip-function 'my-agenda-skip-non-work)
+          ;;              (org-super-agenda-groups
+          ;;               my-agenda-super-group-tags
+          ;;              )))
+          ;;   (alltodo "" ((org-agenda-overriding-header "")
+          ;;   (org-agenda-skip-function 'my-agenda-skip-non-work)
+          ;;                ;; (tags-todo "." ((org-agenda-overriding-header "")
+          ;;                (org-super-agenda-groups
+          ;;                 my-agenda-super-group-alltodo)))
+          ;;   ))
 
 
-          ("p" "Projects"
-           ;; (
-           ((agenda "" ((org-agenda-span 'day)
-                        (org-super-agenda-groups
-                         '((:name "Today"
-                            :time-grid t
-                            :date today
-                            :todo "TODAY"
-                            :scheduled today
-                            :order 1)))))
-            (alltodo "" ((org-agenda-overriding-header "")
-                         (org-super-agenda-groups
-                          `((:name "WAITING"
-                             :children "WAITING"
-                             :order 2)
-                            (:discard (:anything t)))
-                          )))))
+          ;; ("p" "Projects"
+          ;;  ;; (
+          ;;  ((agenda "" ((org-agenda-span 'day)
+          ;;               (org-super-agenda-groups
+          ;;                '((:name "Today"
+          ;;                   :time-grid t
+          ;;                   :date today
+          ;;                   :todo "TODAY"
+          ;;                   :scheduled today
+          ;;                   :order 1)))))
+          ;;   (alltodo "" ((org-agenda-overriding-header "")
+          ;;                (org-super-agenda-groups
+          ;;                 `((:name "WAITING"
+          ;;                    :children "WAITING"
+          ;;                    :order 2)
+          ;;                   (:discard (:anything t)))
+          ;;                 )))))
 
           ;; ("P" "Personal test"
            ;; (,my-agenda-non-work-cmd))
 
-          ("T" "Test Today view"
+          ("t" "Today view"
            ((agenda "" ((org-agenda-overriding-header "")
                         (org-agenda-span 'day)
                         (org-agenda-start-day nil)
@@ -839,7 +856,7 @@ Refer to `org-agenda-prefix-format' for more information."
             (alltodo "" ((org-agenda-overriding-header "")
                          (org-super-agenda-groups my-super-group-alltodo-today)))))
 
-          ("Pw" "Planning Week"
+          ("pw" "Planning Week"
           ((tags-todo "goal" ((org-agenda-overriding-header "Goals")))
            (agenda "" ((org-agenda-overriding-header "Month Planner")
                        (org-agenda-span 14)
@@ -853,7 +870,7 @@ Refer to `org-agenda-prefix-format' for more information."
             (todo "" ((org-agenda-overriding-header "Things to schedule")
                          (org-super-agenda-groups my-super-group-todo-planning)))))
 
-          ("Pm" "Planning Month"
+          ("pm" "Planning Month"
           ((tags-todo "goal" ((org-agenda-overriding-header "Goals")))
            (agenda "" ((org-agenda-overriding-header "Month Planner")
                        (org-agenda-span 'month)
@@ -867,7 +884,7 @@ Refer to `org-agenda-prefix-format' for more information."
             (todo "" ((org-agenda-overriding-header "Things to schedule")
                          (org-super-agenda-groups my-super-group-todo-planning)))))
 
-          ("w" "Weekly Overview"
+          ("w" "Week Overview"
           ((agenda "" ((org-agenda-overriding-header "Week view")
                         (org-agenda-span 'week)
                         (org-agenda-start-on-weekday 1)
@@ -878,13 +895,51 @@ Refer to `org-agenda-prefix-format' for more information."
             (alltodo "" ((org-agenda-overriding-header "")
                          (org-super-agenda-groups my-super-group-alltodo-week)))))
 
-          ("W" . "Weekly Review Helper")
-          ("Wn" "New Tasks"
-           ((tags "new" ((org-agenda-overriding-header "Remove new tag and assign TODO states and priorities")))))
-          ("Wd" "Done Tasks"
-           ((todo "DONE|CANCELLED|ABANDONED|ANSWERED|ACHIEVED|MISSED" ((org-agenda-overriding-header "Archive all DONE items")
-                         ;; (org-super-agenda-groups my-super-group-alltodo-week-done)
-                         ))))
+          ;; TODO look at and update super-agenda-groups
+          ("b" "Bi-Week Overview"
+          ((agenda "" ((org-agenda-overriding-header "Bi-Weekly view")
+                        (org-agenda-span 14)
+                        (org-agenda-start-on-weekday 1)
+                        (org-agenda-time-grid '(nil (800 1000 1200 1400 1600 1800 2000) "" "----------------"))
+                        ;; (org-agenda-prefix-format '((agenda . " %i %?-12t%-6e% s")))
+                        )
+                    )
+            (alltodo "" ((org-agenda-overriding-header "")
+                         (org-super-agenda-groups my-super-group-alltodo-week)))))
+
+          ;; TODO look at and update super-agenda-groups
+          ("m" "Month Overview"
+          ((agenda "" ((org-agenda-overriding-header "Month view")
+                        (org-agenda-span 'month)
+                        (org-agenda-start-on-weekday 1)
+                        (org-agenda-time-grid '(nil (800 1000 1200 1400 1600 1800 2000) "" "----------------"))
+                        ;; (org-agenda-prefix-format '((agenda . " %i %?-12t%-6e% s")))
+                        )
+                    )
+            (alltodo "" ((org-agenda-overriding-header "")
+                         (org-super-agenda-groups my-super-group-alltodo-week)))))
+
+          ;; TODO look at and update super-agenda-groups
+          ("y" "Year Overview"
+          ((agenda "" ((org-agenda-overriding-header "Year view")
+                        (org-agenda-span 'year)
+                        (org-agenda-start-on-weekday 1)
+                        (org-agenda-time-grid '(nil (800 1000 1200 1400 1600 1800 2000) "" "----------------"))
+                        ;; (org-agenda-prefix-format '((agenda . " %i %?-12t%-6e% s")))
+                        )
+                    )
+            (alltodo "" ((org-agenda-overriding-header "")
+                         (org-super-agenda-groups my-super-group-alltodo-week)))))
+
+
+          ;; ("W" . "Weekly Review Helper")
+          ;; ("Wn" "New Tasks"
+          ;;  ((tags "new" ((org-agenda-overriding-header "Remove new tag and assign TODO states and priorities")))))
+          ;; ("Wd" "Done Tasks"
+          ;;  ((todo "DONE|CANCELLED|ABANDONED|ANSWERED|ACHIEVED|MISSED" ((org-agenda-overriding-header "Archive all DONE items")
+          ;;                ;; (org-super-agenda-groups my-super-group-alltodo-week-done)
+          ;;                ))))
+
           ;; From m-dwyer
           ;; ("W" "Weekly review TEST"
           ;; ((agenda "" ((org-agenda-overriding-header "Week view")
@@ -1062,7 +1117,7 @@ Refer to `org-agenda-prefix-format' for more information."
 
   ;; (setq lexical-binding t)
 
-  (defun org-roam-node-insert-immediate (arg &rest args)
+(defun org-roam-node-insert-immediate (arg &rest args)
   (interactive "P")
   (let ((args (cons arg args))
         (org-roam-capture-templates (list (append (car org-roam-capture-templates)
@@ -1149,7 +1204,7 @@ capture was not aborted."
 ;; )
 #+end_src
 ** Attempting automatic done logging
-#+begin_src elisp :tangle no
+#+begin_src elisp :tangle yes
 (defun my/test-org-roam-copy-todo-to-today ()
   (interactive)
   (let ((org-refile-keep t) ;; Set this to nil to delete the original!
@@ -1188,8 +1243,13 @@ capture was not aborted."
 (defun my/org-roam-copy-todo-to-today ()
   (interactive)
   (let ((org-refile-keep t) ;; Set this to nil to delete the original!
+        (org-id-link-to-org-use-id t)
         (org-after-refile-insert-hook #'save-buffer))
+    ;; (save-window-excursion
+    ;;   (call-interactively 'org-id-copy)
+    ;;   (org-roam-dailies-capture-today nil "!D"))))
     (save-window-excursion
+      ;; (org-agenda-switch-to)
       (call-interactively 'org-store-link)
       (org-roam-dailies-capture-today nil "!D"))))
 
@@ -1203,7 +1263,8 @@ capture was not aborted."
                  ;; (lambda (type)
                  ;;   (when (eq type 'done)
                 (lambda ()
-                (when (equal org-state "DONE")
+                ;; (when (equal org-state "DONE")
+                (when (or (equal org-state "DONE") (equal org-state "COMPLETED"))
                 ;; (when (equal (org-element-property :todo-type 'done))
                 ;; (when (equal (:todo-type 'done))
                 ;; (when (org-element-map
@@ -1214,13 +1275,15 @@ capture was not aborted."
 
 (defun my/org-roam-capture-clock-in()
   (interactive)
-  (call-interactively 'org-store-link)
-  (org-roam-dailies-capture-today nil "!CI"))
+  (let ((org-id-link-to-org-use-id t))
+        (call-interactively 'org-store-link)
+        (org-roam-dailies-capture-today nil "!CI")))
 
 (defun my/org-roam-capture-clock-out()
   (interactive)
-  (call-interactively 'org-store-link)
-  (org-roam-dailies-capture-today nil "!CO"))
+  (let ((org-id-link-to-org-use-id t))
+        (call-interactively 'org-store-link)
+        (org-roam-dailies-capture-today nil "!CO")))
 
 (add-hook 'org-clock-in-hook #'my/org-roam-capture-clock-in)
 (add-hook 'org-clock-out-hook #'my/org-roam-capture-clock-out)
@@ -1301,19 +1364,29 @@ capture was not aborted."
                 :target (file+head ,file-name ,head)
                 :unarrowed t)
                 ;; ("C" "Clocking" item "1. %<%H:%M> %(azr/print-node-link \"%k\")"
-                ("!CI" "Clocking" item "1. %<%H:%M> %a"
+                ("!CI" "Clocking In" item "1. %<%H:%M> %a"
+                :unnarrowed t
                 :immediate-finish t
                 :clock-keep t
                 :target (file+head+olp ,file-name ,head ("Clock History" "Clock In")))
-                ("!CO" "Clocking" item "1. %<%H:%M> %a"
+                ("!CO" "Clocking Out" item "1. %<%H:%M> %a"
+                :unnarrowed t
                 :immediate-finish t
                 :clock-keep t
                 :target (file+head+olp ,file-name ,head ("Clock History" "Clock Out")))
                 ("!D" "Done Log" item "1. %<%H:%M> %a"
                 :immediate-finish t
                 :target (file+head+olp ,file-name ,head ("Closed Tasks")))
-                ("j" "Journal" entry "** %<%H:%M> %?"
+                ;; ("jj" "Journal New Entry" entry "** %<%H:%M> %?"
+                ;; :target (file+head+olp ,file-name ,head ("Journal")))
+                ("jj" "Journal New Entry" entry "* %?"
                 :target (file+head+olp ,file-name ,head ("Journal")))
+                ("jl" "Journal Link" entry "* %a %?"
+                :target (file+head+olp ,file-name ,head ("Journal"))
+                :immediate-finish t)
+                ("jt" "Journal ToDo" item "[ ] %?"
+                :target (file+head+olp ,file-name ,head ("Things ToDo")))
+                ;; Eventually remove these/replace:
                 ("t" "ToDo" item "[ ] %?"
                 :target (file+head+olp ,file-name ,head ("Test"))))
                 )))
@@ -1997,6 +2070,7 @@ Don't need anymore. It is included in org +pretty
 ;;   (setq vertico-sort-function 'vertico-sort-alpha))
 #+end_src
 * Key mappings
+** General
 #+begin_src elisp
 (defun my/org-next-parent-heading ()
   "Jumps to the next parent heading."
@@ -2005,6 +2079,10 @@ Don't need anymore. It is included in org +pretty
     (org-forward-element))
 
 (map! :leader
+      "+" #'hydra/text-zoom/body
+      ;; "W" #'+hydra/window-nav/body
+      "W" #'my/hydra/window-nav/body
+      "A" #'my/hydra/agenda-nav/body
       "w /" #'evil-window-vsplit
       "w -" #'evil-window-split
       "RET" #'org-insert-subheading
@@ -2026,32 +2104,79 @@ Don't need anymore. It is included in org +pretty
       :desc "Goto yesterday" "n r d y" #'my/org-roam-dailies-goto-yesterday
       )
 
+;; Custom org-capture
+(map! :leader
+      :desc "Capture" "X" nil
+      ;;:desc "test2" "X t" #'(lambda () (interactive) (call-interactively #'org-capture nil "t"))
+      ;; :desc "test3" "X T" #'org-capture nil "t"
+      :desc "ToDo" "X t" (cmd! (org-capture nil "t"))
+      :desc "Scheduled ToDo" "X T" (cmd! (org-capture nil "T"))
+      :desc "New Idea" "X i" (cmd! (org-capture nil "i"))
+      :desc "Org Capture" "X X" #'org-capture
+      :desc "Roam Capture" "X R" #'org-roam-capture
+      ;; Journal/Dailies
+      :desc "Goto Dailies" "X d" #'my/org-roam-dailies-goto-date
+      :desc "Capture Dailies" "X D" #'org-roam-dailies-capture-date
+      :desc "Journal" "X j" nil
+      :desc "Journal Entry" "X j j" (cmd! (org-roam-dailies-capture-today nil "jj"))
+      :desc "Journal ToDo" "X j t" (cmd! (org-roam-dailies-capture-today nil "jt"))
+      ;; :desc "Journal Link" "X j l" (cmd! (org-roam-dailies-capture-today nil "jl"))
+      :desc "Journal Link" "X j l" #'(lambda () (interactive) (call-interactively 'org-store-link) (org-roam-dailies-capture-today nil "jl"))
+      )
+
+;; Custom org-agenda
+;; (map!
+;;     :leader
+;;     :prefix "A"
+;;     :desc "Agenda" "A" #'org-agenda
+;;     :desc "View DONE" "d" #'my/org-agenda-view-all-done
+;;     :desc "View New" "n" #'my/org-agenda-view-all-new-tags
+;;     :desc "Today" "t" (cmd! (org-agenda nil "t"))
+;;     :desc "Open agenda file" "o" (cmd! (org-open-file +org-capture-todo-file))
+;;       )
+
 ;; Make Tab to fold groups and Shift-Tab to default back to org-agenda-goto
 (map! :after evil-org-agenda
       :map evil-org-agenda-mode-map
       :m [tab] #'origami-toggle-node
       :m [backtab] #'org-agenda-goto)
 
-(map! :after org-journal
-      :map org-journal-mode-map
-      :localleader
-      "c" 'nil
-      )
+;; (map! :after org-journal
+;;       :map org-journal-mode-map
+;;       :localleader
+;;       "c" 'nil
+;;       )
 
-(map!
- :after org-journal
- :map org-journal-mode-map
- :localleader
- (:prefix ("c" . "clock")
-  "c" #'org-clock-cancel
-  "l" #'+org/toggle-last-clock
-  "i" #'org-clock-in
-  "I" #'org-clock-in-last
-  "o" #'org-clock-out
-  "r" #'org-resolve-clocks
-  "R" #'org-clock-report
-  "t" #'org-evaluate-time-range
-  ))
+;; (map!
+;;  :after org-journal
+;;  :map org-journal-mode-map
+;;  :localleader
+;;  (:prefix ("c" . "clock")
+;;   "c" #'org-clock-cancel
+;;   "l" #'+org/toggle-last-clock
+;;   "i" #'org-clock-in
+;;   "I" #'org-clock-in-last
+;;   "o" #'org-clock-out
+;;   "r" #'org-resolve-clocks
+;;   "R" #'org-clock-report
+;;   "t" #'org-evaluate-time-range
+;;   ))
+
+;; Adding to org-capture list
+;; (map!
+;;  :after org
+;;  :map org-capture-mode-map
+;;  ;; :localleader
+;;  ;; (:prefix ("R" . "clock")
+;;   "c" #'org-clock-cancel
+;;   "l" #'+org/toggle-last-clock
+;;   "i" #'org-clock-in
+;;   "I" #'org-clock-in-last
+;;   "o" #'org-clock-out
+;;   "r" #'org-resolve-clocks
+;;   "R" #'org-clock-report
+;;   "t" #'org-evaluate-time-range
+;;   )
 
 ;; Could instead set doom-localleader-key to ","
 (map! :n "," (cmd! (push (cons t ?m) unread-command-events)
@@ -2090,21 +2215,135 @@ Don't need anymore. It is included in org +pretty
 ;; "j j" #'(lambda () (interactive) (call-interactively #'outline-up-heading) (call-interactively #'org/insert-item-below))
 ;; "j k" #'outline-up-heading)
 #+end_src
-* Unused functions
-#+begin_src elisp :tangle no
-  ;; This allows refile targets in the same buffer:
-  (defun +org/opened-buffer-files ()
-    "Return the list of files currently opened in emacs"
-    (delq nil
-          (mapcar (lambda (x)
-                    (if (and (buffer-file-name x)
-                             (string-match "\\.org$"
-                                           (buffer-file-name x)))
-                        (buffer-file-name x)))
-                  (buffer-list))))
+** Hydra keymaps
+#+begin_src elisp
+;; Personal window navigation
+(defhydra my/hydra/window-nav (:hint nil)
+  "
+          Split: _-_/_v_ert  _/_/_s_:horz
+         Delete: _c_lose  _o_nly
+  Switch Window: _h_:left  _j_:down  _k_:up  _l_:right  _U_:undo  _R_:redo
+    Move Window: _H_:left  _J_:down  _K_:up  _L_:right
+        Buffers: _p_revious  _n_ext  _b_:select  _f_ind-file  _p_roject
+         Resize: _y_:splitter left  _u_:splitter down  _i_:splitter up  _o_:splitter right
+         Scroll: _a_:up  _z_:down
+     Workspaces: _1_  _2_  _3_  _4_  _5_  _N_ew  _D_elete
+"
+  ("z" scroll-up-line)
+  ("a" scroll-down-line)
 
-  (setq org-refile-targets '((+org/opened-buffer-files :maxlevel . 9)))
+  ("h" windmove-left)
+  ("j" windmove-down)
+  ("k" windmove-up)
+  ("l" windmove-right)
+  ("U" winner-undo)
+  ("R" winner-redo)
+
+  ("H" +evil/window-move-left)
+  ("J" +evil/window-move-down)
+  ("K" +evil/window-move-up)
+  ("L" +evil/window-move-right)
+
+  ("p" previous-buffer)
+  ("n" next-buffer)
+  ("b" switch-to-buffer)
+  ("f" find-file)
+  ("p" projectile-switch-project)
+
+  ("s" split-window-below)
+  ("-" split-window-below)
+  ("v" split-window-right)
+  ("/" split-window-right)
+
+  ("c" delete-window)
+  ("o" delete-other-windows)
+
+  ("y" hydra-move-splitter-left)
+  ("u" hydra-move-splitter-down)
+  ("i" hydra-move-splitter-up)
+  ("o" hydra-move-splitter-right)
+
+  ("1" +workspace/switch-to-0)
+  ("2" +workspace/switch-to-1)
+  ("3" +workspace/switch-to-2)
+  ("4" +workspace/switch-to-3)
+  ("5" +workspace/switch-to-4)
+  ("D" +workspace/delete)
+  ("N" +workspace/new)
+
+  ("q" nil))
+
+;; Personal agenda view
+(defhydra my/hydra/agenda-nav (:hint nil
+                               :exit t)
+"
+Current focus : %`dm--my-focus
+"
+  ("A" org-agenda "Org Agenda")
+  ("q" nil "Quit")
+  ("1" my/org-focus-personal "Personal ":exit nil :column "Focus")
+  ("2" my/org-focus-vispero "Vispero ":exit nil :column "Focus")
+
+  ("t" (lambda()
+         (interactive)
+         (call-interactively (org-agenda nil "t")))
+   "Today" :column "Agenda Views")
+  ("w" (lambda()
+         (interactive)
+         (call-interactively (org-agenda nil "w")))
+   "Week" :column "Agenda Views")
+  ("b" (lambda()
+         (interactive)
+         (call-interactively (org-agenda nil "b")))
+   "2 Weeks" :column "Agenda Views")
+  ("m" (lambda()
+         (interactive)
+         (call-interactively (org-agenda nil "m")))
+   "Month" :column "Agenda Views")
+  ("y" (lambda()
+         (interactive)
+         (call-interactively (org-agenda nil "y")))
+   "Year" :column "Agenda Views")
+
+  ("W" (lambda()
+         (interactive)
+         (call-interactively (org-agenda nil "pw")))
+   "Planning week" :column "Planning")
+  ("M" (lambda()
+         (interactive)
+         (call-interactively (org-agenda nil "pm")))
+   "Planning month" :column "Planning")
+
+  ("d" my/org-agenda-view-all-done "All 'DONE'" :column "Misc")
+  ("n" my/org-agenda-view-all-new-tags "All 'new'" :column "Misc")
+  ("o" (lambda()
+         (interactive)
+         (call-interactively (org-open-file +org-capture-todo-file)))
+   "Open agenda file" :column "Misc")
+)
 #+end_src
+*** Example with automatic columns
+#+begin_src elisp :tangle no
+(defhydra my/hydra/agenda-nav (:hint nil
+                               :exit t)
+"
+Testing something %`dm--my-focus
+"
+  ("1" my/org-focus-personal "Focus personal" :exit nil :column "Vertical")
+  ("2" my/org-focus-vispero "Focus Vispero" :exit nil :column "Vertical")
+  ;; ("3" (cmd! (org-agenda nil "t")))
+  ("3" (lambda()
+         (interactive)
+         (call-interactively (org-agenda nil "t")))
+   "Today" :column "Test")
+
+  ("4" my/org-focus-vispero "Focus Vispero" :exit nil :column "Horizontal")
+  ("5" my/org-focus-vispero "Focus Vispero" :exit nil :column "Test")
+  ("6" my/org-focus-vispero "Focus Vispero" :exit nil)
+
+  ("q" nil))
+#+end_src
+* Unused functions
 ** Checkbox attempts
 #+begin_src elisp :tangle no
 ;;Reset checkboxes from Rainer
