@@ -1157,6 +1157,62 @@ capture was not aborted."
    (my/org-roam-filter-by-tag "project")
    :templates org-roam-capture-templates))
 
+(defun my/org-roam-find-people ()
+  (interactive)
+  ;; Select a project file to open, creating it if necessary
+  (org-roam-node-find
+   nil
+   nil
+   (my/org-roam-filter-by-tag "people")
+   :templates org-roam-capture-templates))
+
+(defun my/org-roam-help-people ()
+  (interactive)
+  ;; Select a project file to open, creating it if necessary
+
+  (let ((head
+        (with-temp-buffer
+        (cond ((string-equal dm--my-focus "vispero") (insert-file-contents dm--org-roam-vispero-people-template))
+                (t (insert-file-contents dm--org-roam-vispero-people-template)))
+                (buffer-string)))
+        (file-name
+            (cond ((string-equal dm--my-focus "vispero") "vispero/${slug}.org")
+                    (t "${slug}.org"))))
+    ;; @TODO DJM clean up template system, add custom templates
+  ;;(org-roam-node-find
+   (org-roam-capture
+
+   nil
+   nil
+   :filter-fn (my/org-roam-filter-by-tag "project")
+   ;; :templates org-roam-capture-templates
+   :templates
+
+          ;; (("e" "New Entry" entry "* %?"
+          ;;   :if-new (file+head "${slug}.org" "#+TITLE: ${title}\n")
+          ;;   :unnarrowed t))
+   `(("h" "Helping" plain ""
+      :clock-in t
+      :unnarrowed t
+        :target (file+head+olp ,file-name ,head ("Journal"))))
+                        )))
+        ;; :target (file+olp "${slug}.org" ("Journal"))))
+        ;; :target (olp ("Journal"))))
+        ;; :if-new (file+head+olp "${slug}.org" "" ("Journal"))))
+                ;; :target (file+head+olp "${slug}.org" ,head ("Journal"))))
+                ;; :target (olp ("Journal"))))
+                ;; :target (file+head+olp ,file-name ,head ("Journal"))))
+
+(defun my/org-roam-capture-projects ()
+  (interactive)
+  (org-roam-capture
+   nil
+   ;; nil
+   "!t"
+   :filter-fn (my/org-roam-filter-by-tag "project")
+   ;; :templates org-roam-capture-templates
+   ))
+
   ;; (org-roam-node-find
   ;;  nil
   ;;  nil
