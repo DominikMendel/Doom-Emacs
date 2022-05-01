@@ -2134,6 +2134,11 @@ Don't need anymore. It is included in org +pretty
     (org-up-element)
     (org-forward-element))
 
+;; Code completion to use TAB
+(map! :after company
+      :map company-active-map
+      [tab] #'company-complete-selection)
+
 (map! :leader
       "+" #'hydra/text-zoom/body
       ;; "W" #'+hydra/window-nav/body
