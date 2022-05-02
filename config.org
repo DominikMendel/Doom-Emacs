@@ -583,9 +583,13 @@ Refer to `org-agenda-prefix-format' for more information."
          :face error
          :deadline past
          :order 3)
-        (:name "Ongoing"
-         :scheduled past
+        (:discard (:not (:scheduled past)))
+        (;; :name "Ongoing"
+         ;; :scheduled past
+         :auto-parent t
          :order 4)
+        ;; (:auto-parent t
+        ;;  :order 5)
         (:discard (:anything t))))
 
 (setq my-super-group-alltodo-today
@@ -593,6 +597,7 @@ Refer to `org-agenda-prefix-format' for more information."
         ;; (:auto-category t)
         ;; You will see scheduled items from the agenda view, so discard any extras.
         (:discard (:scheduled today))
+        (:discard (:todo "SOMEDAY"))
         (:name "Important"
          :priority "A"
          :order 1)
@@ -614,9 +619,17 @@ Refer to `org-agenda-prefix-format' for more information."
         (:name "Blocked"
          :todo "BLOCKED"
          :order 7)
+        (:discard (:not (:todo "TODO")))
+        (:auto-parent t
+         :order 8)
         (:discard (:anything t))))
 
-(setq my-super-group-alltodo-week
+(setq my-super-group-agenda-overview
+      '(
+        (:auto-parent t)
+        ))
+
+(setq my-super-group-alltodo-overview
       '(
         ;; (:auto-category t)
         ;; You will see scheduled items from the agenda view, so discard any extras.
@@ -639,9 +652,17 @@ Refer to `org-agenda-prefix-format' for more information."
         (:name "Next Tasks"
          :todo "NEXT"
          :order 5)
-        (:discard (:not (:todo "TODO")))
-        (:auto-category t
+        (:name "Someday"
+         :todo "SOMEDAY"
+         :order 7)
+        ;; (:discard (:not (:todo "TODO")))
+        (:discard (:not (:todo t)))
+        (:discard (:todo "GOAL"))
+        (
+         ;; :auto-category t
+         :auto-parent t
          :order 6)
+
         ;; (:order-multi (6 (:todo "TODO") (:auto-category t)))
         ;; (:todo "TODO"
         ;;  :order 6)
@@ -694,7 +715,7 @@ Refer to `org-agenda-prefix-format' for more information."
          :order 5)
         (:discard (:anything t))))
 
-(setq my-super-group-alltodo-week-done
+(setq my-super-group-alltodo-overview-done
       '((:name "Remove new tag and assign TODO states and priorities"
          :log closed)
          ;; :todo "DONE")
@@ -888,57 +909,61 @@ Refer to `org-agenda-prefix-format' for more information."
           ((agenda "" ((org-agenda-overriding-header "Week view")
                         (org-agenda-span 'week)
                         (org-agenda-start-on-weekday 1)
+                        (org-super-agenda-groups my-super-group-agenda-overview)
                         (org-agenda-time-grid '(nil (800 1000 1200 1400 1600 1800 2000) "" "----------------"))
                         ;; (org-agenda-prefix-format '((agenda . " %i %?-12t%-6e% s")))
                         )
                     )
             (alltodo "" ((org-agenda-overriding-header "")
-                         (org-super-agenda-groups my-super-group-alltodo-week)))))
+                         (org-super-agenda-groups my-super-group-alltodo-overview)))))
 
           ;; TODO look at and update super-agenda-groups
           ("b" "Bi-Week Overview"
           ((agenda "" ((org-agenda-overriding-header "Bi-Weekly view")
                         (org-agenda-span 14)
                         (org-agenda-start-on-weekday 1)
+                        (org-super-agenda-groups my-super-group-agenda-overview)
                         (org-agenda-time-grid '(nil (800 1000 1200 1400 1600 1800 2000) "" "----------------"))
                         ;; (org-agenda-prefix-format '((agenda . " %i %?-12t%-6e% s")))
                         )
                     )
             (alltodo "" ((org-agenda-overriding-header "")
-                         (org-super-agenda-groups my-super-group-alltodo-week)))))
+                         (org-super-agenda-groups my-super-group-alltodo-overview)))))
 
           ;; TODO look at and update super-agenda-groups
           ("m" "Month Overview"
           ((agenda "" ((org-agenda-overriding-header "Month view")
                         (org-agenda-span 'month)
                         (org-agenda-start-on-weekday 1)
+                        (org-super-agenda-groups my-super-group-agenda-overview)
                         (org-agenda-time-grid '(nil (800 1000 1200 1400 1600 1800 2000) "" "----------------"))
                         ;; (org-agenda-prefix-format '((agenda . " %i %?-12t%-6e% s")))
                         )
                     )
             (alltodo "" ((org-agenda-overriding-header "")
-                         (org-super-agenda-groups my-super-group-alltodo-week)))))
+                         (org-super-agenda-groups my-super-group-alltodo-overview)))))
 
           ;; TODO look at and update super-agenda-groups
           ("y" "Year Overview"
           ((agenda "" ((org-agenda-overriding-header "Year view")
                         (org-agenda-span 'year)
                         (org-agenda-start-on-weekday 1)
+                        (org-super-agenda-groups my-super-group-agenda-overview)
                         (org-agenda-time-grid '(nil (800 1000 1200 1400 1600 1800 2000) "" "----------------"))
                         ;; (org-agenda-prefix-format '((agenda . " %i %?-12t%-6e% s")))
                         )
                     )
             (alltodo "" ((org-agenda-overriding-header "")
-                         (org-super-agenda-groups my-super-group-alltodo-week)))))
+                         (org-super-agenda-groups my-super-group-alltodo-overview)))))
 
 
-          ;; ("W" . "Weekly Review Helper")
-          ;; ("Wn" "New Tasks"
-          ;;  ((tags "new" ((org-agenda-overriding-header "Remove new tag and assign TODO states and priorities")))))
-          ;; ("Wd" "Done Tasks"
-          ;;  ((todo "DONE|CANCELLED|ABANDONED|ANSWERED|ACHIEVED|MISSED" ((org-agenda-overriding-header "Archive all DONE items")
-          ;;                ;; (org-super-agenda-groups my-super-group-alltodo-week-done)
-          ;;                ))))
+          ("W" . "Weekly Review Helper")
+          ("Wn" "New Tasks"
+           ((tags "new" ((org-agenda-overriding-header "Remove new tag and assign TODO states and priorities")))))
+          ("Wd" "Done Tasks"
+           ((todo "DONE|CANCELLED|ABANDONED|ANSWERED|ACHIEVED|MISSED" ((org-agenda-overriding-header "Archive all DONE items")
+                         ;; (org-super-agenda-groups my-super-group-alltodo-overview-done)
+                         ))))
 
           ;; From m-dwyer
           ;; ("W" "Weekly review TEST"
