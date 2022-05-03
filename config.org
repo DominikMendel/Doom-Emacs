@@ -304,6 +304,12 @@ the beginning of the list."
           ;; TODO add meetings section with meetings by ID and one for a "new" meeting not specified
           ;; ("m" "Meetings")
 
+          ;; TODO Try using org-clock-current-task for file+olp+datetree
+          ("c" "Clock entry" plain (clock)
+           ""
+           :unnarrowed t
+           )
+
           ("t" "General ToDo" entry (file+headline +org-capture-todo-file "Tasks")
            "* TODO %^{What ToDo?}%? :new:")
 
@@ -521,7 +527,8 @@ Refer to `org-agenda-prefix-format' for more information."
       org-agenda-include-deadlines t
       org-agenda-block-separator nil
       org-agenda-tags-column 100 ;; from testing this seems to be a good value
-      org-agenda-compact-blocks t)
+      org-agenda-compact-blocks t
+      org-agenda-start-day nil)
 
 (defun my-agenda-skip-work ()
   "Skip tasks that are tagged as work related."
@@ -870,7 +877,6 @@ Refer to `org-agenda-prefix-format' for more information."
           ("t" "Today view"
            ((agenda "" ((org-agenda-overriding-header "")
                         (org-agenda-span 'day)
-                        (org-agenda-start-day nil)
                         (org-agenda-time-grid '((daily today) (800 1000 1200 1400 1600 1800 2000) "" "----------------"))
                         (org-super-agenda-groups my-super-group-agenda-today)
                         ))
@@ -881,8 +887,6 @@ Refer to `org-agenda-prefix-format' for more information."
           ((tags-todo "goal" ((org-agenda-overriding-header "Goals")))
            (agenda "" ((org-agenda-overriding-header "Month Planner")
                        (org-agenda-span 14)
-                        ;; (org-agenda-start-day "01")
-                        (org-agenda-start-day nil)
                         (org-super-agenda-groups my-super-group-agenda-planning)
                         ;; (org-agenda-time-grid '(nil (800 1000 1200 1400 1600 1800 2000) "" "----------------"))
                         ;; (org-agenda-prefix-format '((agenda . " %i %?-12t%-6e% s")))
@@ -895,8 +899,6 @@ Refer to `org-agenda-prefix-format' for more information."
           ((tags-todo "goal" ((org-agenda-overriding-header "Goals")))
            (agenda "" ((org-agenda-overriding-header "Month Planner")
                        (org-agenda-span 'month)
-                        ;; (org-agenda-start-day "01")
-                        (org-agenda-start-day nil)
                         (org-super-agenda-groups my-super-group-agenda-planning)
                         ;; (org-agenda-time-grid '(nil (800 1000 1200 1400 1600 1800 2000) "" "----------------"))
                         ;; (org-agenda-prefix-format '((agenda . " %i %?-12t%-6e% s")))
@@ -908,7 +910,7 @@ Refer to `org-agenda-prefix-format' for more information."
           ("w" "Week Overview"
           ((agenda "" ((org-agenda-overriding-header "Week view")
                         (org-agenda-span 'week)
-                        (org-agenda-start-on-weekday 1)
+                        ;; (org-agenda-start-on-weekday 1)
                         (org-super-agenda-groups my-super-group-agenda-overview)
                         (org-agenda-time-grid '(nil (800 1000 1200 1400 1600 1800 2000) "" "----------------"))
                         ;; (org-agenda-prefix-format '((agenda . " %i %?-12t%-6e% s")))
@@ -921,7 +923,7 @@ Refer to `org-agenda-prefix-format' for more information."
           ("b" "Bi-Week Overview"
           ((agenda "" ((org-agenda-overriding-header "Bi-Weekly view")
                         (org-agenda-span 14)
-                        (org-agenda-start-on-weekday 1)
+                        ;; (org-agenda-start-on-weekday 1)
                         (org-super-agenda-groups my-super-group-agenda-overview)
                         (org-agenda-time-grid '(nil (800 1000 1200 1400 1600 1800 2000) "" "----------------"))
                         ;; (org-agenda-prefix-format '((agenda . " %i %?-12t%-6e% s")))
@@ -934,7 +936,7 @@ Refer to `org-agenda-prefix-format' for more information."
           ("m" "Month Overview"
           ((agenda "" ((org-agenda-overriding-header "Month view")
                         (org-agenda-span 'month)
-                        (org-agenda-start-on-weekday 1)
+                        ;; (org-agenda-start-on-weekday 1)
                         (org-super-agenda-groups my-super-group-agenda-overview)
                         (org-agenda-time-grid '(nil (800 1000 1200 1400 1600 1800 2000) "" "----------------"))
                         ;; (org-agenda-prefix-format '((agenda . " %i %?-12t%-6e% s")))
@@ -947,7 +949,7 @@ Refer to `org-agenda-prefix-format' for more information."
           ("y" "Year Overview"
           ((agenda "" ((org-agenda-overriding-header "Year view")
                         (org-agenda-span 'year)
-                        (org-agenda-start-on-weekday 1)
+                        ;; (org-agenda-start-on-weekday 1)
                         (org-super-agenda-groups my-super-group-agenda-overview)
                         (org-agenda-time-grid '(nil (800 1000 1200 1400 1600 1800 2000) "" "----------------"))
                         ;; (org-agenda-prefix-format '((agenda . " %i %?-12t%-6e% s")))
@@ -1201,15 +1203,15 @@ capture was not aborted."
                 (t (insert-file-contents dm--org-roam-vispero-people-template)))
                 (buffer-string)))
         (file-name
-            (cond ((string-equal dm--my-focus "vispero") "vispero/${slug}.org")
-                    (t "${slug}.org"))))
+            (cond ((string-equal dm--my-focus "vispero") (expand-file-name "${slug}.org" dm--org-roam-vispero-dir))
+                    (t (expand-file-name "${slug}.org" org-roam-directory)))))
     ;; @TODO DJM clean up template system, add custom templates
   ;;(org-roam-node-find
    (org-roam-capture
 
    nil
    nil
-   :filter-fn (my/org-roam-filter-by-tag "project")
+   :filter-fn (my/org-roam-filter-by-tag "people")
    ;; :templates org-roam-capture-templates
    :templates
 
@@ -1219,7 +1221,7 @@ capture was not aborted."
    `(("h" "Helping" plain ""
       :clock-in t
       :unnarrowed t
-        :target (file+head+olp ,file-name ,head ("Journal"))))
+        :target (file+head+olp ,file-name ,head ("Helping"))))
                         )))
         ;; :target (file+olp "${slug}.org" ("Journal"))))
         ;; :target (olp ("Journal"))))
