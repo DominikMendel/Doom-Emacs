@@ -1,5 +1,6 @@
 #+TITLE: ${title}
-- tags :: [[roam:Vispero People]]  %?
+#+filetags: :people:%(s-upper-camel-case (string-replace "_" " " "${slug}")):
+- tags :: [[roam:Vispero People]]
 * Time off
 | Start | End | Total days | Description |
 |-------+-----+------------+-------------|
