@@ -877,6 +877,7 @@ Refer to `org-agenda-prefix-format' for more information."
           ("t" "Today view"
            ((agenda "" ((org-agenda-overriding-header "")
                         (org-agenda-span 'day)
+                        (org-agenda-start-on-weekday nil)
                         (org-agenda-time-grid '((daily today) (800 1000 1200 1400 1600 1800 2000) "" "----------------"))
                         (org-super-agenda-groups my-super-group-agenda-today)
                         ))
