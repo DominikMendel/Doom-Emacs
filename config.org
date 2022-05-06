@@ -528,7 +528,7 @@ Refer to `org-agenda-prefix-format' for more information."
       org-agenda-block-separator nil
       org-agenda-tags-column 100 ;; from testing this seems to be a good value
       org-agenda-compact-blocks t
-      org-agenda-start-day nil)
+      )
 
 (defun my-agenda-skip-work ()
   "Skip tasks that are tagged as work related."
@@ -877,6 +877,7 @@ Refer to `org-agenda-prefix-format' for more information."
           ("t" "Today view"
            ((agenda "" ((org-agenda-overriding-header "")
                         (org-agenda-span 'day)
+                        (org-agenda-start-day nil)
                         (org-agenda-start-on-weekday nil)
                         (org-agenda-time-grid '((daily today) (800 1000 1200 1400 1600 1800 2000) "" "----------------"))
                         (org-super-agenda-groups my-super-group-agenda-today)
@@ -912,6 +913,8 @@ Refer to `org-agenda-prefix-format' for more information."
           ((agenda "" ((org-agenda-overriding-header "Week view")
                         (org-agenda-span 'week)
                         ;; (org-agenda-start-on-weekday 1)
+                        (org-agenda-start-day nil)
+                        (org-agenda-start-on-weekday nil)
                         (org-super-agenda-groups my-super-group-agenda-overview)
                         (org-agenda-time-grid '(nil (800 1000 1200 1400 1600 1800 2000) "" "----------------"))
                         ;; (org-agenda-prefix-format '((agenda . " %i %?-12t%-6e% s")))
@@ -937,6 +940,8 @@ Refer to `org-agenda-prefix-format' for more information."
           ("m" "Month Overview"
           ((agenda "" ((org-agenda-overriding-header "Month view")
                         (org-agenda-span 'month)
+                        (org-agenda-start-day nil)
+                        (org-agenda-start-on-weekday nil)
                         ;; (org-agenda-start-on-weekday 1)
                         (org-super-agenda-groups my-super-group-agenda-overview)
                         (org-agenda-time-grid '(nil (800 1000 1200 1400 1600 1800 2000) "" "----------------"))
