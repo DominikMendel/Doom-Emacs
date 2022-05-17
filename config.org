@@ -154,6 +154,7 @@ the beginning of the list."
 ** General org
 #+begin_src elisp
 ;; Marks a ToDo entry as done but makes the "LAST_REPEAT" the day of the schedule
+;; This currenlty ONLY works with SCHEDULED items and not DEADLINES
 (defun willdo-naggins--mark-done ()
   (interactive)
   (let* ((sched-ts (org-timestamp-from-string
@@ -173,6 +174,47 @@ the beginning of the list."
     ;;                (format-time-string
     ;;                 (org-time-stamp-format t t)
     ;;                 thetime))
+    ))
+
+;; This doesn't work from org-agenda views
+(defun my/mark-done-at-scheduled-time ()
+  (interactive)
+  (let* ((sched-ts (org-timestamp-from-string
+                    (org-entry-get nil "SCHEDULED")))
+         ;; (dm--ignore-automatic-dailies-logging t)
+         (org-refile-keep t) ;; Set this to nil to delete the original!
+         (org-id-link-to-org-use-id t)
+         (org-after-refile-insert-hook #'save-buffer)
+         (thetime (org-timestamp-to-time sched-ts)))
+
+    (remove-hook 'org-after-todo-state-change-hook #'my/org-roam-copy-to-today-wrapper)
+    ;trick org-store-note into thinking the task was done when scheduled
+    (define-advice org-add-log-setup (:after (&rest _) trick-store-note)
+      (setq org-log-note-effective-time thetime))
+    (org-todo 'done)
+    ;; (org-agenda-todo 'done) ;; This doesn't work
+    (advice-remove 'org-add-log-setup #'org-add-log-setup@trick-store-note)
+    ;set LAST_REPEAT to reflect the latest scheduling of task
+    (org-add-planning-info 'closed (format-time-string
+                    (org-time-stamp-format t t)
+                    thetime))
+    (save-window-excursion
+      ;; (org-agenda-switch-to)
+      (call-interactively 'org-store-link)
+      (org-roam-dailies--capture thetime nil "!D"))
+
+    (add-hook 'org-after-todo-state-change-hook #'my/org-roam-copy-to-today-wrapper)
+
+  ;; (let ((org-refile-keep t) ;; Set this to nil to delete the original!
+  ;;       (org-id-link-to-org-use-id t)
+  ;;       (org-after-refile-insert-hook #'save-buffer)
+  ;;       ;; (dm--ignore-automatic-dailies-logging t)
+  ;;       )
+  ;;   (save-window-excursion
+  ;;     ;; (org-agenda-switch-to)
+  ;;     (call-interactively 'org-store-link)
+  ;;     (org-roam-dailies--capture thetime nil "!D"))
+  ;;   )
     ))
 
 (after! (:and org org-roam)
@@ -452,6 +494,11 @@ Added on %U - Last reviewed on %U
 ;; (after! org-agenda
 ;;   (add-to-list 'org-agenda-bulk-custom-functions
 ;;                '(?a org-agenda-archive-to-archive-sibling)))
+
+;; This doesn't work with the current function
+;; (after! org-agenda
+;;   (add-to-list 'org-agenda-bulk-custom-functions
+;;                '(?D my/mark-done-at-scheduled-time)))
 
 ;; Doing this to clean up my org-agenda to view since ALL of my org-agenda-files
 ;; are tagged with "project", so it is redundant.
@@ -1337,30 +1384,48 @@ capture was not aborted."
     ;; (save-window-excursion
     ;;   (call-interactively 'org-id-copy)
     ;;   (org-roam-dailies-capture-today nil "!D"))))
+
+    ;; (message "Should ignore = " dm--ignore-automatic-dailies-logging)
+    ;; (when (not dm--ignore-automatic-dailies-logging)
+    ;;     (save-window-excursion
+    ;;       (message "Going to call daily capture")
+    ;;     ;; (org-agenda-switch-to)
+    ;;             (call-interactively 'org-store-link)
+    ;;             (org-roam-dailies-capture-today nil "!D")))
+
     (save-window-excursion
       ;; (org-agenda-switch-to)
       (call-interactively 'org-store-link)
-      (org-roam-dailies-capture-today nil "!D"))))
+      (org-roam-dailies-capture-today nil "!D"))
+    ))
 
 (defun my/org-roam-capture-plus-store-link()
   (interactive)
   (call-interactively 'org-store-link)
   (org-roam-dailies-capture-today nil "!D"))
 
+;; (defvar dm--ignore-automatic-dailies-logging nil "If this is set to 't' then the automatic logging done in org-roam dailies will be ignored.")
+
 (after! (:and org org-roam)
-    (add-to-list 'org-after-todo-state-change-hook
+    ;; (add-to-list 'org-after-todo-state-change-hook
+    (add-hook 'org-after-todo-state-change-hook #'my/org-roam-copy-to-today-wrapper))
                  ;; (lambda (type)
                  ;;   (when (eq type 'done)
-                (lambda ()
-                ;; (when (equal org-state "DONE")
-                (when (or (equal org-state "DONE") (equal org-state "COMPLETED"))
-                ;; (when (equal (org-element-property :todo-type 'done))
-                ;; (when (equal (:todo-type 'done))
-                ;; (when (org-element-map
-                ;;           (org-element-at-point 'headline)
-                ;;           'headline)
-                    ;; (my/org-roam-capture-plus-store-link)))))
-                    (my/org-roam-copy-todo-to-today)))))
+                ;; (lambda ()
+                ;; ;; (when (equal org-state "DONE")
+                ;; (when (or (equal org-state "DONE") (equal org-state "COMPLETED"))
+                ;; ;; (when (and (not dm--ignore-automatic-dailies-logging) (or (equal org-state "DONE") (equal org-state "COMPLETED")))
+                ;; ;; (when (equal (org-element-property :todo-type 'done))
+                ;; ;; (when (equal (:todo-type 'done))
+                ;; ;; (when (org-element-map
+                ;; ;;           (org-element-at-point 'headline)
+                ;; ;;           'headline)
+                ;;     ;; (my/org-roam-capture-plus-store-link)))))
+                ;;     (my/org-roam-copy-todo-to-today)))))
+
+(defun my/org-roam-copy-to-today-wrapper ()
+  (when (or (equal org-state "DONE") (equal org-state "COMPLETED"))
+                    (my/org-roam-copy-todo-to-today)))
 
 (defun my/org-roam-capture-clock-in()
   (interactive)
