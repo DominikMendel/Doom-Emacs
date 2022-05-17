@@ -959,7 +959,6 @@ Refer to `org-agenda-prefix-format' for more information."
           ("w" "Week Overview"
           ((agenda "" ((org-agenda-overriding-header "Week view")
                         (org-agenda-span 'week)
-                        ;; (org-agenda-start-on-weekday 1)
                         (org-agenda-start-day nil)
                         (org-agenda-start-on-weekday nil)
                         (org-super-agenda-groups my-super-group-agenda-overview)
@@ -974,7 +973,6 @@ Refer to `org-agenda-prefix-format' for more information."
           ("b" "Bi-Week Overview"
           ((agenda "" ((org-agenda-overriding-header "Bi-Weekly view")
                         (org-agenda-span 14)
-                        ;; (org-agenda-start-on-weekday 1)
                         (org-super-agenda-groups my-super-group-agenda-overview)
                         (org-agenda-time-grid '(nil (800 1000 1200 1400 1600 1800 2000) "" "----------------"))
                         ;; (org-agenda-prefix-format '((agenda . " %i %?-12t%-6e% s")))
@@ -989,7 +987,6 @@ Refer to `org-agenda-prefix-format' for more information."
                         (org-agenda-span 'month)
                         (org-agenda-start-day nil)
                         (org-agenda-start-on-weekday nil)
-                        ;; (org-agenda-start-on-weekday 1)
                         (org-super-agenda-groups my-super-group-agenda-overview)
                         (org-agenda-time-grid '(nil (800 1000 1200 1400 1600 1800 2000) "" "----------------"))
                         ;; (org-agenda-prefix-format '((agenda . " %i %?-12t%-6e% s")))
@@ -1002,7 +999,6 @@ Refer to `org-agenda-prefix-format' for more information."
           ("y" "Year Overview"
           ((agenda "" ((org-agenda-overriding-header "Year view")
                         (org-agenda-span 'year)
-                        ;; (org-agenda-start-on-weekday 1)
                         (org-super-agenda-groups my-super-group-agenda-overview)
                         (org-agenda-time-grid '(nil (800 1000 1200 1400 1600 1800 2000) "" "----------------"))
                         ;; (org-agenda-prefix-format '((agenda . " %i %?-12t%-6e% s")))
