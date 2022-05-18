@@ -45,7 +45,10 @@ Just some personal information and my doom-theme.
       ;; org-roam-directory "~/Dropbox/org/roam"
       +org-roam-open-buffer-on-find-file nil
       +snippets-dir "~/Dropbox/snippets"
-      display-line-numbers-type 'visual)
+      display-line-numbers-type 'visual
+      scroll-margin 8
+      vertico-scroll-margin 4
+      )
 
 (setq! org-journal-time-format "")
 
