@@ -2355,7 +2355,7 @@ Don't need anymore. It is included in org +pretty
 (map! :leader "l f" 'harpoon-toggle-file)
 (map! :n "C-s" 'harpoon-add-file)
 ;; (map! :n "C-SPC" 'harpoon-toggle-quick-menu)
-(map! :n "C-SPC" 'harpoon-toggle-file)
+(map! :n "C-SPC" 'harpoon-quick-menu-hydra)
 (map! :n "M-1" 'harpoon-go-to-1)
 (map! :n "M-2" 'harpoon-go-to-2)
 (map! :n "M-3" 'harpoon-go-to-3)
