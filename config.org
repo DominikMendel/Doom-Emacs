@@ -55,6 +55,9 @@ Just some personal information and my doom-theme.
 ;; PDF auto-refresh after changes
 (add-hook 'pdf-view-mode-hook (lambda () (auto-revert-mode 1)))
 
+;; Auto recenter screen after jumping
+(add-hook 'imenu-after-jump-hook #'recenter)
+
 (after! org-journal
   (setq! org-journal-carryover-items "TODO=\"TODO\"|TODO=\"INPROGRESS\"|TODO=\"WAITING\"|TODO=\"BLOCKED\"|TODO=\"QUESTION\""))
 #+end_src
