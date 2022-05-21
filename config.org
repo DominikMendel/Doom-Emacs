@@ -188,9 +188,9 @@ the beginning of the list."
          (org-refile-keep t) ;; Set this to nil to delete the original!
          (org-id-link-to-org-use-id t)
          (org-after-refile-insert-hook #'save-buffer)
+         (org-after-todo-state-change-hook (remq #'my/org-roam-copy-to-today-wrapper org-after-todo-state-change-hook))
          (thetime (org-timestamp-to-time sched-ts)))
 
-    (remove-hook 'org-after-todo-state-change-hook #'my/org-roam-copy-to-today-wrapper)
     ;trick org-store-note into thinking the task was done when scheduled
     (define-advice org-add-log-setup (:after (&rest _) trick-store-note)
       (setq org-log-note-effective-time thetime))
@@ -205,8 +205,7 @@ the beginning of the list."
       ;; (org-agenda-switch-to)
       (call-interactively 'org-store-link)
       (org-roam-dailies--capture thetime nil "!D"))
-
-    (add-hook 'org-after-todo-state-change-hook #'my/org-roam-copy-to-today-wrapper)
+    ;; (add-hook 'org-after-todo-state-change-hook #'my/org-roam-copy-to-today-wrapper)
 
   ;; (let ((org-refile-keep t) ;; Set this to nil to delete the original!
   ;;       (org-id-link-to-org-use-id t)
