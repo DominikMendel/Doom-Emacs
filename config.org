@@ -57,6 +57,9 @@ Just some personal information and my doom-theme.
 
 ;; Auto recenter screen after jumping
 (add-hook 'imenu-after-jump-hook #'recenter)
+(add-hook 'evil-post-jump-hook #'recenter)
+(add-hook 'better-jumper-post-jump-hook #'recenter)
+(add-hook 'evil-jumps-post-jump-hook #'recenter)
 
 (after! org-journal
   (setq! org-journal-carryover-items "TODO=\"TODO\"|TODO=\"INPROGRESS\"|TODO=\"WAITING\"|TODO=\"BLOCKED\"|TODO=\"QUESTION\""))
@@ -85,7 +88,7 @@ This function is used in the ":match" parameter for an Org-clocktable. It will p
 ** Create linkable UUID
 - Credit to Rainer König
 I use this function all the time to create a UUID link to a header file so I can keep track of the link even after I archive it.
-This is epsecially useful in my workflow where I would copy a task from my agenda to my journal to show that I am working on said task for the day. Later when I finish that task and archive it I still have a valid link.
+This is especially useful in my workflow where I would copy a task from my agenda to my journal to show that I am working on said task for the day. Later when I finish that task and archive it I still have a valid link.
 #+begin_src elisp
 (defun my/copy-idlink-to-clipboard() "Copy an ID link with the
 headline to killring, if no ID is there then create a new unique
