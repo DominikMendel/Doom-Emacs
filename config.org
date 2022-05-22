@@ -2246,6 +2246,8 @@ Don't need anymore. It is included in org +pretty
       ;; "W" #'+hydra/window-nav/body
       "W" #'my/hydra/window-nav/body
       "A" #'my/hydra/agenda-nav/body
+      "X" #'my/hydra/general-capture/body
+      "R" #'my/hydra/roam/body
       "w /" #'evil-window-vsplit
       "w -" #'evil-window-split
       "RET" #'org-insert-subheading
@@ -2268,24 +2270,24 @@ Don't need anymore. It is included in org +pretty
       )
 
 ;; Custom org-capture
-(map! :leader
-      :desc "Capture" "X" nil
-      ;;:desc "test2" "X t" #'(lambda () (interactive) (call-interactively #'org-capture nil "t"))
-      ;; :desc "test3" "X T" #'org-capture nil "t"
-      :desc "ToDo" "X t" (cmd! (org-capture nil "t"))
-      :desc "Scheduled ToDo" "X T" (cmd! (org-capture nil "T"))
-      :desc "New Idea" "X i" (cmd! (org-capture nil "i"))
-      :desc "Org Capture" "X X" #'org-capture
-      :desc "Roam Capture" "X R" #'org-roam-capture
-      ;; Journal/Dailies
-      :desc "Goto Dailies" "X d" #'my/org-roam-dailies-goto-date
-      :desc "Capture Dailies" "X D" #'org-roam-dailies-capture-date
-      :desc "Journal" "X j" nil
-      :desc "Journal Entry" "X j j" (cmd! (org-roam-dailies-capture-today nil "jj"))
-      :desc "Journal ToDo" "X j t" (cmd! (org-roam-dailies-capture-today nil "jt"))
-      ;; :desc "Journal Link" "X j l" (cmd! (org-roam-dailies-capture-today nil "jl"))
-      :desc "Journal Link" "X j l" #'(lambda () (interactive) (call-interactively 'org-store-link) (org-roam-dailies-capture-today nil "jl"))
-      )
+;; (map! :leader
+;;       :desc "Capture" "X" nil
+;;       ;;:desc "test2" "X t" #'(lambda () (interactive) (call-interactively #'org-capture nil "t"))
+;;       ;; :desc "test3" "X T" #'org-capture nil "t"
+;;       :desc "ToDo" "X t" (cmd! (org-capture nil "t"))
+;;       :desc "Scheduled ToDo" "X T" (cmd! (org-capture nil "T"))
+;;       :desc "New Idea" "X i" (cmd! (org-capture nil "i"))
+;;       :desc "Org Capture" "X X" #'org-capture
+;;       :desc "Roam Capture" "X R" #'org-roam-capture
+;;       ;; Journal/Dailies
+;;       :desc "Goto Dailies" "X d" #'my/org-roam-dailies-goto-date
+;;       :desc "Capture Dailies" "X D" #'org-roam-dailies-capture-date
+;;       :desc "Journal" "X j" nil
+;;       :desc "Journal Entry" "X j j" (cmd! (org-roam-dailies-capture-today nil "jj"))
+;;       :desc "Journal ToDo" "X j t" (cmd! (org-roam-dailies-capture-today nil "jt"))
+;;       ;; :desc "Journal Link" "X j l" (cmd! (org-roam-dailies-capture-today nil "jl"))
+;;       :desc "Journal Link" "X j l" #'(lambda () (interactive) (call-interactively 'org-store-link) (org-roam-dailies-capture-today nil "jl"))
+;;       )
 
 ;; Custom org-agenda
 ;; (map!
@@ -2381,8 +2383,21 @@ Don't need anymore. It is included in org +pretty
 ;; "j k" #'outline-up-heading)
 #+end_src
 ** Hydra keymaps
+*** Stack functions
 #+begin_src elisp
-;; Personal window navigation
+(defvar hydra-stack nil)
+
+(defun hydra-push (expr)
+  (push `(lambda () ,expr) hydra-stack))
+
+(defun hydra-pop ()
+  (interactive)
+  (let ((x (pop hydra-stack)))
+    (when x
+      (funcall x))))
+#+end_src
+*** Window navigation
+#+begin_src elisp
 (defhydra my/hydra/window-nav (:hint nil)
   "
           Split: _-_/_v_ert  _/_/_s_:horz
@@ -2437,8 +2452,9 @@ Don't need anymore. It is included in org +pretty
   ("N" +workspace/new)
 
   ("q" nil))
-
-;; Personal agenda view
+#+end_src
+*** Agenda
+#+begin_src elisp
 (defhydra my/hydra/agenda-nav (:hint nil
                                :exit t)
 "
@@ -2485,6 +2501,104 @@ Current focus : %`dm--my-focus
          (interactive)
          (call-interactively (org-open-file +org-capture-todo-file)))
    "Open agenda file" :column "Misc")
+)
+#+end_src
+*** General capture
+#+begin_src elisp
+(defhydra my/hydra/general-capture (:hint nil
+                               :exit t)
+"
+Current focus : %`dm--my-focus
+"
+  ("X" org-capture "Org Capture")
+  ("q" nil "Quit")
+  ("1" my/org-focus-personal "Personal ":exit nil :column "Focus")
+  ("2" my/org-focus-vispero "Vispero ":exit nil :column "Focus")
+
+  ("j" my/hydra/journal-capture/body "Journal Capture" :exit t)
+  ("d" my/org-roam-dailies-goto-date "Goto Dailies" :exit t)
+  ("D" my/org-roam-capture-goto-date "Capture Dailies" :exit t)
+
+  ("t" (lambda()
+         (interactive)
+         (call-interactively (org-capture nil "t")))
+   "ToDo")
+  ("T" (lambda()
+         (interactive)
+         (call-interactively (org-capture nil "T")))
+   "Scheduled ToDo")
+  ("i" (lambda()
+         (interactive)
+         (call-interactively (org-capture nil "i")))
+   "New Idea")
+)
+#+end_src
+*** Journal capture
+#+begin_src elisp
+(defhydra my/hydra/journal-capture (:hint nil
+                               :exit t)
+"
+Current focus : %`dm--my-focus
+"
+  ("q" nil "Quit")
+  ("1" my/org-focus-personal "Personal ":exit nil :column "Focus")
+  ("2" my/org-focus-vispero "Vispero ":exit nil :column "Focus")
+
+  ("j" (lambda()
+         (interactive)
+         (call-interactively (org-roam-dailies-capture-today nil "jj")))
+   "Journal Entry")
+  ("J" (lambda()
+         (interactive)
+         (call-interactively 'org-store-link) (org-roam-dailies-capture-today nil "jl"))
+   "Journal Link")
+  ;; ("t" (lambda()
+  ;;        (interactive)
+  ;;        (call-interactively (org-roam-dailies-capture-today nil "jt")))
+  ;;  "Journal ToDo")
+  ;; ("c" (lambda()
+  ;;        (interactive)
+  ;;        (call-interactively (org-roam-dailies-capture-today nil "jt")))
+  ;;  "Clocked entry")
+  ("l" (lambda()
+         (interactive)
+         (call-interactively (org-capture nil "jl")))
+   "Lunch")
+  ("s" (lambda()
+         (interactive)
+         (call-interactively (org-capture nil "js")))
+   "Startup")
+  ("h" my/org-roam-help-people "Helping Person")
+  ;; ("s" my/org-roam-startup "Startup")
+)
+#+end_src
+*** Roam
+#+begin_src elisp
+(defhydra my/hydra/roam (:hint nil
+                               :exit t)
+"
+Current focus : %`dm--my-focus
+"
+  ("q" nil "Quit")
+  ("1" my/org-focus-personal "Personal ":exit nil :column "Focus")
+  ("2" my/org-focus-vispero "Vispero ":exit nil :column "Focus")
+
+  ("R" org-roam-capture "Org-Roam Capture" :exit t)
+  ("i" org-roam-node-insert  "Insert Node" :exit t)
+  ("I" org-roam-node-insert-immediate  "Insert Immediate" :exit t)
+
+  ("j" (lambda()
+         (interactive)
+         (call-interactively (org-roam-dailies-capture-today nil "jj")))
+   "Journal Entry")
+  ("t" (lambda()
+         (interactive)
+         (call-interactively (org-roam-dailies-capture-today nil "jt")))
+   "Journal ToDo")
+  ("l" (lambda()
+         (interactive)
+         (call-interactively 'org-store-link) (org-roam-dailies-capture-today nil "jl"))
+   "Journal Link")
 )
 #+end_src
 *** Example with automatic columns
