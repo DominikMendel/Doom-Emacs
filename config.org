@@ -130,15 +130,19 @@ text and copying to the killring."
 #+end_src
 * Theme
 #+begin_src elisp
-(setq doom-theme 'doom-solarized-dark)
+;; (setq doom-theme 'doom-solarized-dark)
+(setq doom-theme 'doom-gruvbox)
+;;(setq doom-theme 'doom-monokai-classic)
+;; (setq doom-theme 'doom-moonlight)
 (after! doom-themes
   (setq doom-themes-enable-bold t
         doom-themes-enable-italic t))
 (custom-set-faces!
   '(font-lock-comment-face :slant italic)
   '(font-lock-keyword-face :slant italic)
-  '(region :background "DarkSlateBlue")
-  '(vertico-current :background "DarkSlateBlue"))
+  ;; '(region :background "DarkSlateBlue")
+  ;; '(vertico-current :background "DarkSlateBlue")
+  )
   ;; '(region :background "#094959"))
 
 (defun my/next-theme ()
