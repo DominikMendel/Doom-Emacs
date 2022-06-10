@@ -2129,8 +2129,10 @@ tasks."
 
 (defun vulpea--title-to-tag (title)
 "Convert TITLE to tag."
-(concat "@" (s-replace " " "" title)))
+;; (concat "@" (s-replace " " "" title)))
+(s-replace " " "" title))
 
+;; (defun vulpea-tags-add (orig-fun &rest args)
 (defun vulpea-tags-add ()
   "Add a tag to current note."
   (interactive)
