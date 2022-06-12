@@ -7,4 +7,4 @@
 :END:
 #+TITLE: Vispero %<%Y-%m-%d>
 #+filetags: :journal:
-* %<%A, %d %B %Y>
+%<%A, %d %B %Y W%W>
