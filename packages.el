@@ -8,7 +8,7 @@
 (package! harpoon)
 (package! origami)
 
-(unpin! org-roam company-org-roam)
+;; (unpin! org-roam company-org-roam)
 ;;; $DOOMDIR/packages.el
 
 ;; To install a package with Doom you must declare them here and run 'doom sync'
