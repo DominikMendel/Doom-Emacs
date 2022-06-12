@@ -451,14 +451,24 @@ Added on %U - Last reviewed on %U
            :immediate-finish nil
            :clock-in t)
 
-          ("jl" "Journal Lunch" plain (function org-journal-find-location)
-           "** %(format-time-string org-journal-time-format)Lunch :break:"
+          ;; ("jl" "Journal Lunch" plain (function org-journal-find-location)
+          ;;  "** %(format-time-string org-journal-time-format)Lunch :break:"
+          ;;  :jump-to-captured nil
+          ;;  :immediate-finish t
+          ;;  :clock-in t)
+
+          ("jl" "Journal Lunch" plain
+           ;; (file+olp "/home/dominik/Dropbox/org/roam/vispero/vispero_agenda.org" "Logging" "Lunch")
+           (file+olp "/home/dominik/Dropbox/org/roam/vispero/vispero_agenda.org" "Lunch")
+           ""
            :jump-to-captured nil
            :immediate-finish t
            :clock-in t)
 
-          ("js" "Journal Startup" plain (function org-journal-find-location)
-           "** %(format-time-string org-journal-time-format)Startup"
+          ("js" "Journal Startup" plain
+           ;; (file+olp "/home/dominik/Dropbox/org/roam/vispero/vispero_agenda.org" "Logging" "Startup")
+           (file+olp "/home/dominik/Dropbox/org/roam/vispero/vispero_agenda.org" "Startup")
+           ""
            :jump-to-captured nil
            :immediate-finish t
            :clock-in t)
@@ -468,6 +478,18 @@ Added on %U - Last reviewed on %U
            :jump-to-captured t
            :immediate-finish t
            :clock-in t)
+
+          ;; ("js" "Journal Startup" plain (function org-journal-find-location)
+          ;;  "** %(format-time-string org-journal-time-format)Startup"
+          ;;  :jump-to-captured nil
+          ;;  :immediate-finish t
+          ;;  :clock-in t)
+
+          ;; ("jS" "Journal Startup jump to" plain (function org-journal-find-location)
+          ;;  "** %(format-time-string org-journal-time-format)Startup"
+          ;;  :jump-to-captured t
+          ;;  :immediate-finish t
+          ;;  :clock-in t)
 
           ("jT" "Journal Testing" plain (function org-journal-find-location)
            "** %(format-time-string org-journal-time-format)Testing : %a"
@@ -1437,14 +1459,16 @@ capture was not aborted."
 
 (defun my/org-roam-capture-clock-in()
   (interactive)
-  (let ((org-id-link-to-org-use-id t))
-        (call-interactively 'org-store-link)
+  (let* ((tags (vulpea-buffer-tags-get))
+         (org-id-link-to-org-use-id (if (-contains? tags "journal") "use-existing" t)))
+        ;; (call-interactively 'org-store-link)
         (org-roam-dailies-capture-today nil "!CI")))
 
 (defun my/org-roam-capture-clock-out()
   (interactive)
-  (let ((org-id-link-to-org-use-id t))
-        (call-interactively 'org-store-link)
+  (let* ((tags (vulpea-buffer-tags-get))
+         (org-id-link-to-org-use-id (if (-contains? tags "journal") "use-existing" t)))
+        ;;(call-interactively 'org-store-link)
         (org-roam-dailies-capture-today nil "!CO")))
 
 (add-hook 'org-clock-in-hook #'my/org-roam-capture-clock-in)
@@ -1541,11 +1565,26 @@ capture was not aborted."
                 :target (file+head+olp ,file-name ,head ("Closed Tasks")))
                 ;; ("jj" "Journal New Entry" entry "** %<%H:%M> %?"
                 ;; :target (file+head+olp ,file-name ,head ("Journal")))
+                ("!JS" "Journal Startup" entry "* Startup%?"
+                :target (file+head+olp ,file-name ,head ("Journal"))
+                :unnarrowed t
+                :immediate-finish t
+                :clock-in t)
+                ("!JL" "Journal Lunch" entry "* Lunch%?"
+                :target (file+head+olp ,file-name ,head ("Journal"))
+                :unnarrowed t
+                :immediate-finish t
+                :clock-in t)
                 ("jj" "Journal New Entry" entry "* %?"
                 :target (file+head+olp ,file-name ,head ("Journal")))
                 ("jl" "Journal Link" entry "* %a %?"
                 :target (file+head+olp ,file-name ,head ("Journal"))
                 :immediate-finish t)
+                ("jc" "Journal New Clock Entry" entry "* %^{What are you doing?}%?"
+                :target (file+head+olp ,file-name ,head ("Journal"))
+                :jump-to-captured nil
+                :immediate-finish t
+                :clock-in t)
                 ("jt" "Journal ToDo" item "[ ] %?"
                 :target (file+head+olp ,file-name ,head ("Things ToDo")))
                 ;; Eventually remove these/replace:
@@ -2553,11 +2592,15 @@ Current focus : %`dm--my-focus
   ("j" (lambda()
          (interactive)
          (call-interactively (org-roam-dailies-capture-today nil "jj")))
-   "Journal Entry")
+   "Entry")
   ("J" (lambda()
          (interactive)
          (call-interactively 'org-store-link) (org-roam-dailies-capture-today nil "jl"))
-   "Journal Link")
+   "Link")
+  ("t" (lambda()
+         (interactive)
+         (call-interactively (org-roam-dailies-capture-today nil "jc")))
+   "Clocked In")
   ;; ("t" (lambda()
   ;;        (interactive)
   ;;        (call-interactively (org-roam-dailies-capture-today nil "jt")))
@@ -2566,14 +2609,23 @@ Current focus : %`dm--my-focus
   ;;        (interactive)
   ;;        (call-interactively (org-roam-dailies-capture-today nil "jt")))
   ;;  "Clocked entry")
+
   ("l" (lambda()
          (interactive)
-         (call-interactively (org-capture nil "jl")))
+         (call-interactively (org-roam-dailies-capture-today nil "!JL")))
    "Lunch")
   ("s" (lambda()
          (interactive)
-         (call-interactively (org-capture nil "js")))
+         (call-interactively (org-roam-dailies-capture-today nil "!JS")))
    "Startup")
+  ;; ("l" (lambda()
+  ;;        (interactive)
+  ;;        (call-interactively (org-capture nil "jl")))
+  ;;  "Lunch")
+  ;; ("s" (lambda()
+  ;;        (interactive)
+  ;;        (call-interactively (org-capture nil "js")))
+  ;;  "Startup")
   ("h" my/org-roam-help-people "Helping Person")
   ;; ("s" my/org-roam-startup "Startup")
 )
