@@ -14,7 +14,7 @@ Just some personal information and my doom-theme.
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets.
 (setq user-full-name "Dominik Mendel"
-      user-mail-address "Dominikmendel95@gmail.com")
+      user-mail-address "Dominik@mendel.family")
 
 ;; Doom exposes five (optional) variables for controlling fonts in Doom. Here
 ;; are the three important ones:
@@ -42,7 +42,6 @@ Just some personal information and my doom-theme.
       org-journal-date-prefix "* "
       org-journal-enable-agenda-integration t
       org-journal-enable-cache t
-      ;; org-roam-directory "~/Dropbox/org/roam"
       +org-roam-open-buffer-on-find-file nil
       +snippets-dir "~/Dropbox/snippets"
       display-line-numbers-type 'visual
@@ -1554,8 +1553,6 @@ capture was not aborted."
                 ("!D" "Done Log" item "1. %<%H:%M> %a"
                 :immediate-finish t
                 :target (file+head+olp ,file-name ,head ("Closed Tasks")))
-                ;; ("jj" "Journal New Entry" entry "** %<%H:%M> %?"
-                ;; :target (file+head+olp ,file-name ,head ("Journal")))
                 ("!JS" "Journal Startup" entry "* Startup%?"
                 :target (file+head+olp ,file-name ,head ("Journal"))
                 :unnarrowed t
@@ -1659,18 +1656,6 @@ capture was not aborted."
 ,#+TITLE: ${title}\n")
            :unnarrowed t)
 
-          ("t" "Test")
-          ("tt" "Test test" plain "- tags :: %?\n* "
-           :if-new (file+head "${slug}.org" "#+TITLE: ${title}\n")
-           ;; :file-name (test-directory-string "testingbuhhNameDontMatter")
-           ;; :file-name (test-directory-string "${slug}")
-           ;; :file-name (test-directory-multiple "%y" "%m" "%d" "${slug}")
-           :function (test-directory-multiple "y" "m" "d" "slug")
-           ;; added a double space at the end for the double-space insert link issue.
-           :head "#+TITLE: ${title}\n- tags ::  %?"
-           :unnarrowed t)
-
-
           ("v" "Vispero")
           ("vv" "Vispero Default" plain (file ,dm--org-roam-default-template)
            :target (file ,(expand-file-name "${slug}.org" dm--org-roam-vispero-dir))
@@ -1728,78 +1713,6 @@ capture was not aborted."
 
                         )))
 #+end_src
-** Old version 1
-#+begin_src elisp :tangle no
-        ;; Roam v1
-        ;; '(("d" "default" plain (function org-roam--capture-get-point)
-        ;;    ;; "%?"
-        ;;    :file-name "${slug}"
-        ;;    ;; added a double space at the end for the double-space insert link issue.
-        ;;    :head "#+TITLE: ${title}\n- tags ::  %?\n* "
-        ;;    :unnarrowed t)
-
-        ;;   ("a" "New Area" plain (function org-roam--capture-get-point)
-        ;;    "%?"
-        ;;    :file-name "${slug}"
-        ;;    ;; added a double space at the end for the double-space insert link issue.
-        ;;    :head "#+TITLE: ${title}\n- tags :: [[file:../../../Dropbox/org/roam/indexes.org][Indexes]]"
-        ;;    :unnarrowed t)
-
-        ;;   ("r" "Reading General")
-        ;;   ("rr" "Reading" plain (function org-roam--capture-get-point)
-        ;;    :file-name "${slug}"
-        ;;    ;; added a double space at the end for the double-space insert link issue.
-        ;;    :head "#+TITLE: ${title}\n- tags ::  %?\n* Notes\n* Overview"
-        ;;    :unnarrowed t)
-
-        ;;   ("rc" "Reading Character" plain (function org-roam--capture-get-point)
-        ;;    :file-name "${slug}"
-        ;;    ;; added a double space at the end for the double-space insert link issue.
-        ;;    :head "#+TITLE: ${title}\n- tags ::  %?\n* Notes\n* Mentions"
-        ;;    :unnarrowed t)
-
-        ;;   ("j" "Japanese")
-        ;;   ("jj" "Japanese Vocabulary" plain (function org-roam--capture-get-point)
-        ;;    :file-name "${slug}"
-        ;;    :head "#+TITLE: ${title}\n#+roam_tags: %^{prompt}\n- tags :: [[file:../../../Dropbox/org/roam/japanese.org][Japanese]]\n* Definition"
-        ;;    "%?"
-        ;;    :unnarrowed t)
-
-        ;;   ("jk" "Japanese Kanji" plain (function org-roam--capture-get-point)
-        ;;    :file-name "${slug}"
-        ;;    :head "#+TITLE: ${title}\n#+roam_tags: %^{prompt}\n- tags :: [[file:../../../Dropbox/org/roam/japanese.org][Japanese]]\n* Readings\n** onyomi %?\n** kunyomi"
-        ;;    :unnarrowed t)
-
-        ;;   ("t" "Test")
-        ;;   ("tt" "Test test" plain (function org-roam--capture-get-point)
-        ;;    ;; :file-name (test-directory-string "testingbuhhNameDontMatter")
-        ;;    ;; :file-name (test-directory-string "${slug}")
-        ;;    ;; :file-name (test-directory-multiple "%y" "%m" "%d" "${slug}")
-        ;;    :function (test-directory-multiple "y" "m" "d" "slug")
-        ;;    ;; added a double space at the end for the double-space insert link issue.
-        ;;    :head "#+TITLE: ${title}\n- tags ::  %?"
-        ;;    :unnarrowed t)
-
-
-        ;;   ("v" "Vispero")
-        ;;   ("vv" "Vispero Default" plain (function org-roam--capture-get-point)
-        ;;    :file-name "vispero/${slug}"
-        ;;    ;; added a double space at the end for the double-space insert link issue.
-        ;;    :head "#+TITLE: ${title}\n- tags ::  %?"
-        ;;    :unnarrowed t)
-        ;;   ("vt" "Vispero Tagged" plain (function org-roam--capture-get-point)
-        ;;    "%?"
-        ;;    :file-name "vispero/${slug}"
-        ;;    ;; added a double space at the end for the double-space insert link issue.
-        ;;    :head "#+TITLE: ${title}\n- tags :: [[file:~/Dropbox/org/roam/vispero.org][Vispero]] "
-        ;;    :unnarrowed t)
-        ;;   ("vb" "Vispero Bug" plain (function org-roam--capture-get-point)
-        ;;    :file-name "vispero/Bug ${slug}"
-        ;;    :head "#+TITLE: Bug ${title}\n#+roam_key: http://bugzilla.fsi.local/show_bug.cgi?id=${slug}\n#+roam_alias: ${slug}\n- tags :: [[file:~/Dropbox/org/roam/vispero_bugzilla.org][Vispero Bugzilla]] \n"
-        ;;    "%?"
-        ;;    :unnarrowed t)
-        ;;   ))
-#+end_src
 * Vulpea
 - [[https://github.com/d12frosted/vulpea][GitHub]]
 - A wrapper around org roam which adds extra functionality
@@ -1811,83 +1724,21 @@ capture was not aborted."
   ;; find out what meta means)
   :hook ((org-roam-db-autosync-mode . vulpea-db-autosync-enable)))
 #+end_src
-** My version
-#+begin_src elisp :tangle no
-;; This replaces vulpea-project-files
-(defun vulpea-agenda-files ()
-  "Return a list of note files that are part of `org-agenda'."
-  (seq-map
-   #'vulpea-note-path
-   (vulpea-db-query-by-tags-some '("project" "agenda" "vispero"))))
-
-;; (defun vulpea-project-files ()
-;;   "Return a list of note files that are part of `org-agenda'."
-;;   (seq-map
-;;    #'vulpea-note-path
-;;    (vulpea-db-query-by-tags-some '("project"))))
-
-;; (defun vulpea-agenda-files ()
-;;   "Return a list of note files that are part of `org-agenda'."
-;;   (seq-map
-;;    #'vulpea-note-path
-;;    (vulpea-db-query-by-tags-some '("agenda"))))
-
-;; (defun vulpea-journal-files ()
-;;   "Return a list of note files that are part of `org-agenda'."
-;;   (seq-map
-;;    #'vulpea-note-path
-;;    (vulpea-db-query-by-tags-some '("journal"))))
-
-;; This replaces vulpea-project-update-tag
-(defun my-update-filetags ()
-  "Update filetags in the current buffer."
-  (when (and (not (active-minibuffer-window))
-             (vulpea-buffer-p))
-    (save-excursion
-      (goto-char (point-min))
-      (let* ((tags (vulpea-buffer-tags-get))
-             (original-tags tags)
-             (meta (vulpea-buffer-meta))
-             (tags (vulpea-buffer-meta-get-list! meta "tags" 'link)))
-
-        (if (vulpea-project-p)
-            (setq tags (cons "project" tags))
-          (setq tags (remove "project" tags)))
-
-        ;; (if (seq-contains-p tags "[[id:c0a1e283-0329-4546-b391-18ac52099f01][Vispero]]")
-        ;;     (setq tags (cons "vispero" tags))
-        ;;   (setq tags (remove "vispero" tags)))
-
-        ;; cleanup duplicates
-        (setq tags (seq-uniq tags))
-
-        ;; update tags if changed
-        (when (or (seq-difference tags original-tags)
-                  (seq-difference original-tags tags))
-          (apply #'vulpea-buffer-tags-set tags))))))
-
-;; Function to convert files to add a tag
-;; But I don't know how to use
-;; (defun my-update-files-with-tags ()
-;; (interactive)
-;; (seq-do
-;;  (lambda (note)
-;;    ;; do something with buffer visiting note
-;;    (vulpea-utils-with-note note
-;;      ;; just add a single tag (it handles duplication etc)
-;;      (vulpea-buffer-tags-add "vispero")
-;;      ;; save buffer
-;;      (save-buffer)))
-;;  (vulpea-db-query
-;;   (lambda (note)
-;;     (seq-contains-p
-;;      (vulpea-note-meta-get-list
-;;       note
-;;       "tags"
-;;       ;; you could use note here, but (a) it does unnecessary db
-;;       ;; call and (b) all we care about is id
-;;       'link)
-;;      "[[id:c0a1e283-0329-4546-b391-18ac52099f01][Vispero]]")))))
+** Original
+- This is the original implementation from [[https://d12frosted.io/posts/2020-07-07-task-management-with-roam-vol4.html][d12frosted]] with some personal edits.
+#+begin_src elisp :tangle yes
+;; (defun vulpea-project-p ()
+;;   "Return non-nil if current buffer has any todo entry."
+;;   (org-element-map
+;;       (org-element-parse-buffer 'headline)
+;;       'headline
+;;     (lambda (h)
+;;       (and (org-element-property :todo-type h)
+;;            (not (org-element-property :archivedp h))))
+;;            ;; (not (org-in-archived-heading-p h))))
+;;            ;; (not (seq-contains-p (org-element-property :tags h)
+;;            ;;                      "ARCHIVE"))))
+;;     nil 'first-match))
 
 (defun vulpea-project-p ()
   "Return non-nil if current buffer has any todo entry.
@@ -1904,6 +1755,26 @@ tasks."
      (lambda (h)
        (org-element-property :todo-type h)))))
 
+(defun vulpea-project-update-tag ()
+    "Update PROJECT tag in the current buffer."
+    (when (and (not (active-minibuffer-window))
+               (vulpea-buffer-p))
+      (save-excursion
+        (goto-char (point-min))
+        (let* ((tags (vulpea-buffer-tags-get))
+               (original-tags tags))
+          (if (vulpea-project-p)
+              (setq tags (cons "project" tags))
+            (setq tags (remove "project" tags)))
+
+          ;; cleanup duplicates
+          (setq tags (seq-uniq tags))
+
+          ;; update tags if changed
+          (when (or (seq-difference tags original-tags)
+                    (seq-difference original-tags tags))
+            (apply #'vulpea-buffer-tags-set tags))))))
+
 (defun vulpea-buffer-p ()
   "Return non-nil if the currently visited buffer is a note."
   (and buffer-file-name
@@ -1911,19 +1782,18 @@ tasks."
         (expand-file-name (file-name-as-directory org-roam-directory))
         (file-name-directory buffer-file-name))))
 
-(defun vulpea-agenda-files-update (&rest _)
-  "Update the value of `org-agenda-files'."
-  (setq org-agenda-files (vulpea-agenda-files)))
-
-(add-hook 'find-file-hook #'my-update-filetags)
-(add-hook 'before-save-hook #'my-update-filetags)
-
-(advice-add 'org-agenda :before #'vulpea-agenda-files-update)
-(advice-add 'org-todo-list :before #'vulpea-agenda-files-update)
+(defun vulpea-project-files ()
+    "Return a list of note files containing 'project' tag." ;
+    (seq-uniq
+     (seq-map
+      #'car
+      (org-roam-db-query
+       [:select [nodes:file]
+        :from tags
+        :left-join nodes
+        :on (= tags:node-id nodes:id)
+        :where (like tag (quote "%\"project\"%"))]))))
 #+end_src
-
-#+RESULTS:
-
 ** Required Vulpea functions
 #+begin_src elisp
 ;; functions borrowed from `vulpea' library
@@ -2009,97 +1879,6 @@ If nil it defaults to `split-string-default-separators', normally
     (when (re-search-forward (concat "\\(^#\\+" name ":.*\n?\\)")
                              (point-max) t)
       (replace-match ""))))
-#+end_src
-** Original
-- This is the original implementation from [[https://d12frosted.io/posts/2020-07-07-task-management-with-roam-vol4.html][d12frosted]]
-#+begin_src elisp :tangle yes
-;; (defun vulpea-project-p ()
-;;   "Return non-nil if current buffer has any todo entry."
-;;   (org-element-map
-;;       (org-element-parse-buffer 'headline)
-;;       'headline
-;;     (lambda (h)
-;;       (and (org-element-property :todo-type h)
-;;            (not (org-element-property :archivedp h))))
-;;            ;; (not (org-in-archived-heading-p h))))
-;;            ;; (not (seq-contains-p (org-element-property :tags h)
-;;            ;;                      "ARCHIVE"))))
-;;     nil 'first-match))
-
-(defun vulpea-project-p ()
-  "Return non-nil if current buffer has any todo entry.
-
-TODO entries marked as done are ignored, meaning the this
-function returns nil if current buffer contains only completed
-tasks."
-  (seq-find                                 ; (3)
-   (lambda (type)
-     (eq type 'todo))
-   (org-element-map                         ; (2)
-       (org-element-parse-buffer 'headline) ; (1)
-       'headline
-     (lambda (h)
-       (org-element-property :todo-type h)))))
-
-(defun vulpea-project-update-tag ()
-    "Update PROJECT tag in the current buffer."
-    (when (and (not (active-minibuffer-window))
-               (vulpea-buffer-p))
-      (save-excursion
-        (goto-char (point-min))
-        (let* ((tags (vulpea-buffer-tags-get))
-               (original-tags tags))
-          (if (vulpea-project-p)
-              (setq tags (cons "project" tags))
-            (setq tags (remove "project" tags)))
-
-          ;; cleanup duplicates
-          (setq tags (seq-uniq tags))
-
-          ;; update tags if changed
-          (when (or (seq-difference tags original-tags)
-                    (seq-difference original-tags tags))
-            (apply #'vulpea-buffer-tags-set tags))))))
-
-(defun vulpea-buffer-p ()
-  "Return non-nil if the currently visited buffer is a note."
-  (and buffer-file-name
-       (string-prefix-p
-        (expand-file-name (file-name-as-directory org-roam-directory))
-        (file-name-directory buffer-file-name))))
-
-(defun vulpea-project-files ()
-    "Return a list of note files containing 'project' tag." ;
-    (seq-uniq
-     (seq-map
-      #'car
-      (org-roam-db-query
-       [:select [nodes:file]
-        :from tags
-        :left-join nodes
-        :on (= tags:node-id nodes:id)
-        :where (like tag (quote "%\"project\"%"))]))))
-
-;; Testing functions for debugging
-;; (defun vulpea-project-files ()
-;;   "Return a list of note files that are part of `org-agenda'."
-;;   (seq-map
-;;    #'vulpea-note-path
-;;    (vulpea-db-query-by-tags-every '("project"))))
-
-;; (org-roam-db-query
-;;  [:select *
-;;   :from tags
-;;   :where (= node-id "905bd73e-2588-4b42-9a04-b8f69549ceb0")])
-
-;; (org-roam-db-query
-;;  [:select [id file title]
-;;   :from nodes
-;;   :where (= id "905bd73e-2588-4b42-9a04-b8f69549ceb0")])
-
-;; (defun vulpea-agenda-files-update (&rest _)
-;;   "Update the value of `org-agenda-files'."
-;;   (setq org-agenda-files (vulpea-project-files)))
 #+end_src
 ** Custom functions to see DONE files
 #+begin_src elisp
@@ -2231,43 +2010,115 @@ tasks."
 (add-hook 'vulpea-insert-handle-functions
           #'my-vulpea-insert-handle)
 #+end_src
-* Org visuals
-** Org Superstar
-Don't need anymore. It is included in org +pretty
-#+begin_src elisp
-;; (use-package org-superstar  ;; Improved version of org-bullets
-;;   :ensure t
-;;   :config
-;;   (add-hook 'org-mode-hook (lambda () (org-superstar-mode 1))))
-#+end_src
-** Org-fancy-priorities
-Don't need anymore. It is included in org +pretty
-#+begin_src elisp
-;; (use-package org-fancy-priorities
-;;   :ensure t
-;;   :hook
-;;   (org-mode . org-fancy-priorities-mode)
-;;   :config
-;;   (setq org-fancy-priorities-list '("❗" "⬆" "⬇" "☕")))
+** My version for testing
+#+begin_src elisp :tangle no
+;; This replaces vulpea-project-files
+(defun vulpea-agenda-files ()
+  "Return a list of note files that are part of `org-agenda'."
+  (seq-map
+   #'vulpea-note-path
+   (vulpea-db-query-by-tags-some '("project" "agenda" "vispero"))))
 
+;; (defun vulpea-project-files ()
+;;   "Return a list of note files that are part of `org-agenda'."
+;;   (seq-map
+;;    #'vulpea-note-path
+;;    (vulpea-db-query-by-tags-some '("project"))))
 
+;; (defun vulpea-agenda-files ()
+;;   "Return a list of note files that are part of `org-agenda'."
+;;   (seq-map
+;;    #'vulpea-note-path
+;;    (vulpea-db-query-by-tags-some '("agenda"))))
 
-;; Here are some additional functions/macros that could help you configure Doom:
-;;
-;; - `load!' for loading external *.el files relative to this one
-;; - `use-package!' for configuring packages
-;; - `after!' for running code after a package has loaded
-;; - `add-load-path!' for adding directories to the `load-path', relative to
-;;   this file. Emacs searches the `load-path' when you load packages with
-;;   `require' or `use-package'.
-;; - `map!' for binding new keys
-;;
-;; To get information about any of these functions/macros, move the cursor over
-;; the highlighted symbol at press 'K' (non-evil users must press 'C-c c k').
-;; This will open documentation for it, including demos of how they are used.
-;;
-;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
-;; they are implemented.
+;; (defun vulpea-journal-files ()
+;;   "Return a list of note files that are part of `org-agenda'."
+;;   (seq-map
+;;    #'vulpea-note-path
+;;    (vulpea-db-query-by-tags-some '("journal"))))
+
+;; This replaces vulpea-project-update-tag
+(defun my-update-filetags ()
+  "Update filetags in the current buffer."
+  (when (and (not (active-minibuffer-window))
+             (vulpea-buffer-p))
+    (save-excursion
+      (goto-char (point-min))
+      (let* ((tags (vulpea-buffer-tags-get))
+             (original-tags tags)
+             (meta (vulpea-buffer-meta))
+             (tags (vulpea-buffer-meta-get-list! meta "tags" 'link)))
+
+        (if (vulpea-project-p)
+            (setq tags (cons "project" tags))
+          (setq tags (remove "project" tags)))
+
+        ;; (if (seq-contains-p tags "[[id:c0a1e283-0329-4546-b391-18ac52099f01][Vispero]]")
+        ;;     (setq tags (cons "vispero" tags))
+        ;;   (setq tags (remove "vispero" tags)))
+
+        ;; cleanup duplicates
+        (setq tags (seq-uniq tags))
+
+        ;; update tags if changed
+        (when (or (seq-difference tags original-tags)
+                  (seq-difference original-tags tags))
+          (apply #'vulpea-buffer-tags-set tags))))))
+
+;; Function to convert files to add a tag
+;; But I don't know how to use
+;; (defun my-update-files-with-tags ()
+;; (interactive)
+;; (seq-do
+;;  (lambda (note)
+;;    ;; do something with buffer visiting note
+;;    (vulpea-utils-with-note note
+;;      ;; just add a single tag (it handles duplication etc)
+;;      (vulpea-buffer-tags-add "vispero")
+;;      ;; save buffer
+;;      (save-buffer)))
+;;  (vulpea-db-query
+;;   (lambda (note)
+;;     (seq-contains-p
+;;      (vulpea-note-meta-get-list
+;;       note
+;;       "tags"
+;;       ;; you could use note here, but (a) it does unnecessary db
+;;       ;; call and (b) all we care about is id
+;;       'link)
+;;      "[[id:c0a1e283-0329-4546-b391-18ac52099f01][Vispero]]")))))
+
+(defun vulpea-project-p ()
+  "Return non-nil if current buffer has any todo entry.
+
+TODO entries marked as done are ignored, meaning the this
+function returns nil if current buffer contains only completed
+tasks."
+  (seq-find                                 ; (3)
+   (lambda (type)
+     (eq type 'todo))
+   (org-element-map                         ; (2)
+       (org-element-parse-buffer 'headline) ; (1)
+       'headline
+     (lambda (h)
+       (org-element-property :todo-type h)))))
+
+(defun vulpea-buffer-p ()
+  "Return non-nil if the currently visited buffer is a note."
+  (and buffer-file-name
+       (string-prefix-p
+        (expand-file-name (file-name-as-directory org-roam-directory))
+        (file-name-directory buffer-file-name))))
+
+(defun vulpea-agenda-files-update (&rest _)
+  "Update the value of `org-agenda-files'."
+  (setq org-agenda-files (vulpea-agenda-files)))
+
+(add-hook 'find-file-hook #'my-update-filetags)
+(add-hook 'before-save-hook #'my-update-filetags)
+
+(advice-add 'org-agenda :before #'vulpea-agenda-files-update)
+(advice-add 'org-todo-list :before #'vulpea-agenda-files-update)
 #+end_src
 * Vertico
 - Search and auto-complete
@@ -2291,7 +2142,6 @@ Don't need anymore. It is included in org +pretty
 
 (map! :leader
       "+" #'hydra/text-zoom/body
-      ;; "W" #'+hydra/window-nav/body
       "W" #'my/hydra/window-nav/body
       "A" #'my/hydra/agenda-nav/body
       "X" #'my/hydra/general-capture/body
@@ -2316,37 +2166,6 @@ Don't need anymore. It is included in org +pretty
       :desc "Goto tomorrow" "n r d m" #'my/org-roam-dailies-goto-tomorrow
       :desc "Goto yesterday" "n r d y" #'my/org-roam-dailies-goto-yesterday
       )
-
-;; Custom org-capture
-;; (map! :leader
-;;       :desc "Capture" "X" nil
-;;       ;;:desc "test2" "X t" #'(lambda () (interactive) (call-interactively #'org-capture nil "t"))
-;;       ;; :desc "test3" "X T" #'org-capture nil "t"
-;;       :desc "ToDo" "X t" (cmd! (org-capture nil "t"))
-;;       :desc "Scheduled ToDo" "X T" (cmd! (org-capture nil "T"))
-;;       :desc "New Idea" "X i" (cmd! (org-capture nil "i"))
-;;       :desc "Org Capture" "X X" #'org-capture
-;;       :desc "Roam Capture" "X R" #'org-roam-capture
-;;       ;; Journal/Dailies
-;;       :desc "Goto Dailies" "X d" #'my/org-roam-dailies-goto-date
-;;       :desc "Capture Dailies" "X D" #'org-roam-dailies-capture-date
-;;       :desc "Journal" "X j" nil
-;;       :desc "Journal Entry" "X j j" (cmd! (org-roam-dailies-capture-today nil "jj"))
-;;       :desc "Journal ToDo" "X j t" (cmd! (org-roam-dailies-capture-today nil "jt"))
-;;       ;; :desc "Journal Link" "X j l" (cmd! (org-roam-dailies-capture-today nil "jl"))
-;;       :desc "Journal Link" "X j l" #'(lambda () (interactive) (call-interactively 'org-store-link) (org-roam-dailies-capture-today nil "jl"))
-;;       )
-
-;; Custom org-agenda
-;; (map!
-;;     :leader
-;;     :prefix "A"
-;;     :desc "Agenda" "A" #'org-agenda
-;;     :desc "View DONE" "d" #'my/org-agenda-view-all-done
-;;     :desc "View New" "n" #'my/org-agenda-view-all-new-tags
-;;     :desc "Today" "t" (cmd! (org-agenda nil "t"))
-;;     :desc "Open agenda file" "o" (cmd! (org-open-file +org-capture-todo-file))
-;;       )
 
 ;; Make Tab to fold groups and Shift-Tab to default back to org-agenda-goto
 (map! :after evil-org-agenda
@@ -2604,15 +2423,6 @@ Current focus : %`dm--my-focus
          (interactive)
          (call-interactively (org-roam-dailies-capture-today nil "jc")))
    "Clocked In")
-  ;; ("t" (lambda()
-  ;;        (interactive)
-  ;;        (call-interactively (org-roam-dailies-capture-today nil "jt")))
-  ;;  "Journal ToDo")
-  ;; ("c" (lambda()
-  ;;        (interactive)
-  ;;        (call-interactively (org-roam-dailies-capture-today nil "jt")))
-  ;;  "Clocked entry")
-
   ("l" (lambda()
          (interactive)
          (call-interactively (org-roam-dailies-capture-today nil "!JL")))
@@ -2621,16 +2431,7 @@ Current focus : %`dm--my-focus
          (interactive)
          (call-interactively (org-roam-dailies-capture-today nil "!JS")))
    "Startup")
-  ;; ("l" (lambda()
-  ;;        (interactive)
-  ;;        (call-interactively (org-capture nil "jl")))
-  ;;  "Lunch")
-  ;; ("s" (lambda()
-  ;;        (interactive)
-  ;;        (call-interactively (org-capture nil "js")))
-  ;;  "Startup")
   ("h" my/org-roam-help-people "Helping Person")
-  ;; ("s" my/org-roam-startup "Startup")
 )
 #+end_src
 *** Roam
@@ -2711,18 +2512,11 @@ Functions used to swap focuses between personal and work.
 (defun my/org-focus-personal()
   (interactive)
   (setq dm--my-focus "personal")
-   ;; org-agenda-files (seq-filter (lambda(x) (not (string-match "/vispero/"(file-name-directory x))))
-   ;;                                           (directory-files-recursively "~/Dropbox/org/roam" "\\.org$"))
-        ;;+org-capture-todo-file dm--org-personal-inbox-file-name)
-        ;; org-roam-dailies-directory "daily")
   (my/call-focus-function-setters))
 
 (defun my/org-focus-vispero()
   (interactive)
   (setq dm--my-focus "vispero")
-   ;; org-agenda-files (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$")
-        ;; +org-capture-todo-file dm--org-vispero-inbox-file-name)
-        ;; org-roam-dailies-directory "vispero/daily")
   (my/call-focus-function-setters))
 
 (defun my/call-focus-function-setters ()
@@ -2731,19 +2525,15 @@ Functions used to swap focuses between personal and work.
   (my/set-org-roam-dailies-capture)
   (my/set-org-capture-templates))
 
-;; Old journal method:
-;; (defun my/org-focus-personal()
-;;   (interactive)
-;;   (setq org-agenda-files (append (seq-filter (lambda(x) (not (string-match "/vispero/"(file-name-directory x))))
-;;                                              (directory-files-recursively "~/Dropbox/org/roam" "\\.org$")) (directory-files-recursively "~/Dropbox/org/roam/journal" "\\.org$"))
-;;         +org-capture-todo-file "~/Dropbox/org/roam/personal_agenda.org"
-;;         ))
+;; Old approach to change:
+;; org-agenda-files (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$")
+    ;; +org-capture-todo-file dm--org-vispero-inbox-file-name)
+    ;; org-roam-dailies-directory "vispero/daily")
 
-;; (defun my/org-focus-work()
-;;   (interactive)
-;;   (setq org-agenda-files (append (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$") (directory-files-recursively "~/Dropbox/org/roam/vispero/journal" "\\.org$"))
-;;         +org-capture-todo-file "~/Dropbox/org/roam/vispero/vispero_agenda.org"
-;;         ))
+;; org-agenda-files (seq-filter (lambda(x) (not (string-match "/vispero/"(file-name-directory x))))
+;;                                           (directory-files-recursively "~/Dropbox/org/roam" "\\.org$"))
+    ;;+org-capture-todo-file dm--org-personal-inbox-file-name)
+    ;; org-roam-dailies-directory "daily")
 #+end_src
 * Coding
 ** Rust
@@ -2764,62 +2554,24 @@ Functions used to swap focuses between personal and work.
 ;; (after! org-roam
 ;;     (setq +org-capture-todo-file dm--org-personal-inbox-file-name))
 
-;; (after! org-journal
-    (setq org-journal-dir "~/Dropbox/org/roam/daily"
-        ;; org-agenda-files (seq-filter (lambda(x) (not (string-match "/vispero/"(file-name-directory x))))
-        ;;                              (directory-files-recursively "~/Dropbox/org" "\\.org$"))
+(setq org-journal-dir "~/Dropbox/org/roam/daily"
+    org-journal-date-format "%A, %d %B %Y"
+    org-journal-file-header ":PROPERTIES:\n:ROAM_ALIASES: \"Personal %A, %B %d %Y\"\n:END:\n#+TITLE: Personal %Y-%m-%d\n"
+    org-journal-file-type 'daily
+    org-journal-file-format "Personal %Y-%m-%d.org"
+    )
 
-        org-journal-date-format "%A, %d %B %Y"
-        ;; org-agenda-files 'personal-agenda-files
-        org-journal-file-header ":PROPERTIES:\n:ROAM_ALIASES: \"Personal %A, %B %d %Y\"\n:END:\n#+TITLE: Personal %Y-%m-%d\n"
-        org-journal-file-type 'daily
-        org-journal-file-format "Personal %Y-%m-%d.org"
-        )
-;;)
+(setq doom-font (font-spec :family "Fira Code Retina" :size 15)
+      doom-variable-pitch-font (font-spec :family "JuliaMono Medium" :size 15)
+      doom-big-font (font-spec :family "Fira Code Retina" :size 24))
 
-;; This works!
-;; (defun my/org-roam-daily-test()
-;;   (interactive)
-;;   (org-roam-dailies-capture-today nil "t"))
-;; (global-set-key (kbd "<f3>") 'my/org-roam-daily-test)
+(defun test-directory-string (file-path)
+  (concat "testDirectory/" file-path))
 
+(defun test-directory-multiple (a b c d)
+  (concat "testDirectory/" a b c d))
 
-
-;; (after! org-roam
-
-;;     )
-
-;;   (setq org-roam-dailies-capture-templates
-;;         ;; Testing new template system
-;;         (let ((head
-;;             (with-temp-buffer
-;;                 ;; (insert-file-contents dm--org-personal-daily-template)
-;;               (cond ((string-equal dm--my-focus "vispero") (insert-file-contents dm--org-vispero-daily-template))
-;;                     (t (insert-file-contents dm--org-personal-daily-template)))
-;;                 (buffer-string))))
-;;           ;; Backtick list
-;;         `(("d" "default" plain "%?"
-;;            :target (file+head "Personal %<%Y-%m-%d>.org" ,dm/get-daily-template)
-;;            :unarrowed t)
-;;           ("j" "journal" entry "** %<%H:%M> %?"
-;;            :target (file+head+olp "Personal %<%Y-%m-%d>.org" ,head ("Journal")))
-;;           ("t" "ToDo" item "[ ] %?"
-;;            :target (file+head+olp "Personal %<%Y-%m-%d>.org" ,head ("Test"))))
-
-;;         ;; '(("d" "default" entryy ""
-;;         ;;    :target (file+head "Personal %<%Y-%m-%d>.org" ":PROPERTIES:\n:ROAM_ALIASES: \"Personal %<%A, %B %d %Y>\"\n:END:\n#+TITLE: Personal %<%Y-%m-%d>\n* %<%A, %d %B %Y>\n")
-;;         ;;    :unarrowed t)
-
-;; ;;   (setq org-roam-dailies-capture-templates
-;; ;;         '(("d" "default" entry "** %?"
-;; ;;            :target (file+head "Personal %<%Y-%m-%d>.org" ":PROPERTIES:
-;; ;; :ROAM_ALIASES: \"Personal %<%A, %B %d %Y>\"
-;; ;; :END:
-;; ;; ,#+TITLE: Personal %<%Y-%m-%d>\n* %<%A, %d %B %Y>\n")
-;; ;;            :prepend nil
-;; ;;            :unarrowed nil)
-;;           )))
-
+;; Unused journal code that needs to be removed
 ;; (setq org-journal-dir "~/Dropbox/org/roam/journal"
 ;;       ;; org-agenda-files (seq-filter (lambda(x) (not (string-match "/vispero/"(file-name-directory x))))
 ;;       ;;                              (directory-files-recursively "~/Dropbox/org" "\\.org$"))
@@ -2830,42 +2582,14 @@ Functions used to swap focuses between personal and work.
 ;;       org-journal-file-type 'monthly
 ;;       org-journal-file-format "Journal %Y-%m.org"
 ;;       )
-
-(setq doom-font (font-spec :family "Fira Code Retina" :size 15)
-      doom-variable-pitch-font (font-spec :family "JuliaMono Medium" :size 15)
-      doom-big-font (font-spec :family "Fira Code Retina" :size 24))
-
-;; (after! org-agenda
-;; (setq org-agenda-files (append (directory-files-recursively "~/Dropbox/org/roam" "\\.org$"))))
-
-;; (after! org-agenda
-;;     (setq org-agenda-files (seq-filter (lambda(x) (not (string-match "/vispero/"(file-name-directory x))))
-;;                                             (directory-files-recursively "~/Dropbox/org/roam" "\\.org$"))))
-
-;; (setq org-agenda-files (append (seq-filter (lambda(x) (not (string-match "/vispero/"(file-name-directory x))))
-;;                                            (directory-files-recursively "~/Dropbox/org/roam" "\\.org$")) (directory-files-recursively "~/Dropbox/org/roam/journal" "\\.org$")))
-
-
-
-(defun test-directory-string (file-path)
-  (concat "testDirectory/" file-path))
-
-(defun test-directory-multiple (a b c d)
-  (concat "testDirectory/" a b c d))
 #+end_src
 ** mu4e
+- I have my mbsyncrc in a different folder on my system, to keep it separate from the
+- mbsyncrc available publicly in my dotfiles. You MUST edit the following line.
+- Be sure that the following command is: "mbsync -c ~/.config/mu4e/mbsyncrc -a"
 #+begin_src elisp :tangle (if (eq (doom-system-distro) 'arch) "config.el" "no")
-;; (setq user-mail-address "dominikmendel95@gmail.com"
-;;       user-full-name  "Dominik Mendel"
-      ;; I have my mbsyncrc in a different folder on my system, to keep it separate from the
-      ;; mbsyncrc available publicly in my dotfiles. You MUST edit the following line.
-      ;; Be sure that the following command is: "mbsync -c ~/.config/mu4e/mbsyncrc -a"
-
-;; (setq mu4e-compose-org-msg-toggle-next nil)
 
 (after! mu4e
-
-  ;; Lastly added the "Default smtp" to try and help.
     (set-email-account! "Gmail"
     '((mu4e-sent-folder       . "/Gmail/[Gmail]/Sent Mail")
         (mu4e-drafts-folder     . "/Gmail/[Gmail]/Drafts")
@@ -2926,76 +2650,13 @@ Functions used to swap focuses between personal and work.
         (:name "Messages with images"
             :query "mime:image/*"
             :key ?p))
-
-        ;; mu4e-maildir-shortcuts
-        ;; '(("Gmail/Inbox"             . ?i)
-        ;;     ("/Gmail/[Gmail]/Sent Mail" . ?s)
-        ;;     ("/Gmail/[Gmail]/Trash"     . ?t)
-        ;;     ("/Gmail/[Gmail]/Drafts"    . ?d)
-        ;;     ("/Gmail/[Gmail]/All Mail"  . ?a))
-
                         ))
-
-        ;;starttls-use-gnutls t
-        ;;smtpmail-starttls-credentials '(("smtp.1and1.com" 587 nil nil))
-
-        ;; mu4e-contexts
-        ;;     (list
-        ;;     ;; Gmail account
-        ;;     (make-mu4e-context
-        ;;     :name "Gmail"
-        ;;     :match-func
-        ;;         (lambda (msg)
-        ;;         (when msg
-        ;;             (string-prefix-p "/Gmail" (mu4e-message-field msg :maildir))))
-        ;;     :vars '((user-mail-address . "dominikmendel@gmail.com")
-        ;;             (user-full-name    . "Dominik Mendel")
-        ;;             (smtpmail-smtp-server  . "smtp.gmail.com")
-        ;;             (smtpmail-smtp-service . 465)
-        ;;             (smtpmail-stream-type  . ssl)
-        ;;             (mu4e-compose-signature . "Dominik Mendel")
-        ;;             (mu4e-drafts-folder  . "/Gmail/[Gmail]/Drafts")
-        ;;             (mu4e-sent-folder  . "/Gmail/[Gmail]/Sent Mail")
-        ;;             (mu4e-refile-folder  . "/Gmail/[Gmail]/All Mail")
-        ;;             (mu4e-trash-folder  . "/Gmail/[Gmail]/Trash")))
-
-        ;;     ;; Personal account
-        ;;     (make-mu4e-context
-        ;;     :name "Dominik Mendel"
-        ;;     :match-func
-        ;;         (lambda (msg)
-        ;;         (when msg
-        ;;             (string-prefix-p "/Dominik-Mendel" (mu4e-message-field msg :maildir))))
-        ;;     :vars '((user-mail-address . "dominik@mendel.family")
-        ;;             (user-full-name    . "Dominik Mendel")
-        ;;             (smtpmail-smtp-server  . "smtp.migadu.com")
-        ;;             (smtpmail-smtp-service . 465)
-        ;;             (smtpmail-stream-type  . ssl)
-        ;;             (mu4e-compose-signature . "Dominik Mendel")
-        ;;             (mu4e-drafts-folder  . "/Dominik-Mendel/Drafts")
-        ;;             (mu4e-sent-folder  . "/Dominik-Mendel/Sent")
-        ;;             (mu4e-refile-folder  . "/Dominik-Mendel/Archive")
-        ;;             (mu4e-trash-folder  . "/Dominik-Mendel/Trash"))))
-
-        ;; mu4e-sent-folder "/account-1/Sent"
-        ;; mu4e-drafts-folder "/account-1/Drafts"
-        ;; mu4e-trash-folder "/account-1/Trash"
-        ;; mu4e-maildir-shortcuts
-        ;; '(("/account-1/Inbox"      . ?i)
-        ;;   ("/account-1/Sent Items" . ?s)
-        ;;   ("/account-1/Drafts"     . ?d)
-        ;;   ("/account-1/Trash"      . ?t)))
 #+end_src
 * Work machine
 - You cannot put "\n\n" in org-journal-date format. It will cause your first entry to be on the previous date.
   + However, now your first entry appears to be on the same line as your header, it isn't an is a visual bug at first.
 #+begin_src elisp :tangle (if (eq (doom-system-distro) 'ubuntu) "config.el" "no")
 (setq dm--my-focus "vispero")
-;; (setq org-roam-dailies-directory "vispero/daily")
-;; (setq +org-capture-todo-file "~/Dropbox/org/roam/vispero/vispero_agenda.org")
-;; (after! org-agenda
-        ;; org-agenda-files (append (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$"))
-        ;; )
 
 (setq org-journal-dir "~/Dropbox/org/roam/vispero/daily"
       ;; org-journal-date-format "%A, %d %B %Y\n:CLOCKTABLE:\n#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:\n:END:\n"
@@ -3008,94 +2669,30 @@ Functions used to swap focuses between personal and work.
       org-journal-file-format "Vispero %Y-%m-%d.org"
       )
 
-(after! org-roam
-    ;; (setq +org-capture-todo-file dm--org-vispero-inbox-file-name)
-;;   (setq org-roam-dailies-capture-templates
-;;         '(("d" "default" entry "** %?"
-;;            :target (file+head "Vispero %<%Y-%m-%d>.org" ":PROPERTIES:
-;; :ROAM_ALIASES: \"Vispero %<%A, %B %d %Y>\"
-;; :END:
-;; :CLOCKTABLE:\n#+BEGIN: clocktable :scope vispero-roam :block %<%Y-%m-%d> :maxlevel 9 :fileskip0 t\n#+END:\n:END:\n#+TITLE: Vispero %<%Y-%m-%d>\n* %<%A, %d %B %Y>\n")
-
-;; ;; (defun my/testing-vispero (tag-name)
-;; ;;   (lambda (node)
-;; ;;     (memeber tag-name (my/org-roam-filter-by-tag "vispero"))))
-
-;; ;; (defun my/testing-vispero-tag (tag-name)
-;; ;;   (lambda (node)
-;; ;;     (member tag-name (org-roam-node-tags node))))
-
-;;           ;; ("t" "testing" entry "* %?"
-;;           ;;  :target (file+head "%<%Y-%m-%d>.org" "#+TITLE: %<%Y-%m-%d>\n"))
-;;           )))
-
-;; (setq some-vispero-variable "vispero/")
-(defun some-vispero-variable () (substring "vispero/" 0))
-
-(defun my/org-roam-capture-task ()
-  (interactive)
-  ;; Add the project file to the agenda after capture is finished
-  ;;(add-hook 'org-capture-after-finalize-hook #'my/org-roam-project-finalize-hook)
-
-  ;; Capture the new task, creating the project file if necessary
-  (org-roam-capture- :node (org-roam-node-read
-                            nil
-                            (my/org-roam-filter-by-tag "project"))
-                     :templates '(("p" "project" plain "** TODO %?"
-                                   :if-new (file+head+olp "vispero/${slug}.org"
-                                   ;; :if-new (file+head+olp "${some-vispero-variable}${slug}.org"
-                                                          "#+TITLE: ${title}\n#+filetags: project\n- tags :: [[roam:Vispero]] \n* Tasks\n** ARCHIVE :ARCHIVE:\n* Notes"
-                                                          ("Tasks"))))))
-           :prepend nil)
-
-
-
-;; (setq +org-capture-todo-file "~/Dropbox/org/roam/vispero/vispero_agenda.org"
-;;       org-agenda-files (append (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$") (directory-files-recursively "~/Dropbox/org/roam/vispero/daily" "\\.org$")))
-;; Old daily journals (unfinished)
-;; (setq org-journal-dir "~/Dropbox/org/roam/vispero/journal"
-;;       org-agenda-files (append (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$") (directory-files-recursively "~/Dropbox/org/roam/vispero/journal" "\\.org$"))
-;;       ;; org-journal-date-format "%A, %d %B %Y\n:CLOCKTABLE:\n#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:\n:END:\n"
-;;       org-journal-date-format "%A, %d %B %Y\n:CLOCKTABLE:\n#+BEGIN: clocktable :scope vispero-roam :block %Y-%m-%d :maxlevel 9\n#+END:\n:END:\n"
-;;       org-journal-file-header "#+TITLE: Vispero Journal %A %m %d %Y\n#+STARTUP: showeverything\n:CLOCKTABLE:\n#+BEGIN: clocktable :scope vispero-roam :block %Y-%m-%d :maxlevel 9\n#+END:\n:END:\n"
-;;       org-journal-file-type 'daily
-;;       org-journal-file-format "%Y/%B/Vispero Journal %A %m-%d-%Y.org"
-;;       +org-capture-todo-file "~/Dropbox/org/roam/vispero/vispero_agenda.org"
-;;       )
-
-;; Old weekly journals
-;; (setq org-journal-dir "~/Dropbox/org/roam/vispero/journal"
-;;       org-agenda-files (append (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$") (directory-files-recursively "~/Dropbox/org/roam/vispero/journal" "\\.org$"))
-;;       ;; org-journal-date-format "%A, %d %B %Y\n:CLOCKTABLE:\n#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:\n:END:\n"
-;;       org-journal-date-format "%A, %d %B %Y\n:CLOCKTABLE:\n#+BEGIN: clocktable :scope vispero-roam :block %Y-%m-%d :maxlevel 9\n#+END:\n:END:\n"
-;;       ;; org-journal-file-header "#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:"
-;;       org-journal-file-type 'weekly
-;;       org-journal-file-format "%Y/Vispero Journal %W_%m-%d.org"
-;;       +org-capture-todo-file "~/Dropbox/org/roam/vispero/vispero_agenda.org"
-;;       )
 
 (setq doom-font (font-spec :family "Fira Code" :size 15)
       doom-variable-pitch-font (font-spec :family "Fira Code" :size 15)
       doom-big-font (font-spec :family "Fira Code" :size 24))
-;; For journal testing
-;; (setq! org-journal-dir "/home/dominik/Dropbox/org/visperoJournal"
-;;       org-agenda-files (append (directory-files-recursively "/home/dominik/Dropbox/org/roam/vispero" "\\.org$") (directory-files-recursively "/home/dominik/Dropbox/org/visperoJournal" "\\.org$"))
-;;       org-journal-date-format "%A, %d %B %Y\n#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:\n"
-;;       org-journal-file-type 'weekly
-;;       org-journal-file-format "%Y_%W_%m-%d.org"
-;;       +org-capture-todo-file "/home/dominik/Dropbox/org/roam/vispero/vispero_agenda.org"
-;;       )
 
-;; (defun org-journal-file-header-func (time)
-;;   "Custom function to create journal header."
-;;   (concat
-;;    (pcase org-journal-file-type
-;;      (`daily "#+TITLE: Daily Journal\n#+STARTUP: showeverything")
-;;      (`weekly "#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:\n")
-;;      (`monthly "#+TITLE: Monthly Journal\n#+STARTUP: folded")
-;;      (`yearly "#+TITLE: Yearly Journal\n#+STARTUP: folded"))))
+;; Some random thing idk rembmer what I was testing that needs to be removed
+(after! org-roam
+    (defun some-vispero-variable () (substring "vispero/" 0))
 
-;; (setq org-journal-file-header 'org-journal-file-header-func)
+    (defun my/org-roam-capture-task ()
+    (interactive)
+    ;; Add the project file to the agenda after capture is finished
+    ;;(add-hook 'org-capture-after-finalize-hook #'my/org-roam-project-finalize-hook)
+
+    ;; Capture the new task, creating the project file if necessary
+    (org-roam-capture- :node (org-roam-node-read
+                                nil
+                                (my/org-roam-filter-by-tag "project"))
+                        :templates '(("p" "project" plain "** TODO %?"
+                                    :if-new (file+head+olp "vispero/${slug}.org"
+                                    ;; :if-new (file+head+olp "${some-vispero-variable}${slug}.org"
+                                                            "#+TITLE: ${title}\n#+filetags: project\n- tags :: [[roam:Vispero]] \n* Tasks\n** ARCHIVE :ARCHIVE:\n* Notes"
+                                                            ("Tasks"))))))
+            :prepend nil)
 #+end_src
 * Testing functionality
 #+begin_src elisp :tangle no
@@ -3107,17 +2704,3 @@ Functions used to swap focuses between personal and work.
 (defcustom personal-agenda-files (append (seq-filter (lambda(x) (not (string-match "/vispero/"(file-name-directory x))))
                                                      (directory-files-recursively "~/Dropbox/org/roam" "\\.org$")) (directory-files-recursively "~/Dropbox/org/journal" "\\.org$")))
 #+end_src
-* Things to add
-** A way to make all roam captures go to vispero directory if on work PC
-- Can make the captures the same but instead reference some variable directory
-  + Then have the OS version tangles just change that variable
-** Make org directory and org roam directory for work go straight to the vispero path
-*** :file-name cannot run a function I think
-** Make a bug + swarmzilla hyperlink type
-** Figure out the org-journal-handle-old-carryover
-- Add a "tag" to the journal carry over = NOT "old"
-- Add the logic from the org-journal documentation to tag old entries as "old"
-  + Then just figure out some way to skip anything tagged "old"
-  + Need to make sure not to remove the old tags like "bluetooth" when doing so
-- Can maybe move away from using TODO states in journal and just use tags of the same representation
-  + This would mean that if I want an item to be carry overed it would tag it with "inprogress" instead of marking it with a todo state
