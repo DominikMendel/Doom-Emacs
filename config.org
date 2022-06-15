@@ -1,5 +1,6 @@
 #+TITLE: Config
 #+PROPERTY: header-args+ :tangle config.el
+* Introduction
 * Header info
 Just some personal information and my doom-theme.
 - I have been loving doom-horizon. I wanted something in dark mode that was best for my eyes.
