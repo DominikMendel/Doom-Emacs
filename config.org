@@ -127,9 +127,6 @@ text and copying to the killring."
       org-log-reschedule t
       org-log-into-drawer t
       org-enforce-todo-checkbox-dependencies t)
-
-;; Broken with Roam v2. It makes saves really slow
-;; (add-hook 'before-save-hook 'org-update-all-dblocks())
 #+end_src
 * Theme
 #+begin_src elisp
@@ -238,21 +235,9 @@ the beginning of the list."
   )
 
 (after! org
-  ;; Testing new archive
-  ;; (setq org-archive-location "%s_archive::datetree/")
-  ;; This doesn't work. Idk how to do an "olp" style
-  ;; (setq org-archive-location "::* Tasks\n** ARCHIVE :ARCHIVE:")
-  ;; (setq org-archive-location "::* ARCHIVE :ARCHIVE:")
-  ;; (setq org-archive-location "testing_archive.org_archive::datetree/* From %s")
-  ;; (setq org-archive-location "~/Dropbox/org/roam/archive/%s_archive::datetree/")
-
   (setq org-startup-folded t)
   (setq org-ellipsis " ▼ ")
   (setq org-hide-emphasis-markers t)
-  ;; (add-to-list 'org-modules 'org-checklist)
-  ;; (require 'org-checklist)
-  ;; (add-to-list 'org-modules 'org-habits)
-  ;; (require 'org-habits)
   (setq org-sparse-tree-open-archived-trees t) ;;For finding archived headings
   (setq org-clock-into-drawer "CLOCKING")
   (org-add-link-type "yt" #'make-youtube-time-link)
@@ -264,12 +249,10 @@ the beginning of the list."
           (sequence "[ ](T)" "[-](I)" "[?](?)" "|" "[X](D)")))
   (setq org-log-done 'time)
   (setq org-refile-targets '((+org/opened-buffer-files :maxlevel . 9)))
-  ;; (setq org-refile-targets (quote ((org-agenda-files :maxlevel . 2))))
   (setq org-list-demote-modify-bullet
        '(("+" . "-") ("-" . "+") ("*" . "+") ("1." . "a.") ("a." . "-")))
   (setq org-log-redeadline 'note)
   (setq org-cycle-open-archived-trees t)
-  ;; (setq org-id-link-to-org-use-id t)
   )
 
   (defun +org/opened-buffer-files ()
@@ -282,15 +265,6 @@ the beginning of the list."
                         (buffer-file-name x)))
                   (buffer-list))))
 
-
-;; This doesn't work
-(defun my/org-buffer-restart()
-  (interactive)
-  (with-current-buffer buffer
-  (fundamental-mode))
-  ;; (with-current-buffer buffer
-  ;; (org-mode))
-  )
 
 #+end_src
 ** Org-capture-templates
@@ -318,8 +292,6 @@ the beginning of the list."
 (defun my/org-capture-plus-store-link()
   (interactive)
   (call-interactively 'org-store-link)
-  ;; (call-interactively 'org-id-copy)
-  ;; (org-capture))
   (org-capture nil "jJ"))
 (global-set-key (kbd "<f4>") 'my/org-capture-plus-store-link)
 
@@ -338,16 +310,6 @@ the beginning of the list."
            (file (lambda () (dm/get-japanese-filename (dm/prompt-string "English alias:" 'dm--org-capture-area))))
            (file ,dm--org-roam-japanese-vocabulary-template)
            :unnarrowed t)
-
-          ;; ("T" "Testing clock in" plain (file+olp +org-capture-todo-file "Testing" "Startup")
-          ;; ("T" "Testing clock in" plain (file+olp +org-capture-todo-file "Testing" "%^{Select Meeting|Standup|Embedded Software Team|CAP Schedule Review|Embedded Software Knowledge Sharing|Technical Brief - One on One with Rob|Townhall}")
-          ;; ("T" "Testing clock in" plain (id "edb8e933-ad45-4ba9-a28c-74b439d989f1")
-           ;; "** %^{Select Meeting|Standup|Embedded Software Team|CAP Schedule Review|Embedded Software Knowledge Sharing|Technical Brief - One on One with Rob|Townhall}%? :meeting:"
-          ;; "%?"
-          ;; :jump-to-captured nil
-          ;; :immediate-finish t
-          ;; :clock-in t
-          ;; :clock-keep t)
 
           ;; TODO add meetings section with meetings by ID and one for a "new" meeting not specified
           ;; ("m" "Meetings")
@@ -502,11 +464,6 @@ Added on %U - Last reviewed on %U
           ("sp" "Personal")
           ("spt" "todoDOM" entry (file+headline "~/Dropbox/org/roam/personal_agenda.org" "Tasks")
            "* TODO %?\n %i\n")
-          ;; :empty-lines-before 1)
-          ;; :prepend t)
-          ;; :headline "Test"
-          ;; :type entry
-          ;; :template ("* %?" "%i %a"))
 
           ("sw" "Work")
           ("swt" "Work General ToDo" entry (file+headline "~/Dropbox/org/roam/vispero/vispero_agenda.org" "Tasks")
@@ -519,19 +476,16 @@ Added on %U - Last reviewed on %U
 #+end_src
 ** Org Agenda
 #+begin_src elisp
-;; (after! org-agenda
-;;   (add-to-list 'org-agenda-bulk-custom-functions
-;;                '(?a org-agenda-archive-to-archive-sibling)))
-
-;; This doesn't work with the current function
-;; (after! org-agenda
-;;   (add-to-list 'org-agenda-bulk-custom-functions
-;;                '(?D my/mark-done-at-scheduled-time)))
-
 ;; Doing this to clean up my org-agenda to view since ALL of my org-agenda-files
 ;; are tagged with "project", so it is redundant.
 (after! org
     (add-to-list 'org-tags-exclude-from-inheritance "project"))
+#+end_src
+*** Unused
+#+begin_src elisp :tangle :no
+(after! org-agenda
+  (add-to-list 'org-agenda-bulk-custom-functions
+               '(?a org-agenda-archive-to-archive-sibling)))
 #+end_src
 ** Org-super-agenda
 - Types of agenda custom command keywords: ([[https://orgmode.org/worg/org-tutorials/org-custom-agenda-commands.html][link]])
@@ -597,8 +551,6 @@ Refer to `org-agenda-prefix-format' for more information."
 (setq org-agenda-skip-scheduled-if-done t
       org-agenda-skip-deadline-if-done t
       org-agenda-skip-timestamp-if-done t
-;; (setq org-agenda-skip-scheduled-if-done t
-;;       org-agenda-skip-deadline-if-done t
       org-agenda-include-deadlines t
       org-agenda-block-separator nil
       org-agenda-tags-column 100 ;; from testing this seems to be a good value
@@ -606,26 +558,25 @@ Refer to `org-agenda-prefix-format' for more information."
       )
 
 (defun my-agenda-skip-work ()
-  "Skip tasks that are tagged as work related."
+  "Skip tasks that as work related by checking the file name."
   (save-restriction
     (widen)
     (let ((subtree-end (save-excursion (org-end-of-subtree t))))
       (cond
+       ;; Use this for checking tags instead of path name
        ;; ((seq-contains-p (org-get-tags) "vispero")
        ((string-match-p "vispero" (buffer-file-name))
         subtree-end)
-       ;; New: Doesn't work for some reason
-       ;; ((seq-contains-p (org-get-tags) "ssg")
-       ;;  subtree-end)
        (t
         nil)))))
 
 (defun my-agenda-skip-non-work ()
-  "Skip tasks that are tagged as non-work related."
+  "Skip tasks that as work related by checking the file name."
   (save-restriction
     (widen)
     (let ((subtree-end (save-excursion (org-end-of-subtree t))))
       (cond
+       ;; Use this for checking tags instead of path name
        ;; ((not (seq-contains-p (org-get-tags) "vispero"))
        ((not (string-match-p "vispero" (buffer-file-name)))
         subtree-end)
@@ -797,16 +748,6 @@ Refer to `org-agenda-prefix-format' for more information."
          :order 5)
         (:discard (:anything t))))
 
-(setq my-super-group-alltodo-overview-done
-      '((:name "Remove new tag and assign TODO states and priorities"
-         :log closed)
-         ;; :todo "DONE")
-         ;; :and (:todo "DONE"
-         ;;       :scheduled t
-         ;; :not (:log closed)))
-         ;; :todo ("DONE" "CANCELLED" "ABANDONED" "ANSWERED" "MISSED" "ACHIEVED" "COMPLETED"))
-        (:discard (:anything t))))
-
 (setq my-agenda-super-group-alltodo
       '(
         ;; Discarding the file path works and I don't need the functions anymore
@@ -889,45 +830,7 @@ Refer to `org-agenda-prefix-format' for more information."
 (after! org
   (setq org-agenda-custom-commands
         '(
-          ;; ("op" "Overview Personal"
-          ;;  ((agenda "" ((org-agenda-span 'day)
-          ;;   (org-agenda-skip-function 'my-agenda-skip-work)
-          ;;               (org-super-agenda-groups
-          ;;                my-agenda-super-group-agenda
-          ;;                )))
-          ;;   ;; (tags "question" ((org-agenda-overriding-header "")
-          ;;   (tags "." ((org-agenda-overriding-header "")
-          ;;   (org-agenda-skip-function 'my-agenda-skip-work)
-          ;;              (org-super-agenda-groups
-          ;;               my-agenda-super-group-tags
-          ;;              )))
-          ;;   (alltodo "" ((org-agenda-overriding-header "")
-          ;;   (org-agenda-skip-function 'my-agenda-skip-work)
-          ;;                ;; (tags-todo "." ((org-agenda-overriding-header "")
-          ;;                (org-super-agenda-groups
-          ;;                 my-agenda-super-group-alltodo)))
-          ;;   ))
-
-          ;; ("ow" "Overview Work"
-          ;;  ((agenda "" ((org-agenda-span 'day)
-          ;;   (org-agenda-skip-function 'my-agenda-skip-non-work)
-          ;;               (org-super-agenda-groups
-          ;;                my-agenda-super-group-agenda
-          ;;                )))
-          ;;   ;; (tags "question" ((org-agenda-overriding-header "")
-          ;;   (tags "." ((org-agenda-overriding-header "")
-          ;;   (org-agenda-skip-function 'my-agenda-skip-non-work)
-          ;;              (org-super-agenda-groups
-          ;;               my-agenda-super-group-tags
-          ;;              )))
-          ;;   (alltodo "" ((org-agenda-overriding-header "")
-          ;;   (org-agenda-skip-function 'my-agenda-skip-non-work)
-          ;;                ;; (tags-todo "." ((org-agenda-overriding-header "")
-          ;;                (org-super-agenda-groups
-          ;;                 my-agenda-super-group-alltodo)))
-          ;;   ))
-
-
+          ;; An example of how to use org-super-agenda-groups in-line
           ;; ("p" "Projects"
           ;;  ;; (
           ;;  ((agenda "" ((org-agenda-span 'day)
@@ -946,9 +849,6 @@ Refer to `org-agenda-prefix-format' for more information."
           ;;                   (:discard (:anything t)))
           ;;                 )))))
 
-          ;; ("P" "Personal test"
-           ;; (,my-agenda-non-work-cmd))
-
           ("t" "Today view"
            ((agenda "" ((org-agenda-overriding-header "")
                         (org-agenda-span 'day)
@@ -966,7 +866,6 @@ Refer to `org-agenda-prefix-format' for more information."
                        (org-agenda-span 14)
                         (org-super-agenda-groups my-super-group-agenda-planning)
                         ;; (org-agenda-time-grid '(nil (800 1000 1200 1400 1600 1800 2000) "" "----------------"))
-                        ;; (org-agenda-prefix-format '((agenda . " %i %?-12t%-6e% s")))
                         )
                     )
             (todo "" ((org-agenda-overriding-header "Things to schedule")
@@ -978,7 +877,6 @@ Refer to `org-agenda-prefix-format' for more information."
                        (org-agenda-span 'month)
                         (org-super-agenda-groups my-super-group-agenda-planning)
                         ;; (org-agenda-time-grid '(nil (800 1000 1200 1400 1600 1800 2000) "" "----------------"))
-                        ;; (org-agenda-prefix-format '((agenda . " %i %?-12t%-6e% s")))
                         )
                     )
             (todo "" ((org-agenda-overriding-header "Things to schedule")
@@ -991,25 +889,21 @@ Refer to `org-agenda-prefix-format' for more information."
                         (org-agenda-start-on-weekday nil)
                         (org-super-agenda-groups my-super-group-agenda-overview)
                         (org-agenda-time-grid '(nil (800 1000 1200 1400 1600 1800 2000) "" "----------------"))
-                        ;; (org-agenda-prefix-format '((agenda . " %i %?-12t%-6e% s")))
                         )
                     )
             (alltodo "" ((org-agenda-overriding-header "")
                          (org-super-agenda-groups my-super-group-alltodo-overview)))))
 
-          ;; TODO look at and update super-agenda-groups
           ("b" "Bi-Week Overview"
           ((agenda "" ((org-agenda-overriding-header "Bi-Weekly view")
                         (org-agenda-span 14)
                         (org-super-agenda-groups my-super-group-agenda-overview)
                         (org-agenda-time-grid '(nil (800 1000 1200 1400 1600 1800 2000) "" "----------------"))
-                        ;; (org-agenda-prefix-format '((agenda . " %i %?-12t%-6e% s")))
                         )
                     )
             (alltodo "" ((org-agenda-overriding-header "")
                          (org-super-agenda-groups my-super-group-alltodo-overview)))))
 
-          ;; TODO look at and update super-agenda-groups
           ("m" "Month Overview"
           ((agenda "" ((org-agenda-overriding-header "Month view")
                         (org-agenda-span 'month)
@@ -1017,19 +911,16 @@ Refer to `org-agenda-prefix-format' for more information."
                         (org-agenda-start-on-weekday nil)
                         (org-super-agenda-groups my-super-group-agenda-overview)
                         (org-agenda-time-grid '(nil (800 1000 1200 1400 1600 1800 2000) "" "----------------"))
-                        ;; (org-agenda-prefix-format '((agenda . " %i %?-12t%-6e% s")))
                         )
                     )
             (alltodo "" ((org-agenda-overriding-header "")
                          (org-super-agenda-groups my-super-group-alltodo-overview)))))
 
-          ;; TODO look at and update super-agenda-groups
           ("y" "Year Overview"
           ((agenda "" ((org-agenda-overriding-header "Year view")
                         (org-agenda-span 'year)
                         (org-super-agenda-groups my-super-group-agenda-overview)
                         (org-agenda-time-grid '(nil (800 1000 1200 1400 1600 1800 2000) "" "----------------"))
-                        ;; (org-agenda-prefix-format '((agenda . " %i %?-12t%-6e% s")))
                         )
                     )
             (alltodo "" ((org-agenda-overriding-header "")
@@ -1041,138 +932,17 @@ Refer to `org-agenda-prefix-format' for more information."
            ((tags "new" ((org-agenda-overriding-header "Remove new tag and assign TODO states and priorities")))))
           ("Wd" "Done Tasks"
            ((todo "DONE|CANCELLED|ABANDONED|ANSWERED|ACHIEVED|MISSED" ((org-agenda-overriding-header "Archive all DONE items")
-                         ;; (org-super-agenda-groups my-super-group-alltodo-overview-done)
                          ))))
-
-          ;; From m-dwyer
-          ;; ("W" "Weekly review TEST"
-          ;; ((agenda "" ((org-agenda-overriding-header "Week view")
-          ;;               (org-agenda-span 'week)
-          ;;               (org-agenda-start-on-weekday 1)
-          ;;               (org-agenda-time-grid '(nil (800 1000 1200 1400 1600 1800 2000) "" "----------------"))
-          ;;               (org-agenda-prefix-format '((agenda . " %i %?-12t%-6e% s")))
-          ;;               )
-          ;;           )
-          ;;   (alltodo "" ((org-agenda-overriding-header "")
-          ;;                (org-super-agenda-groups
-          ;;                 '((:name "Overdue (past scheduled/deadline)"
-          ;;                    :deadline past
-          ;;                    :scheduled past
-          ;;                    :order 1
-          ;;                    )
-          ;;                   (:name "Individual Tasks"
-          ;;                    :file-path "task"
-          ;;                    :order 2
-          ;;                    )
-          ;;                   (:name "Next tasks"
-          ;;                    :todo "NEXT"
-          ;;                    :order 3)
-          ;;                   (:discard (:anything t))
-          ;;                   )
-          ;;                 )
-          ;;                )
-          ;;            )
-          ;;   )
-          ;; )
-
-          ;; ("w" "Weekly review"
-          ;;  ((alltodo "" ((org-agenda-overriding-header "")
-          ;;               (org-agenda-skip-function '(org-agenda-skip-entry-if 'notregexpt "^\\*\\* DONE"))))))
-          ;; ))))
           ))
 
   )
-
-;; '(
-;;   ("o" "Overview")
-;;   ("ot" "Overview Test"
-;; ((agenda "" ((org-agenda-span 'day)
-;;              (org-super-agenda-groups
-;;               '((:name "Today"
-;;                  :time-grid t
-;;                  :date today
-;;                  :todo "TODAY"
-;;                  :scheduled today
-;;                  :order 1)))))
-;;  (alltodo "" ((org-agenda-overriding-header "")
-;;               (org-super-agenda-groups
-;;                '((:name "Next to do"
-;;                   :todo "NEXT"
-;;                   :order 4)
-;;                  (:name "Important"
-;;                   :tag "Important"
-;;                   :priority "A"
-;;                   :order 6)
-;;                  (:name "Due Today"
-;;                   :deadline today
-;;                   :order 2)
-;;                  (:name "Due Soon"
-;;                   :deadline future
-;;                   :order 8)
-;;                  (:name "Overdue"
-;;                   :deadline past
-;;                   :face error
-;;                   :order 7)
-;;                  (:name "Projects"
-;;                   :tag "Project"
-;;                   :order 10)
-;;                  (:name "Questions"
-;;                   :todo "QUESTION"
-;;                   :order 15)
-;;                  (:name "Inprogress"
-;;                   :todo "INPROGRESS"
-;;                   :order 3)
-;;                  (:name "In review"
-;;                   :todo "IN-REVIEW"
-;;                   :order 14)
-;;                  (:name "Waiting"
-;;                   :todo "WAITING"
-;;                   :order 20)
-;;                  (:name "Some day"
-;;                   :todo "SOMEDAY"
-;;                   :order 25)
-;;                  (:name "Trivial"
-;;                   :priority<= "C"
-;;                   :tag ("Trivial" "Unimportant")
-;;                   :todo ("SOMEDAY")
-;;                   :order 90)
-;;                  (:discard (:tag ("Chore" "Routine" "Daily")))))))))))
-
-;; (setq org-agenda-custom-commands
-;;       '(("A" . "Agendas")
-;;         ("AT" "Daily Overview"
-;;          (agenda "" (org-agenda-span 'day)
-;;                  (org-super-agenda-groups
-;;                   '((:name "Today"
-;;                      :time-grid t
-;;                      :date today
-;;                      :todo "INPROGRESS")))))
-
-;;         ("AW" "Weekly Overview"
-;;          (org-agenda-span 'week))
-
-;;         ))
-
-;; (after! org-capture
-;;   (setq org-capture-templates
-;;   ;; (add-to-list 'org-capture-templates
-;;         '("T" "Todo" entry (file+headline "~/Dropbox/org/roam/vispero/vispero_agenda.org" "Tasks")
-;;           "* TODO %?\n %i\n %a")))
-;; (use-package! org-super-agenda
-;;   :commands (org-super-agenda-moda))
-;; (after! org-agenda
-;;   (org-super-agenda-mode))
-
-;; (setq org-agenda-skip-scheduled-if-done t
-;;       org-agenda-skip-deadline-if-done t
-;;       org-agenda-include-deadlines t
-;;       org-agenda-block-separator nil
-;;       org-agenda-tags-column 100 ;; from testing this seems to be a good value
-;;       org-agenda-compact-blocks t)
 #+end_src
 ** Org-journal
+- I'm currently not using org-journal anymore. I found a lot of bugs for anything I tried implementing past the normal, and very basic, use case.
+  + Now I use org-roam-dailies and couldn't be happier.
+- This section shows some of the hacks I needed to make "roam" files from org-journal function calls.
+  + Like creating an org-ID in the header location.
 #+begin_src elisp
-;; (add-hook 'org-journal-after-header-create-hook #'org-id-get-create)
 (add-hook 'org-journal-after-entry-create-hook #'org-roam-db-autosync--setup-file-h)
 (add-hook 'org-journal-after-entry-create-hook #'org-journal-restore-hooks)
 
@@ -1184,10 +954,6 @@ Refer to `org-agenda-prefix-format' for more information."
 (defun org-create-new-id-journal ()
   (goto-char (point-min))
   (org-id-get-create)
-  ;; (save-buffer)
-  ;; (org-roam-db-update-file)
-  ;; (org-roam-db-sync)
-  ;; (org-update-all-dblocks)
   (goto-char (point-max)))
 #+end_src
 * Org-roam
@@ -2335,6 +2101,7 @@ Current focus : %`dm--my-focus
   ("q" nil "Quit")
   ("1" my/org-focus-personal "Personal ":exit nil :column "Focus")
   ("2" my/org-focus-vispero "Vispero ":exit nil :column "Focus")
+  ("3" my/org-focus-all "All":exit nil :column "Focus")
 
   ("t" (lambda()
          (interactive)
@@ -2385,6 +2152,7 @@ Current focus : %`dm--my-focus
   ("q" nil "Quit")
   ("1" my/org-focus-personal "Personal ":exit nil :column "Focus")
   ("2" my/org-focus-vispero "Vispero ":exit nil :column "Focus")
+  ("3" my/org-focus-all "All":exit nil :column "Focus")
 
   ("j" my/hydra/journal-capture/body "Journal Capture" :exit t)
   ("d" my/org-roam-dailies-goto-date "Goto Dailies" :exit t)
@@ -2414,6 +2182,7 @@ Current focus : %`dm--my-focus
   ("q" nil "Quit")
   ("1" my/org-focus-personal "Personal ":exit nil :column "Focus")
   ("2" my/org-focus-vispero "Vispero ":exit nil :column "Focus")
+  ("3" my/org-focus-all "All":exit nil :column "Focus")
 
   ("j" (lambda()
          (interactive)
@@ -2448,6 +2217,7 @@ Current focus : %`dm--my-focus
   ("q" nil "Quit")
   ("1" my/org-focus-personal "Personal ":exit nil :column "Focus")
   ("2" my/org-focus-vispero "Vispero ":exit nil :column "Focus")
+  ("3" my/org-focus-all "All":exit nil :column "Focus")
 
   ("R" org-roam-capture "Org-Roam Capture" :exit t)
   ("i" org-roam-node-insert  "Insert Node" :exit t)
@@ -2476,6 +2246,7 @@ Testing something %`dm--my-focus
 "
   ("1" my/org-focus-personal "Focus personal" :exit nil :column "Vertical")
   ("2" my/org-focus-vispero "Focus Vispero" :exit nil :column "Vertical")
+  ("3" my/org-focus-all "All":exit nil :column "Vertical")
   ;; ("3" (cmd! (org-agenda nil "t")))
   ("3" (lambda()
          (interactive)
