@@ -482,7 +482,7 @@ Added on %U - Last reviewed on %U
     (add-to-list 'org-tags-exclude-from-inheritance "project"))
 #+end_src
 *** Unused
-#+begin_src elisp :tangle :no
+#+begin_src elisp :tangle no
 (after! org-agenda
   (add-to-list 'org-agenda-bulk-custom-functions
                '(?a org-agenda-archive-to-archive-sibling)))
@@ -959,33 +959,12 @@ Refer to `org-agenda-prefix-format' for more information."
 * Org-roam
 ** General
 #+begin_src elisp
-  ;; (org-roam-db-build-cache ())
-
-  ;; "Vispero %A, %B %d %Y"
-  ;; REMOVE VISPERO AFTER TESTING
-;;         '(("d" "default" entry "** %?"
-;;            :if-new (file+head "Vispero %<%Y-%m-%d>.org" ":PROPERTIES:
-;; :ROAM_ALIASES: \"Vispero %<%A, %B %d %Y>\"
-;; :END:
-;; :CLOCKTABLE:\n#+BEGIN: clocktable :scope vispero-roam :block %<%Y-%m-%d> :maxlevel 9\n#+END:\n:END:\n#+TITLE: Vispero %<%Y-%m-%d>\n* %<%A, %d %B %Y>\n")
-;;            :prepend nil)
-;;           ))
-
-;;   (setq org-roam-dailies-capture-templates
-;;         '(("d" "default" plain "** %?" :target
-;;            (file+head "Vispero %<%Y-%m-%d>.org" ":PROPERTIES:
-;; :ROAM_ALIASES: \"Vispero %<%A, %B %d %Y>\"
-;; :END:
-;; ,#+TITLE: Vispero %<%Y-%m-%d>\n:CLOCKTABLE:\n#+BEGIN: clocktable :scope vispero-roam :block %<%Y-%m-%d> :maxlevel 9\n#+END:\n:END:\n* %<%A, %d %B %Y>\n"))
-;;           ))
 (setq lexical-binding t)
 
 (after! roam
   (setq org-roam-directory "~/Dropbox/org/roam"))
 
 (setq org-roam-node-default-sort nil)
-
-  ;; (setq lexical-binding t)
 
 (defun org-roam-node-insert-immediate (arg &rest args)
   (interactive "P")
@@ -1049,85 +1028,24 @@ capture was not aborted."
             (cond ((string-equal dm--my-focus "vispero") (expand-file-name "${slug}.org" dm--org-roam-vispero-dir))
                     (t (expand-file-name "${slug}.org" org-roam-directory)))))
     ;; @TODO DJM clean up template system, add custom templates
-  ;;(org-roam-node-find
    (org-roam-capture
-
    nil
    nil
    :filter-fn (my/org-roam-filter-by-tag "people")
-   ;; :templates org-roam-capture-templates
    :templates
-
-          ;; (("e" "New Entry" entry "* %?"
-          ;;   :if-new (file+head "${slug}.org" "#+TITLE: ${title}\n")
-          ;;   :unnarrowed t))
    `(("h" "Helping" plain ""
       :clock-in t
       :unnarrowed t
         :target (file+head+olp ,file-name ,head ("Helping"))))
                         )))
-        ;; :target (file+olp "${slug}.org" ("Journal"))))
-        ;; :target (olp ("Journal"))))
-        ;; :if-new (file+head+olp "${slug}.org" "" ("Journal"))))
-                ;; :target (file+head+olp "${slug}.org" ,head ("Journal"))))
-                ;; :target (olp ("Journal"))))
-                ;; :target (file+head+olp ,file-name ,head ("Journal"))))
 
 (defun my/org-roam-capture-projects ()
   (interactive)
   (org-roam-capture
    nil
-   ;; nil
    "!t"
    :filter-fn (my/org-roam-filter-by-tag "project")
-   ;; :templates org-roam-capture-templates
    ))
-
-  ;; (org-roam-node-find
-  ;;  nil
-  ;;  nil
-  ;;  (my/org-roam-filter-by-tag "project")
-  ;;  :templates
-  ;;  '(("p" "project" plain "** %?"
-  ;;     :if-new (file+head "${slug}.org" "#+TITLE: ${title}\n#+filetags: project\n- tags ::\n* Tasks\n** ARCHIVE :ARCHIVE:\n" ("Tasks"))
-  ;;     :unnarrowed t))))
-
-;; (defun my/org-roam-capture-task ()
-;;   (interactive)
-;;   ;; Add the project file to the agenda after capture is finished
-;;   ;;(add-hook 'org-capture-after-finalize-hook #'my/org-roam-project-finalize-hook)
-
-;;   ;; Capture the new task, creating the project file if necessary
-;;   (org-roam-capture- :node (org-roam-node-read
-;;                             nil
-;;                             (my/org-roam-filter-by-tag "project"))
-;;                      :templates '(("p" "project" plain "** TODO %?"
-;;                                    :if-new (file+head+olp "${slug}.org"
-;;                                                           "#+TITLE: ${title}\n#+filetags: project\n- tags ::\n* Tasks\n** ARCHIVE :ARCHIVE:\n"
-;;                                                           ("Tasks"))))))
-
-;; (after! org-roam
-;; (defun my/org-roam-copy-todo-to-today ()
-;;   (interactive)
-;;   (let ((org-refile-keep t) ;; Set this to nil to delete the original!
-;;         (org-roam-dailies-capture-templates
-;;           '(("t" "tasks" entry "%?"
-;;              :if-new (file+head+olp Personal "Personal %<%Y-%m-%d>.org" ":PROPERTIES:\n:ROAM_ALIASES: \"Personal %<%A, %B %d %Y>\"\n:END:\n#+TITLE: Personal %<%Y-%m-%d>\n* %<%A, %d %B %Y>\n" ("Tasks")))))
-;;         (org-after-refile-insert-hook #'save-buffer)
-;;         today-file
-;;         pos)
-;;     (save-window-excursion
-;;       (org-roam-dailies--capture (current-time) t)
-;;       ;; (org-roam-dailies-capture-date (current-time) t)
-;;       ;; (org-roam-dailies-capture-today nil)
-;;       (setq today-file (buffer-file-name))
-;;       (setq pos (point)))
-
-;;     ;; Only refile if the target file is different than the current file
-;;     (unless (equal (file-truename today-file)
-;;                    (file-truename (buffer-file-name)))
-;;       (org-refile nil nil (list "Tasks" today-file nil pos)))))
-;; )
 #+end_src
 ** Attempting automatic done logging
 #+begin_src elisp :tangle yes
@@ -1145,25 +1063,15 @@ capture was not aborted."
         (org-roam-dailies-capture-templates
           '(
             ("t" "tasks" entry "%?"
-             ;; :if-new (file+head+olp "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n" ("Tasks")))
              (file+head+olp "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n" ("Tasks")))
-            ;; ("c" "Clocking" entry "** %<%H:%M> %k %K Current clock %(azr/print-node-link \"%k\")"
-            ;;     :target (file+head+olp ,file-name ,head ("Journal")))
             ))
         (org-after-refile-insert-hook #'save-buffer)
         today-file
         pos)
     (save-window-excursion
-    ;; (save-excursion
-      ;; (org-roam-dailies--capture (current-time) t)
       (org-roam-dailies-capture-today nil "c")
       (setq today-file (buffer-file-name))
       (setq pos (point)))
-
-    ;; Only refile if the target file is different than the current file
-    ;; (unless (equal (file-truename today-file)
-    ;;                (file-truename (buffer-file-name)))
-    ;;   (org-refile nil nil (list "Tasks" today-file nil pos)))
     ))
 
 (defun my/org-roam-copy-todo-to-today ()
@@ -1171,47 +1079,18 @@ capture was not aborted."
   (let ((org-refile-keep t) ;; Set this to nil to delete the original!
         (org-id-link-to-org-use-id t)
         (org-after-refile-insert-hook #'save-buffer))
-    ;; (save-window-excursion
-    ;;   (call-interactively 'org-id-copy)
-    ;;   (org-roam-dailies-capture-today nil "!D"))))
-
-    ;; (message "Should ignore = " dm--ignore-automatic-dailies-logging)
-    ;; (when (not dm--ignore-automatic-dailies-logging)
-    ;;     (save-window-excursion
-    ;;       (message "Going to call daily capture")
-    ;;     ;; (org-agenda-switch-to)
-    ;;             (call-interactively 'org-store-link)
-    ;;             (org-roam-dailies-capture-today nil "!D")))
 
     (save-window-excursion
-      ;; (org-agenda-switch-to)
       (call-interactively 'org-store-link)
-      (org-roam-dailies-capture-today nil "!D"))
-    ))
+      (org-roam-dailies-capture-today nil "!D"))))
 
 (defun my/org-roam-capture-plus-store-link()
   (interactive)
   (call-interactively 'org-store-link)
   (org-roam-dailies-capture-today nil "!D"))
 
-;; (defvar dm--ignore-automatic-dailies-logging nil "If this is set to 't' then the automatic logging done in org-roam dailies will be ignored.")
-
 (after! (:and org org-roam)
-    ;; (add-to-list 'org-after-todo-state-change-hook
     (add-hook 'org-after-todo-state-change-hook #'my/org-roam-copy-to-today-wrapper))
-                 ;; (lambda (type)
-                 ;;   (when (eq type 'done)
-                ;; (lambda ()
-                ;; ;; (when (equal org-state "DONE")
-                ;; (when (or (equal org-state "DONE") (equal org-state "COMPLETED"))
-                ;; ;; (when (and (not dm--ignore-automatic-dailies-logging) (or (equal org-state "DONE") (equal org-state "COMPLETED")))
-                ;; ;; (when (equal (org-element-property :todo-type 'done))
-                ;; ;; (when (equal (:todo-type 'done))
-                ;; ;; (when (org-element-map
-                ;; ;;           (org-element-at-point 'headline)
-                ;; ;;           'headline)
-                ;;     ;; (my/org-roam-capture-plus-store-link)))))
-                ;;     (my/org-roam-copy-todo-to-today)))))
 
 (defun my/org-roam-copy-to-today-wrapper ()
   (when (or (equal org-state "DONE") (equal org-state "COMPLETED"))
@@ -1220,15 +1099,15 @@ capture was not aborted."
 (defun my/org-roam-capture-clock-in()
   (interactive)
   (let* ((tags (vulpea-buffer-tags-get))
+         ;; Should this use doom--setq-org-id-link-to-org-use-id-for-org-roam-find-file-h ?
          (org-id-link-to-org-use-id (if (-contains? tags "journal") "use-existing" t)))
-        ;; (call-interactively 'org-store-link)
         (org-roam-dailies-capture-today nil "!CI")))
 
 (defun my/org-roam-capture-clock-out()
   (interactive)
   (let* ((tags (vulpea-buffer-tags-get))
+         ;; Should this use doom--setq-org-id-link-to-org-use-id-for-org-roam-find-file-h ?
          (org-id-link-to-org-use-id (if (-contains? tags "journal") "use-existing" t)))
-        ;;(call-interactively 'org-store-link)
         (org-roam-dailies-capture-today nil "!CO")))
 
 (add-hook 'org-clock-in-hook #'my/org-roam-capture-clock-in)
@@ -1309,7 +1188,6 @@ capture was not aborted."
             `(("d" "default" plain "%?"
                 :target (file+head ,file-name ,head)
                 :unarrowed t)
-                ;; ("C" "Clocking" item "1. %<%H:%M> %(azr/print-node-link \"%k\")"
                 ("!CI" "Clocking In" item "1. %<%H:%M> %a"
                 :unnarrowed t
                 :immediate-finish t
@@ -1345,21 +1223,21 @@ capture was not aborted."
                 :clock-in t)
                 ("jt" "Journal ToDo" item "[ ] %?"
                 :target (file+head+olp ,file-name ,head ("Things ToDo")))
-                ;; Eventually remove these/replace:
+                ;; TODO Eventually remove these/replace:
                 ("t" "ToDo" item "[ ] %?"
                 :target (file+head+olp ,file-name ,head ("Test"))))
                 )))
 
     (my/set-org-roam-dailies-capture)
 
+;; I used to use this
 (defun azr/print-node-link (title)
   "Insert a org-roam-node-link to a title if the file is found, if not print the title as it is"
   (let* ((nd (org-roam-node-from-title-or-alias title)) )
   (if nd
         (let* ((ID (org-roam-node-id nd)))
         (print (format " [[id:%s][%s]]" ID title)))
-    (print title))
-))
+    (print title))))
 
 (setq org-roam-capture-templates
         ;; Backtick list
@@ -1387,10 +1265,6 @@ capture was not aborted."
 :END:"
            :if-new (file+head "${slug}.org" "#+TITLE: ${title}\n")
            :unnarrowed t)
-
-          ;; ("e" "New Entry" entry  "* %?"
-          ;;  :if-new (file+head "${slug}.org")
-          ;;  :unnarrowed t)
 
           ("r" "Reading General")
           ("rr" "Reading" plain (file ,dm--org-roam-reading-template)
@@ -1467,25 +1341,18 @@ capture was not aborted."
 ,#+TITLE: ${title}\n#+filetags: :bug:\n")
            :unnarrowed t)
 
-;;         ("b" "bug" plain "- tags ::  [[roam:Vispero Bugzilla]] %?\n* Notes\n* Logging\n"
-;;            :if-new (file+head "vispero/bugs/%(url-host (url-generic-parse-url \"${ref}\"))-${slug}.org" ":PROPERTIES:
-;; :ROAM_REFS: ${ref}
-;; :END:
-;; ,#+TITLE: ${title}\n#+filetags: :bug:\n")
-;;            :unnarrowed t)
 
-  ;; (setq org-roam-capture-ref-templates
-  ;;       '(("r" "ref" plain #'org-roam-capture--get-point "%?"
-  ;;          :file-name "website/%(url-host (url-generic-parse-url \"${ref}\"))-${slug}"
-  ;;          :head "#+TITLE: ${title}\n#+roam_key: ${ref}\n- tags ::  "
-  ;;          :unnarrowed t))))
-
-
+;; Generic roam reg remplate for reference
+;; (setq org-roam-capture-ref-templates
+;;       '(("r" "ref" plain #'org-roam-capture--get-point "%?"
+;;          :file-name "website/%(url-host (url-generic-parse-url \"${ref}\"))-${slug}"
+;;          :head "#+TITLE: ${title}\n#+roam_key: ${ref}\n- tags ::  "
+;;          :unnarrowed t))))
                         )))
 #+end_src
 * Vulpea
 - [[https://github.com/d12frosted/vulpea][GitHub]]
-- A wrapper around org roam which adds extra functionality
+- A convenient wrapper around org-roam which adds extra functionality
 #+begin_src elisp
 (use-package! vulpea
   :ensure t
@@ -1494,9 +1361,25 @@ capture was not aborted."
   ;; find out what meta means)
   :hook ((org-roam-db-autosync-mode . vulpea-db-autosync-enable)))
 #+end_src
-** Original
+** Main Functionality
 - This is the original implementation from [[https://d12frosted.io/posts/2020-07-07-task-management-with-roam-vol4.html][d12frosted]] with some personal edits.
 #+begin_src elisp :tangle yes
+(defun vulpea-project-p ()
+  "Return non-nil if current buffer has any todo entry.
+
+TODO entries marked as done are ignored, meaning the this
+function returns nil if current buffer contains only completed
+tasks."
+  (seq-find
+   (lambda (type)
+     (eq type 'todo))
+   (org-element-map
+       (org-element-parse-buffer 'headline)
+       'headline
+     (lambda (h)
+       (org-element-property :todo-type h)))))
+
+;; Original function
 ;; (defun vulpea-project-p ()
 ;;   "Return non-nil if current buffer has any todo entry."
 ;;   (org-element-map
@@ -1509,21 +1392,6 @@ capture was not aborted."
 ;;            ;; (not (seq-contains-p (org-element-property :tags h)
 ;;            ;;                      "ARCHIVE"))))
 ;;     nil 'first-match))
-
-(defun vulpea-project-p ()
-  "Return non-nil if current buffer has any todo entry.
-
-TODO entries marked as done are ignored, meaning the this
-function returns nil if current buffer contains only completed
-tasks."
-  (seq-find                                 ; (3)
-   (lambda (type)
-     (eq type 'todo))
-   (org-element-map                         ; (2)
-       (org-element-parse-buffer 'headline) ; (1)
-       'headline
-     (lambda (h)
-       (org-element-property :todo-type h)))))
 
 (defun vulpea-project-update-tag ()
     "Update PROJECT tag in the current buffer."
@@ -1565,10 +1433,10 @@ tasks."
         :where (like tag (quote "%\"project\"%"))]))))
 #+end_src
 ** Required Vulpea functions
+- Functions borrowed from Vulpea library
+  + Not needed if you include the Vulpea package
+  + [[https://github.com/d12frosted/vulpea/blob/6a735c34f1f64e1f70da77989e9ce8da7864e5ff/vulpea-buffer.el][Link]]
 #+begin_src elisp
-;; functions borrowed from `vulpea' library
-;; https://github.com/d12frosted/vulpea/blob/6a735c34f1f64e1f70da77989e9ce8da7864e5ff/vulpea-buffer.el
-
 (defun vulpea-buffer-tags-get ()
   "Return filetags value in current buffer."
   (vulpea-buffer-prop-get-list "filetags" "[ :]"))
@@ -1781,6 +1649,7 @@ If nil it defaults to `split-string-default-separators', normally
           #'my-vulpea-insert-handle)
 #+end_src
 ** My version for testing
+Used for testing. Not currently included.
 #+begin_src elisp :tangle no
 ;; This replaces vulpea-project-files
 (defun vulpea-agenda-files ()
@@ -1892,9 +1761,9 @@ tasks."
 #+end_src
 * Vertico
 - Search and auto-complete
-#+begin_src elisp
-;; (after! vertico
-;;   (setq vertico-sort-function 'vertico-sort-alpha))
+#+begin_src elisp :tangle no
+(after! vertico
+  (setq vertico-sort-function 'vertico-sort-alpha))
 #+end_src
 * Key mappings
 ** General
@@ -1943,43 +1812,6 @@ tasks."
       :m [tab] #'origami-toggle-node
       :m [backtab] #'org-agenda-goto)
 
-;; (map! :after org-journal
-;;       :map org-journal-mode-map
-;;       :localleader
-;;       "c" 'nil
-;;       )
-
-;; (map!
-;;  :after org-journal
-;;  :map org-journal-mode-map
-;;  :localleader
-;;  (:prefix ("c" . "clock")
-;;   "c" #'org-clock-cancel
-;;   "l" #'+org/toggle-last-clock
-;;   "i" #'org-clock-in
-;;   "I" #'org-clock-in-last
-;;   "o" #'org-clock-out
-;;   "r" #'org-resolve-clocks
-;;   "R" #'org-clock-report
-;;   "t" #'org-evaluate-time-range
-;;   ))
-
-;; Adding to org-capture list
-;; (map!
-;;  :after org
-;;  :map org-capture-mode-map
-;;  ;; :localleader
-;;  ;; (:prefix ("R" . "clock")
-;;   "c" #'org-clock-cancel
-;;   "l" #'+org/toggle-last-clock
-;;   "i" #'org-clock-in
-;;   "I" #'org-clock-in-last
-;;   "o" #'org-clock-out
-;;   "r" #'org-resolve-clocks
-;;   "R" #'org-clock-report
-;;   "t" #'org-evaluate-time-range
-;;   )
-
 ;; Could instead set doom-localleader-key to ","
 (map! :n "," (cmd! (push (cons t ?m) unread-command-events)
                    (push (cons t 32) unread-command-events)))
@@ -2009,6 +1841,46 @@ tasks."
 (map! :n "M-7" 'harpoon-go-to-7)
 (map! :n "M-8" 'harpoon-go-to-8)
 (map! :n "M-9" 'harpoon-go-to-9)
+
+#+end_src
+*** Unused
+#+begin_src elisp :tangle no
+(map! :after org-journal
+      :map org-journal-mode-map
+      :localleader
+      "c" 'nil
+      )
+
+(map!
+ :after org-journal
+ :map org-journal-mode-map
+ :localleader
+ (:prefix ("c" . "clock")
+  "c" #'org-clock-cancel
+  "l" #'+org/toggle-last-clock
+  "i" #'org-clock-in
+  "I" #'org-clock-in-last
+  "o" #'org-clock-out
+  "r" #'org-resolve-clocks
+  "R" #'org-clock-report
+  "t" #'org-evaluate-time-range
+  ))
+
+;; Adding to org-capture list
+(map!
+ :after org
+ :map org-capture-mode-map
+ ;; :localleader
+ ;; (:prefix ("R" . "clock")
+  "c" #'org-clock-cancel
+  "l" #'+org/toggle-last-clock
+  "i" #'org-clock-in
+  "I" #'org-clock-in-last
+  "o" #'org-clock-out
+  "r" #'org-resolve-clocks
+  "R" #'org-clock-report
+  "t" #'org-evaluate-time-range
+  )
 
 ;; (map!
 ;;  :leader
@@ -2259,30 +2131,13 @@ Testing something %`dm--my-focus
 
   ("q" nil))
 #+end_src
-* Unused functions
-** Checkbox attempts
-#+begin_src elisp :tangle no
-;;Reset checkboxes from Rainer
-(defun org-reset-checkbox-state-maybe ()
-  "Reset all checkboxes in an entry if the `RESET_CHECK_BOXES' property is set"
-  (interactive "*")
-  (if (org-entry-get (point) "RESET_CHECK_BOXES")
-      (org-reset-checkbox-state-subtree)))
-
-(defun org-checklist ()
-  (when (member org-state org-done-keywords) ;; org-state dynamically bound in org.el/org-todo
-    (org-reset-checkbox-state-maybe)))
-
-(add-hook 'org-after-todo-state-change-hook 'org-checklist)
-
-;;new attempt
-(defun glasser-org-reset-check-on-repeat ()
-  (when (and (org-get-repeat) (member org-state org-done-keywords))
-    (org-reset-checkbox-state-subtree)))
-(add-hook 'org-after-todo-state-change-hook 'glasser-org-reset-check-on-repeat)
-#+end_src
 * Swap focuses
-Functions used to swap focuses between personal and work.
+- Functions used to swap focuses between personal and work.
+- This utilized in various places in my configuration.
+  + Capture templates
+  + Org-agenda files
+  + Org-agenda views
+  + Org-roam functionality
 #+begin_src elisp
 (defun my/org-focus-personal()
   (interactive)
@@ -2299,16 +2154,6 @@ Functions used to swap focuses between personal and work.
   (my/set-org-variables)
   (my/set-org-roam-dailies-capture)
   (my/set-org-capture-templates))
-
-;; Old approach to change:
-;; org-agenda-files (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$")
-    ;; +org-capture-todo-file dm--org-vispero-inbox-file-name)
-    ;; org-roam-dailies-directory "vispero/daily")
-
-;; org-agenda-files (seq-filter (lambda(x) (not (string-match "/vispero/"(file-name-directory x))))
-;;                                           (directory-files-recursively "~/Dropbox/org/roam" "\\.org$"))
-    ;;+org-capture-todo-file dm--org-personal-inbox-file-name)
-    ;; org-roam-dailies-directory "daily")
 #+end_src
 * Coding
 ** Rust
@@ -2324,10 +2169,9 @@ Functions used to swap focuses between personal and work.
   ))
 #+end_src
 * Personal Machine
+- This is only tangled if my operating system is "arch", thus my personal machine.
 #+begin_src elisp :tangle (if (eq (doom-system-distro) 'arch) "config.el" "no")
 (setq dm--my-focus "personal")
-;; (after! org-roam
-;;     (setq +org-capture-todo-file dm--org-personal-inbox-file-name))
 
 (setq org-journal-dir "~/Dropbox/org/roam/daily"
     org-journal-date-format "%A, %d %B %Y"
@@ -2359,11 +2203,11 @@ Functions used to swap focuses between personal and work.
 ;;       )
 #+end_src
 ** mu4e
-- I have my mbsyncrc in a different folder on my system, to keep it separate from the
-- mbsyncrc available publicly in my dotfiles. You MUST edit the following line.
-- Be sure that the following command is: "mbsync -c ~/.config/mu4e/mbsyncrc -a"
+- I have my mbsyncrc in a different folder on my system.
+  + To keep mbsyncrc from being public in my dotfiles.
+- Be sure that the following command is: "mbsync -c ~/.config/mu4e/mbsyncrc -a".
+  + Or wherever your stored mbsyncrc is located.
 #+begin_src elisp :tangle (if (eq (doom-system-distro) 'arch) "config.el" "no")
-
 (after! mu4e
     (set-email-account! "Gmail"
     '((mu4e-sent-folder       . "/Gmail/[Gmail]/Sent Mail")
@@ -2428,8 +2272,7 @@ Functions used to swap focuses between personal and work.
                         ))
 #+end_src
 * Work machine
-- You cannot put "\n\n" in org-journal-date format. It will cause your first entry to be on the previous date.
-  + However, now your first entry appears to be on the same line as your header, it isn't an is a visual bug at first.
+- This is only tangled if my operating system is "ubuntu", thus my work machine.
 #+begin_src elisp :tangle (if (eq (doom-system-distro) 'ubuntu) "config.el" "no")
 (setq dm--my-focus "vispero")
 
@@ -2448,26 +2291,32 @@ Functions used to swap focuses between personal and work.
 (setq doom-font (font-spec :family "Fira Code" :size 15)
       doom-variable-pitch-font (font-spec :family "Fira Code" :size 15)
       doom-big-font (font-spec :family "Fira Code" :size 24))
+#+end_src
 
-;; Some random thing idk rembmer what I was testing that needs to be removed
-(after! org-roam
-    (defun some-vispero-variable () (substring "vispero/" 0))
+#+RESULTS:
+: #<font-spec nil nil Fira\ Code nil nil nil nil nil 24 nil nil nil nil>
 
-    (defun my/org-roam-capture-task ()
-    (interactive)
-    ;; Add the project file to the agenda after capture is finished
-    ;;(add-hook 'org-capture-after-finalize-hook #'my/org-roam-project-finalize-hook)
+* Unused functions
+** Checkbox attempts
+#+begin_src elisp :tangle no
+;;Reset checkboxes from Rainer
+(defun org-reset-checkbox-state-maybe ()
+  "Reset all checkboxes in an entry if the `RESET_CHECK_BOXES' property is set"
+  (interactive "*")
+  (if (org-entry-get (point) "RESET_CHECK_BOXES")
+      (org-reset-checkbox-state-subtree)))
 
-    ;; Capture the new task, creating the project file if necessary
-    (org-roam-capture- :node (org-roam-node-read
-                                nil
-                                (my/org-roam-filter-by-tag "project"))
-                        :templates '(("p" "project" plain "** TODO %?"
-                                    :if-new (file+head+olp "vispero/${slug}.org"
-                                    ;; :if-new (file+head+olp "${some-vispero-variable}${slug}.org"
-                                                            "#+TITLE: ${title}\n#+filetags: project\n- tags :: [[roam:Vispero]] \n* Tasks\n** ARCHIVE :ARCHIVE:\n* Notes"
-                                                            ("Tasks"))))))
-            :prepend nil)
+(defun org-checklist ()
+  (when (member org-state org-done-keywords) ;; org-state dynamically bound in org.el/org-todo
+    (org-reset-checkbox-state-maybe)))
+
+(add-hook 'org-after-todo-state-change-hook 'org-checklist)
+
+;;new attempt
+(defun glasser-org-reset-check-on-repeat ()
+  (when (and (org-get-repeat) (member org-state org-done-keywords))
+    (org-reset-checkbox-state-subtree)))
+(add-hook 'org-after-todo-state-change-hook 'glasser-org-reset-check-on-repeat)
 #+end_src
 * Testing functionality
 #+begin_src elisp :tangle no
