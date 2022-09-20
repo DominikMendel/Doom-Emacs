@@ -1,9 +1,24 @@
 #+TITLE: Config
 #+PROPERTY: header-args+ :tangle config.el
 * Introduction
-Hi I am Dominik. Welcome. Enjoy your stay.
+Hi, I'm Dominik. Welcome. Enjoy your stay.
 
 Feel free to email me at dominik@mendel.family for any questions or discussions you'd like to have about my configuration.
+
+I have a semi-complex task management, GTD, and roam set up that I think is worth sharing. I will try to explain and provide examples to the best of my ability.
+** Focuses
+I strongly believe in keeping work and personal life separate. When I clock out of work, I don't want to see or think about anything work related, ever. This includes work notes, projects, journals, or TODO tasks in org-agenda. However, in the off chance I'm not working and I need to see something work related, I want the ability to do so. Thus, I created a "focus" system.
+
+This focus system is quite simple. I have a "personal", "vispero" (current "work"), and an "all" focus. I am able to swap focuses at any point of time and expect to see only files of that focus. I set this up in such a way that I don't just have a "work" focus, but my /current/ job. This will allow me to add more focuses if need be. i.e., jobs, major hobbies, side projects, etc.
+
+Since I have a work machine (Ubuntu) and a personal machine (Arch btw) I have my focus variable set on startup based on what operating system is running. So when I sign into my work machine I'm always on my work focus.
+*** Example
+If I sign into my work machine, I'll already be on my "work" focus. I can see all of my upcoming things scheduled or due for the day with org-agenda. All of my org-capture-templates keybindings will create files or TODOs in my designated work areas. All of my daily journal entries go to a my work journal via org-roam-dailies. Org-roam-dailies functions only show the date journal entries for the focus.
+
+Now I'm sitting at work, but I need to check my personal agenda for any upcoming events. Swap my focus with the associated function to now "personal". Open up org-agenda, look at my calendar. Great, all done, time to swap back. Swap back to "work" focus with the swap focus. Everything is back to being work mode.
+
+Now the opposite can applied from my personal machine. In this situation I never want to see or think about work, but rarely I need to. So, swap focus, check things, then swap back. Then never think about work again.
+** Task Management
 * Header info
 Just some personal information and my doom-theme.
 - I have been loving doom-horizon. I wanted something in dark mode that was best for my eyes.
