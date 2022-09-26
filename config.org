@@ -2002,7 +2002,7 @@ tasks."
                                :pre (dm--reset-agenda-buffer-focus))
 "
 Current focus : %`dm--my-focus
-Current buffer-test : %`dm--focus-current-buffer
+Current buffer focus : %`dm--focus-current-buffer
 "
   ("A" org-agenda "Org Agenda")
   ("q" nil "Quit")
