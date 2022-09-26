@@ -1981,20 +1981,45 @@ tasks."
 #+end_src
 *** Agenda
 #+begin_src elisp
+(defvar dm--focus-current-buffer nil)
+;; region/subtree/nil are the possible values org-agenda is expecting.
+(defun dm--toggle-agenda-buffer-focus ()
+  "Toggles agenda focus in custom hydra menu."
+  (interactive)
+  (if (equal dm--focus-current-buffer "region")
+    (setq dm--focus-current-buffer "subtree")
+    (if (equal dm--focus-current-buffer "subtree")
+        (setq dm--focus-current-buffer nil)
+        (setq dm--focus-current-buffer "region"))))
+
+(defun dm--reset-agenda-buffer-focus ()
+  "Resets agenda focus in custom hydra menu."
+    (interactive)
+    (setq dm--focus-current-buffer nil))
+
 (defhydra my/hydra/agenda-nav (:hint nil
-                               :exit t)
+                               :exit t
+                               :pre (dm--reset-agenda-buffer-focus))
 "
 Current focus : %`dm--my-focus
+Current buffer-test : %`dm--focus-current-buffer
 "
   ("A" org-agenda "Org Agenda")
   ("q" nil "Quit")
   ("1" my/org-focus-personal "Personal ":exit nil :column "Focus")
   ("2" my/org-focus-vispero "Vispero ":exit nil :column "Focus")
   ("3" my/org-focus-all "All":exit nil :column "Focus")
-
+  ("<" (lambda()
+         (interactive)
+         (call-interactively #'dm--toggle-agenda-buffer-focus))
+   "Buffer Focus":exit nil :column "Buffer")
+  (">" (lambda()
+         (interactive)
+         (call-interactively #'dm--reset-agenda-buffer-focus))
+   "Reset Focus":exit nil :column "Buffer")
   ("t" (lambda()
          (interactive)
-         (call-interactively (org-agenda nil "t")))
+         (call-interactively (org-agenda nil "t" dm--focus-current-buffer)))
    "Today" :column "Agenda Views")
   ("w" (lambda()
          (interactive)
