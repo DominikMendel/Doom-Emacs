@@ -282,8 +282,6 @@ the beginning of the list."
                                            (buffer-file-name x)))
                         (buffer-file-name x)))
                   (buffer-list))))
-
-
 #+end_src
 ** Org-capture-templates
 - %a allows for a link inserted from the file/headline you are currently at and inserts it into the capture
@@ -497,7 +495,8 @@ Added on %U - Last reviewed on %U
 ;; Doing this to clean up my org-agenda to view since ALL of my org-agenda-files
 ;; are tagged with "project", so it is redundant.
 (after! org
-    (add-to-list 'org-tags-exclude-from-inheritance "project"))
+    (add-to-list 'org-tags-exclude-from-inheritance "project")
+    (add-to-list 'org-tags-exclude-from-inheritance "ARCHIVE"))
 #+end_src
 *** Unused
 #+begin_src elisp :tangle no
