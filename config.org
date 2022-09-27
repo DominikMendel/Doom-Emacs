@@ -271,6 +271,7 @@ the beginning of the list."
   (setq org-blank-before-new-entry
         '((heading . nil)
         (plain-list-item . nil)))
+  (setq org-fold-core-style 'overlays)
   )
 
   (defun +org/opened-buffer-files ()
