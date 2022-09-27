@@ -1983,24 +1983,37 @@ tasks."
 *** Agenda
 #+begin_src elisp
 (defvar dm--focus-current-buffer nil)
-;; region/subtree/nil are the possible values org-agenda is expecting.
-(defun dm--toggle-agenda-buffer-focus ()
-  "Toggles agenda focus in custom hydra menu."
-  (interactive)
-  (if (equal dm--focus-current-buffer "region")
-    (setq dm--focus-current-buffer "subtree")
-    (if (equal dm--focus-current-buffer "subtree")
-        (setq dm--focus-current-buffer nil)
-        (setq dm--focus-current-buffer "region"))))
 
-(defun dm--reset-agenda-buffer-focus ()
-  "Resets agenda focus in custom hydra menu."
+(defun dm--toggle-agenda-buffer-focus ()
+  "Toggles agenda focus for custom hydra menu."
+  (interactive)
+
+        (message "focus current value IN SETTER before = %s" dm--focus-current-buffer)
+  (if (equal dm--focus-current-buffer "<")
+        (setq dm--focus-current-buffer nil)
+        (setq dm--focus-current-buffer "<")
+        (message "focus current value IN SETTER after = %s" dm--focus-current-buffer)
+        )
+  )
+
+(defun dm--reset-agenda-buffer-focus (&rest _)
+  "Resets agenda focus for custom hydra menu."
     (interactive)
+    (message "focus current value in RESET initial value = %s" dm--focus-current-buffer)
     (setq dm--focus-current-buffer nil))
+
+(defun dm--org-agenda-wrapper (key)
+    (interactive)
+    ()
+    (message "focus current value in wrapper = %s" dm--focus-current-buffer)
+    (with-current-buffer (buffer-name) (call-interactively (org-agenda nil key dm--focus-current-buffer))))
+
+;; Reset the custom variable on each entry. Hydra's pre/post is buggy.
+(advice-add 'my/hydra/agenda-nav/body :before #'dm--reset-agenda-buffer-focus)
 
 (defhydra my/hydra/agenda-nav (:hint nil
                                :exit t
-                               :pre (dm--reset-agenda-buffer-focus))
+                               )
 "
 Current focus : %`dm--my-focus
 Current buffer focus : %`dm--focus-current-buffer
@@ -2018,34 +2031,40 @@ Current buffer focus : %`dm--focus-current-buffer
          (interactive)
          (call-interactively #'dm--reset-agenda-buffer-focus))
    "Reset Focus":exit nil :column "Buffer")
-  ("t" (lambda()
+  ("t"
+        (lambda()
          (interactive)
-         (call-interactively (org-agenda nil "t" dm--focus-current-buffer)))
-   "Today" :column "Agenda Views")
+         (message "Current buffer = %s" (buffer-name))
+         (message "Org-agenda-files = %s" org-agenda-files)
+        (message "focus current value = %s" dm--focus-current-buffer)
+         (call-interactively (dm--org-agenda-wrapper "t")))
+   "Today" :column "Agenda Views"
+   )
+
   ("w" (lambda()
          (interactive)
-         (call-interactively (org-agenda nil "w")))
+         (call-interactively (dm--org-agenda-wrapper "w")))
    "Week" :column "Agenda Views")
   ("b" (lambda()
          (interactive)
-         (call-interactively (org-agenda nil "b")))
+         (call-interactively (dm--org-agenda-wrapper "b")))
    "2 Weeks" :column "Agenda Views")
   ("m" (lambda()
          (interactive)
-         (call-interactively (org-agenda nil "m")))
+         (call-interactively (dm--org-agenda-wrapper "m")))
    "Month" :column "Agenda Views")
   ("y" (lambda()
          (interactive)
-         (call-interactively (org-agenda nil "y")))
+         (call-interactively (dm--org-agenda-wrapper "y")))
    "Year" :column "Agenda Views")
 
   ("W" (lambda()
          (interactive)
-         (call-interactively (org-agenda nil "pw")))
+         (call-interactively (dm--org-agenda-wrapper "pw")))
    "Planning week" :column "Planning")
   ("M" (lambda()
          (interactive)
-         (call-interactively (org-agenda nil "pm")))
+         (call-interactively (dm--org-agenda-wrapper "pm")))
    "Planning month" :column "Planning")
 
   ("d" my/org-agenda-view-all-done "All 'DONE'" :column "Misc")
