@@ -240,8 +240,8 @@ the beginning of the list."
   ;; (defvar dm--org-archive-location-personal (concat (expand-file-name "archive" org-roam-directory) "/" dm--org-archive-type))
   ;; (defvar dm--org-archive-location-vispero (concat (expand-file-name "archive" dm--org-roam-vispero-dir) "/" dm--org-archive-type))
   (defvar dm--org-archive-type "archive.org_archive::datetree/")
-  (defvar dm--org-archive-location-personal (concat org-roam-directory dm--org-archive-type))
-  (defvar dm--org-archive-location-vispero (concat dm--org-roam-vispero-dir "/" dm--org-archive-type))
+  (defvar dm--org-archive-location-personal (concat org-roam-directory "personal_" dm--org-archive-type))
+  (defvar dm--org-archive-location-vispero (concat dm--org-roam-vispero-dir "/" "vispero_" dm--org-archive-type))
   (defvar dm--org-archive-header-personal "\nArchived entries from personal files\n\n")
   (defvar dm--org-archive-header-vispero "\nArchived entries from Vispero files\n\n")
 
@@ -510,6 +510,11 @@ Added on %U - Last reviewed on %U
 (after! org
     (add-to-list 'org-tags-exclude-from-inheritance "project")
     (add-to-list 'org-tags-exclude-from-inheritance "ARCHIVE"))
+
+;; @TODO Need to set the list. The goal is to remove "A" as archive as subtree.
+;; (after! org-agenda
+;;   (add-to-list 'org-agenda-bulk-custom-functions
+;;                '(?A org-agenda-archive)))
 #+end_src
 *** Unused
 #+begin_src elisp :tangle no
@@ -597,11 +602,13 @@ Refer to `org-agenda-prefix-format' for more information."
        ;; ((seq-contains-p (org-get-tags) "vispero")
        ((string-match-p "vispero" (buffer-file-name))
         subtree-end)
+       ((seq-contains-p (org-get-tags) "ignore")
+        subtree-end)
        (t
         nil)))))
 
-(defun my-agenda-skip-non-work ()
-  "Skip tasks that as work related by checking the file name."
+(defun my-agenda-skip-non-vispero ()
+  "Skip tasks that are Vispero related by checking the file name."
   (save-restriction
     (widen)
     (let ((subtree-end (save-excursion (org-end-of-subtree t))))
@@ -610,11 +617,13 @@ Refer to `org-agenda-prefix-format' for more information."
        ;; ((not (seq-contains-p (org-get-tags) "vispero"))
        ((not (string-match-p "vispero" (buffer-file-name)))
         subtree-end)
+       ((seq-contains-p (org-get-tags) "ignore")
+        subtree-end)
        (t
         nil)))))
 
 (defun my-agenda-skip-function-selector ()
-  (cond ((string-equal dm--my-focus "vispero") (funcall #'my-agenda-skip-non-work))
+  (cond ((string-equal dm--my-focus "vispero") (funcall #'my-agenda-skip-non-vispero))
         ((string-equal dm--my-focus "personal") (funcall #'my-agenda-skip-work))
         ((string-equal dm--my-focus "all") nil)
         (t nil)))
@@ -624,7 +633,7 @@ Refer to `org-agenda-prefix-format' for more information."
 (setq my-agenda-work-cmd '(agenda
                            ""
                            ((org-agenda-span 'day)
-                            (org-agenda-skip-function 'my-agenda-skip-non-work)))
+                            (org-agenda-skip-function 'my-agenda-skip-non-vispero)))
       my-agenda-non-work-cmd '(agenda
                                ""
                                ((org-agenda-span 'day)
@@ -961,7 +970,7 @@ Refer to `org-agenda-prefix-format' for more information."
           ("Wn" "New Tasks"
            ((tags "new" ((org-agenda-overriding-header "Remove new tag and assign TODO states and priorities")))))
           ("Wd" "Done Tasks"
-           ((todo "DONE|CANCELLED|ABANDONED|ANSWERED|ACHIEVED|MISSED" ((org-agenda-overriding-header "Archive all DONE items")
+           ((todo "DONE|COMPLETED|CANCELLED|ABANDONED|ANSWERED|ACHIEVED|MISSED" ((org-agenda-overriding-header "Archive all DONE items")
                          ))))
           ))
 
