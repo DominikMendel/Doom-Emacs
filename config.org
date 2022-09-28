@@ -236,15 +236,27 @@ the beginning of the list."
 
 
 (after! (:and org org-roam)
-  (defvar dm--org-archive-type "%s_archive::datetree/")
-  (defvar dm--org-archive-location-personal (concat (expand-file-name "archive" org-roam-directory) "/" dm--org-archive-type))
-  (defvar dm--org-archive-location-vispero (concat (expand-file-name "archive" dm--org-roam-vispero-dir) "/" dm--org-archive-type))
+  ;; (defvar dm--org-archive-type "%s_archive::datetree/")
+  ;; (defvar dm--org-archive-location-personal (concat (expand-file-name "archive" org-roam-directory) "/" dm--org-archive-type))
+  ;; (defvar dm--org-archive-location-vispero (concat (expand-file-name "archive" dm--org-roam-vispero-dir) "/" dm--org-archive-type))
+  (defvar dm--org-archive-type "archive.org_archive::datetree/")
+  (defvar dm--org-archive-location-personal (concat org-roam-directory dm--org-archive-type))
+  (defvar dm--org-archive-location-vispero (concat dm--org-roam-vispero-dir "/" dm--org-archive-type))
+  (defvar dm--org-archive-header-personal "\nArchived entries from personal files\n\n")
+  (defvar dm--org-archive-header-vispero "\nArchived entries from Vispero files\n\n")
 
   (defun my/set-org-variables ()
-        (cond ((string-equal dm--my-focus "vispero") (setq org-archive-location dm--org-archive-location-vispero))
-            ((string-equal dm--my-focus "personal") (setq org-archive-location dm--org-archive-location-personal))
-            ((string-equal dm--my-focus "all") (setq org-archive-location dm--org-archive-location-personal))
-            (t (setq org-archive-location dm--org-archive-location-personal))))
+        (cond ((string-equal dm--my-focus "vispero")
+               (setq org-archive-location dm--org-archive-location-vispero
+                     org-archive-file-header-format dm--org-archive-header-vispero))
+            ((string-equal dm--my-focus "personal")
+             (setq org-archive-location dm--org-archive-location-personal
+                    org-archive-file-header-format dm--org-archive-header-personal))
+            ((string-equal dm--my-focus "all")
+             (setq org-archive-location dm--org-archive-location-personal
+                    org-archive-file-header-format dm--org-archive-header-personal))
+            (t (setq org-archive-location dm--org-archive-location-personal
+                     org-archive-file-header-format dm--org-archive-header-personal))))
 
   (my/set-org-variables)
   )
