@@ -1,0 +1,10 @@
+:PROPERTIES:
+:ROAM_ALIASES: "Sirius %<%A, %B %d %Y>"
+:END:
+:CLOCKTABLE:
+#+BEGIN: clocktable :scope sirius-roam :block %<%Y-%m-%d> :maxlevel 9 :fileskip0 t
+#+END:
+:END:
+#+TITLE: Sirius %<%Y-%m-%d>
+#+filetags: :journal:sirius:
+%<%A, %d %B %Y W%W>

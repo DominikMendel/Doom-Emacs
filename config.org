@@ -9,7 +9,7 @@ I have a semi-complex task management, GTD, and roam set up that I think is wort
 ** Focuses
 I strongly believe in keeping work and personal life separate. When I clock out of work, I don't want to see or think about anything work related, ever. This includes work notes, projects, journals, or TODO tasks in org-agenda. However, in the off chance I'm not working and I need to see something work related, I want the ability to do so. Thus, I created a "focus" system.
 
-This focus system is quite simple. I have a "personal", "vispero" (current "work"), and an "all" focus. I am able to swap focuses at any point of time and expect to see only files of that focus. I set this up in such a way that I don't just have a "work" focus, but my /current/ job. This will allow me to add more focuses if need be. i.e., jobs, major hobbies, side projects, etc.
+This focus system is quite simple. I have a "personal", "sirius" (current "work"), "vispero" (older "work") and an "all" focus. I am able to swap focuses at any point of time and expect to see only files of that focus. I set this up in such a way that I don't just have a "work" focus, but my /current/ job. This will allow me to add more focuses if need be. i.e., jobs, major hobbies, side projects, etc.
 
 Since I have a work machine (Ubuntu) and a personal machine (Arch btw) I have my focus variable set on startup based on what operating system is running. So when I sign into my work machine I'm always on my work focus.
 *** Example
@@ -94,15 +94,19 @@ I wanted to extend the YouTube url link in Org Mode by including time markings. 
 This function is used in the ":match" parameter for an Org-clocktable. It will pull all clocked times from my entire work journal directory.
 - This is very useful to record how much time I spent working on a specific project.
 - I usually follow the Org-clocktable with the corresponding tag associated with the project to filter all of my total work to the work in the project I want.
-  #+begin_src elisp
+#+begin_src elisp
 (defun vispero-journals() (directory-files-recursively "~/Dropbox/org/roam/vispero/journal" "\\.org$"))
 
 (defun vispero-roam() (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.\\(org\\|org_archive\\)$"))
 
+(defun sirius-journals() (directory-files-recursively "~/Dropbox/org/roam/sirius/journal" "\\.org$"))
+
+(defun sirius-roam() (directory-files-recursively "~/Dropbox/org/roam/sirius" "\\.\\(org\\|org_archive\\)$"))
+
 (defun personal-journals() (directory-files-recursively "~/Dropbox/org/roam/journal" "\\.org$"))
 
 (defun all-roam() (directory-files-recursively "~/Dropbox/org/roam" "\\.\\(org\\|org_archive\\)$"))
-  #+end_src
+#+end_src
 ** Create linkable UUID
 - Credit to Rainer König
 I use this function all the time to create a UUID link to a header file so I can keep track of the link even after I archive it.
@@ -242,19 +246,26 @@ the beginning of the list."
   (defvar dm--org-archive-type "archive.org_archive::datetree/")
   (defvar dm--org-archive-location-personal (concat org-roam-directory "personal_" dm--org-archive-type))
   (defvar dm--org-archive-location-vispero (concat dm--org-roam-vispero-dir "/" "vispero_" dm--org-archive-type))
+  (defvar dm--org-archive-location-sirius (concat dm--org-roam-sirius-dir "/" "sirius_" dm--org-archive-type))
+
   (defvar dm--org-archive-header-personal "\nArchived entries from personal files\n\n")
   (defvar dm--org-archive-header-vispero "\nArchived entries from Vispero files\n\n")
+  (defvar dm--org-archive-header-sirius "\nArchived entries from Sirius files\n\n")
 
   (defun my/set-org-variables ()
-        (cond ((string-equal dm--my-focus "vispero")
-               (setq org-archive-location dm--org-archive-location-vispero
-                     org-archive-file-header-format dm--org-archive-header-vispero))
-            ((string-equal dm--my-focus "personal")
+        (cond
+         ((string-equal dm--my-focus "vispero")
+            (setq org-archive-location dm--org-archive-location-vispero
+                org-archive-file-header-format dm--org-archive-header-vispero))
+         ((string-equal dm--my-focus "sirius")
+            (setq org-archive-location dm--org-archive-location-sirius
+                org-archive-file-header-format dm--org-archive-header-sirius))
+        ((string-equal dm--my-focus "personal")
+            (setq org-archive-location dm--org-archive-location-personal
+                org-archive-file-header-format dm--org-archive-header-personal))
+        ((string-equal dm--my-focus "all")
              (setq org-archive-location dm--org-archive-location-personal
-                    org-archive-file-header-format dm--org-archive-header-personal))
-            ((string-equal dm--my-focus "all")
-             (setq org-archive-location dm--org-archive-location-personal
-                    org-archive-file-header-format dm--org-archive-header-personal))
+                org-archive-file-header-format dm--org-archive-header-personal))
             (t (setq org-archive-location dm--org-archive-location-personal
                      org-archive-file-header-format dm--org-archive-header-personal))))
 
@@ -329,6 +340,7 @@ the beginning of the list."
       "Sets the org-capture-templates value based on what my current focus is. If my focus is 'personal' then the template, file name, and file path will be set to what I have defined as my personal tempaltes. This applies for all other defined focuses."
 
     (cond ((string-equal dm--my-focus "vispero") (setq +org-capture-todo-file dm--org-vispero-inbox-file-name))
+        ((string-equal dm--my-focus "sirius") (setq +org-capture-todo-file dm--org-sirius-inbox-file-name))
         ((string-equal dm--my-focus "personal") (setq +org-capture-todo-file dm--org-personal-inbox-file-name))
         ((string-equal dm--my-focus "all") (setq +org-capture-todo-file dm--org-personal-inbox-file-name))
         (t (setq +org-capture-todo-file dm--org-personal-inbox-file-name)))
@@ -353,7 +365,7 @@ the beginning of the list."
            "* TODO %^{What ToDo?}%? :new:")
 
           ("T" "Scheduled ToDo" entry (file+headline +org-capture-todo-file "Tasks")
-           "* TODO %^{What Todo?}%?\nSCHEDULED: %^{Schedule}t")
+           "* TODO %^{What Todo?}%? :new:\nSCHEDULED: %^{Schedule}t")
 
           ("i" "General New Idea" entry (file+headline +org-capture-todo-file "Ideas")
            "* %^{What's your idea?}%? :new:\n%i")
@@ -602,6 +614,8 @@ Refer to `org-agenda-prefix-format' for more information."
        ;; ((seq-contains-p (org-get-tags) "vispero")
        ((string-match-p "vispero" (buffer-file-name))
         subtree-end)
+       ((string-match-p "sirius" (buffer-file-name))
+        subtree-end)
        ((seq-contains-p (org-get-tags) "ignore")
         subtree-end)
        (t
@@ -622,14 +636,32 @@ Refer to `org-agenda-prefix-format' for more information."
        (t
         nil)))))
 
+(defun my-agenda-skip-non-sirius ()
+  "Skip tasks that are Sirius related by checking the file name."
+  (save-restriction
+    (widen)
+    (let ((subtree-end (save-excursion (org-end-of-subtree t))))
+      (cond
+       ;; Use this for checking tags instead of path name
+       ;; ((not (seq-contains-p (org-get-tags) "sirius"))
+       ((not (string-match-p "sirius" (buffer-file-name)))
+        subtree-end)
+       ((seq-contains-p (org-get-tags) "ignore")
+        subtree-end)
+       (t
+        nil)))))
+
 (defun my-agenda-skip-function-selector ()
   (cond ((string-equal dm--my-focus "vispero") (funcall #'my-agenda-skip-non-vispero))
+        ((string-equal dm--my-focus "sirius") (funcall #'my-agenda-skip-non-sirius))
         ((string-equal dm--my-focus "personal") (funcall #'my-agenda-skip-work))
         ((string-equal dm--my-focus "all") nil)
         (t nil)))
 
 (setq org-agenda-skip-function 'my-agenda-skip-function-selector)
 
+;; This isn't used anymore
+;; @TODO clean this up
 (setq my-agenda-work-cmd '(agenda
                            ""
                            ((org-agenda-span 'day)
@@ -1060,12 +1092,16 @@ capture was not aborted."
 
   (let ((head
         (with-temp-buffer
-        (cond ((string-equal dm--my-focus "vispero") (insert-file-contents dm--org-roam-vispero-people-template))
-                (t (insert-file-contents dm--org-roam-vispero-people-template)))
+        (cond
+         ((string-equal dm--my-focus "vispero") (insert-file-contents dm--org-roam-vispero-people-template))
+         ((string-equal dm--my-focus "sirius") (insert-file-contents dm--org-roam-sirius-people-template))
+         (t (insert-file-contents dm--org-roam-sirius-people-template)))
                 (buffer-string)))
         (file-name
-            (cond ((string-equal dm--my-focus "vispero") (expand-file-name "${slug}.org" dm--org-roam-vispero-dir))
-                    (t (expand-file-name "${slug}.org" org-roam-directory)))))
+            (cond
+             ((string-equal dm--my-focus "sirius") (expand-file-name "${slug}.org" dm--org-roam-sirius-dir))
+             ((string-equal dm--my-focus "vispero") (expand-file-name "${slug}.org" dm--org-roam-vispero-dir))
+             (t (expand-file-name "${slug}.org" org-roam-directory)))))
     ;; @TODO DJM clean up template system, add custom templates
    (org-roam-capture
    nil
@@ -1174,28 +1210,41 @@ capture was not aborted."
 (after! org-roam
     ;; Template and directory locations
     (defvar dm--org-templates-dir (expand-file-name "templates" doom-private-dir))
-    (defvar dm--org-roam-vispero-dir (expand-file-name "vispero" org-roam-directory))
     (defvar dm--org-personal-inbox-file-name (expand-file-name "personal_agenda.org" org-roam-directory))
     (defvar dm--org-roam-website-dir (expand-file-name "website" org-roam-directory))
-    (defvar dm--org-vispero-inbox-file-name (expand-file-name "vispero_agenda.org" dm--org-roam-vispero-dir))
     (defvar dm--org-roam-default-template (expand-file-name "roam-default.org" dm--org-templates-dir))
     (defvar dm--org-roam-new-area-template (expand-file-name "roam-new-area.org" dm--org-templates-dir))
     (defvar dm--org-roam-reading-template (expand-file-name "roam-reading.org" dm--org-templates-dir))
     (defvar dm--org-roam-reading-character-template (expand-file-name "roam-reading-character.org" dm--org-templates-dir))
+    (defvar dm--org-roam-japanese-vocabulary-template (expand-file-name "roam-japanese-vocabulary.org" dm--org-templates-dir))
+    (defvar dm--org-roam-japanese-dir (expand-file-name "japanese" org-roam-directory))
+
+    (defvar dm--org-roam-vispero-dir (expand-file-name "vispero" org-roam-directory))
+    (defvar dm--org-vispero-inbox-file-name (expand-file-name "vispero_agenda.org" dm--org-roam-vispero-dir))
     (defvar dm--org-roam-vispero-default-template (expand-file-name "roam-vispero-default.org" dm--org-templates-dir))
     (defvar dm--org-roam-vispero-tagged-template (expand-file-name "roam-vispero-tagged.org" dm--org-templates-dir))
     (defvar dm--org-roam-vispero-people-template (expand-file-name "roam-vispero-people.org" dm--org-templates-dir))
-    (defvar dm--org-roam-japanese-vocabulary-template (expand-file-name "roam-japanese-vocabulary.org" dm--org-templates-dir))
+
+    (defvar dm--org-roam-sirius-dir (expand-file-name "sirius" org-roam-directory))
+    (defvar dm--org-sirius-inbox-file-name (expand-file-name "sirius_agenda.org" dm--org-roam-sirius-dir))
+    (defvar dm--org-roam-sirius-default-template (expand-file-name "roam-sirius-default.org" dm--org-templates-dir))
+    (defvar dm--org-roam-sirius-tagged-template (expand-file-name "roam-sirius-tagged.org" dm--org-templates-dir))
+    (defvar dm--org-roam-sirius-people-template (expand-file-name "roam-sirius-people.org" dm--org-templates-dir))
+
     ;; Dailies file name and templates
-    (defvar dm--org-roam-personal-dailies-dir (expand-file-name "daily" org-roam-directory))
-    (defvar dm--org-roam-vispero-dailies-dir (expand-file-name "daily" dm--org-roam-vispero-dir))
-    (defvar dm--org-personal-daily-template (expand-file-name "personal-daily.org" dm--org-templates-dir))
-    (defvar dm--org-vispero-daily-template (expand-file-name "vispero-daily.org" dm--org-templates-dir))
     (defvar dm--org-roam-ref-general-template (expand-file-name "roam-ref-general.org" dm--org-templates-dir))
+
+    (defvar dm--org-roam-personal-dailies-dir (expand-file-name "daily" org-roam-directory))
+    (defvar dm--org-personal-daily-template (expand-file-name "personal-daily.org" dm--org-templates-dir))
     (defvar dm--org-personal-file-name "Personal %<%Y-%m-%d>.org")
+
+    (defvar dm--org-roam-vispero-dailies-dir (expand-file-name "daily" dm--org-roam-vispero-dir))
+    (defvar dm--org-vispero-daily-template (expand-file-name "vispero-daily.org" dm--org-templates-dir))
     (defvar dm--org-vispero-file-name "Vispero %<%Y-%m-%d>.org")
 
-    (defvar dm--org-roam-japanese-dir (expand-file-name "japanese" org-roam-directory))
+    (defvar dm--org-roam-sirius-dailies-dir (expand-file-name "daily" dm--org-roam-sirius-dir))
+    (defvar dm--org-sirius-daily-template (expand-file-name "sirius-daily.org" dm--org-templates-dir))
+    (defvar dm--org-sirius-file-name "Sirius %<%Y-%m-%d>.org")
 
     (defun dm/prompt-string (prompt variable)
       (set variable (read-string prompt)))
@@ -1208,7 +1257,9 @@ capture was not aborted."
       "Sets the org-roam-dailies-capture-templates value based on what my current focus is. If my focus is 'personal' then the template, file name, and file path will be set to what I have defined as my personal journal. This applies for all other defined focuses."
 
       ;; Set the dailies directory based on focus
-        (cond ((string-equal dm--my-focus "vispero") (setq org-roam-dailies-directory dm--org-roam-vispero-dailies-dir))
+        (cond
+            ((string-equal dm--my-focus "sirius") (setq org-roam-dailies-directory dm--org-roam-sirius-dailies-dir))
+            ((string-equal dm--my-focus "vispero") (setq org-roam-dailies-directory dm--org-roam-vispero-dailies-dir))
             ((string-equal dm--my-focus "personal") (setq org-roam-dailies-directory dm--org-roam-personal-dailies-dir))
             ((string-equal dm--my-focus "all") (setq org-roam-dailies-directory dm--org-roam-personal-dailies-dir))
             (t (setq org-roam-dailies-directory dm--org-roam-personal-dailies-dir)))
@@ -1216,12 +1267,16 @@ capture was not aborted."
         (setq org-roam-dailies-capture-templates
             (let ((head
                 (with-temp-buffer
-                (cond ((string-equal dm--my-focus "vispero") (insert-file-contents dm--org-vispero-daily-template))
-                        (t (insert-file-contents dm--org-personal-daily-template)))
+                (cond
+                 ((string-equal dm--my-focus "sirius") (insert-file-contents dm--org-sirius-daily-template))
+                 ((string-equal dm--my-focus "vispero") (insert-file-contents dm--org-vispero-daily-template))
+                    (t (insert-file-contents dm--org-personal-daily-template)))
                     (buffer-string)))
                   (file-name
-                   (cond ((string-equal dm--my-focus "vispero") dm--org-vispero-file-name)
-                         (t dm--org-personal-file-name))))
+                   (cond
+                    ((string-equal dm--my-focus "sirius") dm--org-sirius-file-name)
+                    ((string-equal dm--my-focus "vispero") dm--org-vispero-file-name)
+                    (t dm--org-personal-file-name))))
 
             ;; Backtick list
             `(("d" "default" plain "%?"
@@ -1355,6 +1410,28 @@ capture was not aborted."
           ;; Need to add ":ROAM_REFS: http://bugzilla.fsi.local/show_bug.cgi?id=${slug}" to property
           ("vb" "Vispero Bug" plain "- tags :: [[roam:Vispero Bugzilla]] %?\n* Notes\n* Logging\n"
            :if-new (file+head "vispero/bugs/Bug ${slug}.org" ":PROPERTIES:
+:ROAM_REFS: http://bugzilla.fsi.local/show_bug.cgi?id=${slug}
+:END:
+,#+TITLE: Bug ${title}\n#+filetags: :bug:\n")
+           :unnarrowed t)
+
+          ("s" "Sirius")
+          ("ss" "Sirius Default" plain (file ,dm--org-roam-default-template)
+           :target (file ,(expand-file-name "${slug}.org" dm--org-roam-sirius-dir))
+           :unnarrowed t)
+
+          ("st" "Sirius Tagged" plain (file ,dm--org-roam-sirius-tagged-template)
+           :target (file ,(expand-file-name "${slug}.org" dm--org-roam-sirius-dir))
+           :unnarrowed t)
+
+          ("sp" "Sirius People" plain (file ,dm--org-roam-sirius-people-template)
+           :target (file ,(expand-file-name "${slug}.org" dm--org-roam-sirius-dir))
+           :unnarrowed t)
+
+          ;; @TODO this might need to be removed or changed to whatever bug system is used at Sirius
+          ;; Need to add ":ROAM_REFS: http://bugzilla.fsi.local/show_bug.cgi?id=${slug}" to property
+          ("sb" "Sirius Bug" plain "- tags :: [[roam:Sirius Bugzilla]] %?\n* Notes\n* Logging\n"
+           :if-new (file+head "sirius/bugs/Bug ${slug}.org" ":PROPERTIES:
 :ROAM_REFS: http://bugzilla.fsi.local/show_bug.cgi?id=${slug}
 :END:
 ,#+TITLE: Bug ${title}\n#+filetags: :bug:\n")
@@ -1561,13 +1638,18 @@ If nil it defaults to `split-string-default-separators', normally
 #+begin_src elisp
 (defun my/set-agenda-files-personal ()
   "Sets the org-agenda-files to personal non journal/dailies"
-  (setq org-agenda-files (seq-filter (lambda(x) (not (string-match "/\\(vispero\\|journal\\|daily\\)/" (file-name-directory x))))
+  (setq org-agenda-files (seq-filter (lambda(x) (not (string-match "/\\(sirius\\|vispero\\|journal\\|daily\\)/" (file-name-directory x))))
         (directory-files-recursively "~/Dropbox/org/roam" "\\.org$"))))
 
 (defun my/set-agenda-files-vispero ()
   "Sets the org-agenda-files to Vispero non journal/dailies/bugs/reviews"
   (setq org-agenda-files (seq-filter (lambda(x) (not (string-match "/\\(journal\\|daily\\|bugs\\|reviews\\)/" (file-name-directory x))))
         (directory-files-recursively "~/Dropbox/org/roam/vispero" "\\.org$"))))
+
+(defun my/set-agenda-files-sirius ()
+  "Sets the org-agenda-files to Sirius non journal/dailies/bugs/reviews"
+  (setq org-agenda-files (seq-filter (lambda(x) (not (string-match "/\\(journal\\|daily\\|bugs\\|reviews\\)/" (file-name-directory x))))
+        (directory-files-recursively "~/Dropbox/org/roam/sirius" "\\.org$"))))
 
 (defun my/set-agenda-files-all ()
   "Sets the org-agenda-files to everything except journal/dailies"
@@ -1580,6 +1662,7 @@ If nil it defaults to `split-string-default-separators', normally
   (if dm--ignore-vulpea-agenda-files-update-for-done-state
         (cond
                 ((string-equal dm--my-focus "vispero") (funcall #'my/set-agenda-files-vispero))
+                ((string-equal dm--my-focus "sirius") (funcall #'my/set-agenda-files-sirius))
                 ((string-equal dm--my-focus "personal") (funcall #'my/set-agenda-files-personal))
                 ((string-equal dm--my-focus "all") (funcall #'my/set-agenda-files-all))
                 (t (funcall #'my/set-org-agenda-files-all)))
@@ -2042,8 +2125,9 @@ Current buffer focus : %`dm--focus-current-buffer
   ("A" org-agenda "Org Agenda")
   ("q" nil "Quit")
   ("1" my/org-focus-personal "Personal ":exit nil :column "Focus")
-  ("2" my/org-focus-vispero "Vispero ":exit nil :column "Focus")
-  ("3" my/org-focus-all "All":exit nil :column "Focus")
+  ("2" my/org-focus-sirius "Sirius ":exit nil :column "Focus")
+  ("3" my/org-focus-vispero "Vispero ":exit nil :column "Focus")
+  ("4" my/org-focus-all "All":exit nil :column "Focus")
   ("<" (lambda()
          (interactive)
          (call-interactively #'dm--toggle-agenda-buffer-focus))
@@ -2106,8 +2190,9 @@ Current focus : %`dm--my-focus
   ("X" org-capture "Org Capture")
   ("q" nil "Quit")
   ("1" my/org-focus-personal "Personal ":exit nil :column "Focus")
-  ("2" my/org-focus-vispero "Vispero ":exit nil :column "Focus")
-  ("3" my/org-focus-all "All":exit nil :column "Focus")
+  ("2" my/org-focus-sirius "Sirius ":exit nil :column "Focus")
+  ("3" my/org-focus-vispero "Vispero ":exit nil :column "Focus")
+  ("4" my/org-focus-all "All":exit nil :column "Focus")
 
   ("j" my/hydra/journal-capture/body "Journal Capture" :exit t)
   ("d" my/org-roam-dailies-goto-date "Goto Dailies" :exit t)
@@ -2136,8 +2221,9 @@ Current focus : %`dm--my-focus
 "
   ("q" nil "Quit")
   ("1" my/org-focus-personal "Personal ":exit nil :column "Focus")
-  ("2" my/org-focus-vispero "Vispero ":exit nil :column "Focus")
-  ("3" my/org-focus-all "All":exit nil :column "Focus")
+  ("2" my/org-focus-sirius "Sirius ":exit nil :column "Focus")
+  ("3" my/org-focus-vispero "Vispero ":exit nil :column "Focus")
+  ("4" my/org-focus-all "All":exit nil :column "Focus")
 
   ("j" (lambda()
          (interactive)
@@ -2171,8 +2257,9 @@ Current focus : %`dm--my-focus
 "
   ("q" nil "Quit")
   ("1" my/org-focus-personal "Personal ":exit nil :column "Focus")
-  ("2" my/org-focus-vispero "Vispero ":exit nil :column "Focus")
-  ("3" my/org-focus-all "All":exit nil :column "Focus")
+  ("2" my/org-focus-sirius "Sirius ":exit nil :column "Focus")
+  ("3" my/org-focus-vispero "Vispero ":exit nil :column "Focus")
+  ("4" my/org-focus-all "All":exit nil :column "Focus")
 
   ("R" org-roam-capture "Org-Roam Capture" :exit t)
   ("i" org-roam-node-insert  "Insert Node" :exit t)
@@ -2200,17 +2287,18 @@ Current focus : %`dm--my-focus
 Testing something %`dm--my-focus
 "
   ("1" my/org-focus-personal "Focus personal" :exit nil :column "Vertical")
-  ("2" my/org-focus-vispero "Focus Vispero" :exit nil :column "Vertical")
-  ("3" my/org-focus-all "All":exit nil :column "Vertical")
+  ("2" my/org-focus-sirius "Focus Sirius" :exit nil :column "Vertical")
+  ("3" my/org-focus-vispero "Focus Vispero" :exit nil :column "Vertical")
+  ("4" my/org-focus-all "All":exit nil :column "Vertical")
   ;; ("3" (cmd! (org-agenda nil "t")))
-  ("3" (lambda()
+  ("5" (lambda()
          (interactive)
          (call-interactively (org-agenda nil "t")))
    "Today" :column "Test")
 
-  ("4" my/org-focus-vispero "Focus Vispero" :exit nil :column "Horizontal")
-  ("5" my/org-focus-vispero "Focus Vispero" :exit nil :column "Test")
-  ("6" my/org-focus-vispero "Focus Vispero" :exit nil)
+  ("6" my/org-focus-vispero "Focus Vispero" :exit nil :column "Horizontal")
+  ("7" my/org-focus-vispero "Focus Vispero" :exit nil :column "Test")
+  ("8" my/org-focus-vispero "Focus Vispero" :exit nil)
 
   ("q" nil))
 #+end_src
@@ -2222,14 +2310,24 @@ Testing something %`dm--my-focus
   + Org-agenda views
   + Org-roam functionality
 #+begin_src elisp
-(defun my/org-focus-personal()
+(defun my/org-focus-personal ()
   (interactive)
   (setq dm--my-focus "personal")
   (my/call-focus-function-setters))
 
-(defun my/org-focus-vispero()
+(defun my/org-focus-vispero ()
   (interactive)
   (setq dm--my-focus "vispero")
+  (my/call-focus-function-setters))
+
+(defun my/org-focus-sirius ()
+  (interactive)
+  (setq dm--my-focus "sirius")
+  (my/call-focus-function-setters))
+
+(defun my/org-focus-all ()
+  (interactive)
+  (setq dm--my-focus "all")
   (my/call-focus-function-setters))
 
 (defun my/call-focus-function-setters ()
@@ -2357,28 +2455,24 @@ Testing something %`dm--my-focus
 * Work machine
 - This is only tangled if my operating system is "ubuntu", thus my work machine.
 #+begin_src elisp :tangle (if (eq (doom-system-distro) 'ubuntu) "config.el" "no")
-(setq dm--my-focus "vispero")
+(setq dm--my-focus "sirius")
 
-(setq org-journal-dir "~/Dropbox/org/roam/vispero/daily"
-      ;; org-journal-date-format "%A, %d %B %Y\n:CLOCKTABLE:\n#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:\n:END:\n"
-      org-journal-date-format "%A, %d %B %Y"
-      org-journal-file-header ":PROPERTIES:
-:ROAM_ALIASES: \"Vispero %A, %B %d %Y\"
-:END:
-:CLOCKTABLE:\n#+BEGIN: clocktable :scope vispero-roam :block %Y-%m-%d :maxlevel 9 :fileskip0 t\n#+END:\n:END:\n#+TITLE: Vispero %Y-%m-%d"
-      org-journal-file-type 'daily
-      org-journal-file-format "Vispero %Y-%m-%d.org"
-      )
+;; (setq org-journal-dir "~/Dropbox/org/roam/vispero/daily"
+;;       ;; org-journal-date-format "%A, %d %B %Y\n:CLOCKTABLE:\n#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:\n:END:\n"
+;;       org-journal-date-format "%A, %d %B %Y"
+;;       org-journal-file-header ":PROPERTIES:
+;; :ROAM_ALIASES: \"Vispero %A, %B %d %Y\"
+;; :END:
+;; :CLOCKTABLE:\n#+BEGIN: clocktable :scope vispero-roam :block %Y-%m-%d :maxlevel 9 :fileskip0 t\n#+END:\n:END:\n#+TITLE: Vispero %Y-%m-%d"
+;;       org-journal-file-type 'daily
+;;       org-journal-file-format "Vispero %Y-%m-%d.org"
+;;       )
 
 
 (setq doom-font (font-spec :family "Fira Code" :size 15)
       doom-variable-pitch-font (font-spec :family "Fira Code" :size 15)
       doom-big-font (font-spec :family "Fira Code" :size 24))
 #+end_src
-
-#+RESULTS:
-: #<font-spec nil nil Fira\ Code nil nil nil nil nil 24 nil nil nil nil>
-
 * Unused functions
 ** Checkbox attempts
 #+begin_src elisp :tangle no

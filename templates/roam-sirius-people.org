@@ -1,0 +1,6 @@
+#+TITLE: ${title}
+#+filetags: :people:%(s-upper-camel-case (string-replace "_" " " "${slug}")):sirius:
+- tags :: [[roam:Sirius People]]
+* Time off
+| Start | End | Total days | Description |
+|-------+-----+------------+-------------|

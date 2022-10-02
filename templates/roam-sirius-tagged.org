@@ -1,0 +1,4 @@
+#+TITLE: ${title}
+#+filetags: :sirius:
+- tags :: [[roam:Sirius]]  %?
+*
