@@ -209,7 +209,7 @@ the beginning of the list."
     ))
 
 (use-package! org-roam-dailies
-  :commands my/mark-done-at-scheduled-time
+  :commands (my/mark-done-at-scheduled-time my/mark-done-testing)
   :config
         ;; This doesn't work from org-agenda views
         (defun my/mark-done-at-scheduled-time ()
@@ -236,6 +236,28 @@ the beginning of the list."
             (save-window-excursion
                 (call-interactively 'org-store-link)
                 (org-roam-dailies--capture thetime nil "!D"))))
+
+        (defun my/mark-done-at-defined-time ()
+          (interactive)
+            (let* (
+                (org-refile-keep t) ;; Set this to nil to delete the original!
+                (org-id-link-to-org-use-id t)
+                (org-after-refile-insert-hook #'save-buffer)
+                (org-after-todo-state-change-hook (remq #'my/org-roam-copy-to-today-wrapper org-after-todo-state-change-hook))
+                (thetime (org-read-date))
+                (timestamp (org-encode-time (parse-time-string thetime))))
+
+            ;trick org-store-note into thinking the task was done when scheduled
+            (define-advice org-add-log-setup (:after (&rest _) trick-store-note)
+            (setq org-log-note-effective-time thetime))
+            (org-todo 'done)
+            (advice-remove 'org-add-log-setup #'org-add-log-setup@trick-store-note)
+            ;set LAST_REPEAT to reflect the latest scheduling of task
+            (org-add-planning-info 'closed timestamp)
+
+            (save-window-excursion
+                (call-interactively 'org-store-link)
+                (org-roam-dailies--capture timestamp nil "!D"))))
     )
 
 
