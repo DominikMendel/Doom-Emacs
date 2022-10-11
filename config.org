@@ -260,6 +260,29 @@ the beginning of the list."
                 (org-roam-dailies--capture timestamp nil "!D"))))
     )
 
+  (defun my/org-clock-in-at-specified-time (&rest _)
+    (interactive)
+    (require 'org-clock)
+    (require 'org-roam-dailies)
+    (let* ((thetime (org-read-date))
+           (timestamp (org-encode-time (parse-time-string thetime)))
+           (org-clock-in-hook (remq #'my/org-roam-capture-clock-in org-clock-in-hook))
+           (tags (vulpea-buffer-tags-get))
+           (org-id-link-to-org-use-id (if (-contains? tags "journal") "use-existing" t)))
+    (org-clock-in nil timestamp)
+    (org-roam-dailies--capture timestamp nil "!CI")))
+
+  (defun my/org-clock-out-at-specified-time (&rest _)
+    (interactive)
+    (require 'org-clock)
+    (require 'org-roam-dailies)
+    (let* ((thetime (org-read-date))
+           (timestamp (org-encode-time (parse-time-string thetime)))
+           (org-clock-out-hook (remq #'my/org-roam-capture-clock-out org-clock-out-hook))
+           (tags (vulpea-buffer-tags-get))
+           (org-id-link-to-org-use-id (if (-contains? tags "journal") "use-existing" t)))
+    (org-clock-out nil nil timestamp)
+    (org-roam-dailies--capture timestamp nil "!CO")))
 
 (after! (:and org org-roam)
   ;; (defvar dm--org-archive-type "%s_archive::datetree/")
@@ -1146,7 +1169,7 @@ capture was not aborted."
 #+end_src
 ** Attempting automatic done logging
 #+begin_src elisp :tangle yes
-(defun my/test-org-roam-copy-todo-to-today ()
+(defun my/test-org-roam-copy-todo-to-today (&rest _)
   (interactive)
   (let ((org-refile-keep t) ;; Set this to nil to delete the original!
         (head
@@ -1171,7 +1194,7 @@ capture was not aborted."
       (setq pos (point)))
     ))
 
-(defun my/org-roam-copy-todo-to-today ()
+(defun my/org-roam-copy-todo-to-today (&rest _)
   (interactive)
   (let ((org-refile-keep t) ;; Set this to nil to delete the original!
         (org-id-link-to-org-use-id t)
@@ -1181,7 +1204,7 @@ capture was not aborted."
       (call-interactively 'org-store-link)
       (org-roam-dailies-capture-today nil "!D"))))
 
-(defun my/org-roam-capture-plus-store-link()
+(defun my/org-roam-capture-plus-store-link (&rest _)
   (interactive)
   (call-interactively 'org-store-link)
   (org-roam-dailies-capture-today nil "!D"))
@@ -1189,18 +1212,18 @@ capture was not aborted."
 (after! (:and org org-roam)
     (add-hook 'org-after-todo-state-change-hook #'my/org-roam-copy-to-today-wrapper))
 
-(defun my/org-roam-copy-to-today-wrapper ()
+(defun my/org-roam-copy-to-today-wrapper (&rest _)
   (when (or (equal org-state "DONE") (equal org-state "COMPLETED"))
                     (my/org-roam-copy-todo-to-today)))
 
-(defun my/org-roam-capture-clock-in()
+(defun my/org-roam-capture-clock-in (&rest _)
   (interactive)
   (let* ((tags (vulpea-buffer-tags-get))
          ;; Should this use doom--setq-org-id-link-to-org-use-id-for-org-roam-find-file-h ?
          (org-id-link-to-org-use-id (if (-contains? tags "journal") "use-existing" t)))
         (org-roam-dailies-capture-today nil "!CI")))
 
-(defun my/org-roam-capture-clock-out()
+(defun my/org-roam-capture-clock-out (&rest _)
   (interactive)
   (let* ((tags (vulpea-buffer-tags-get))
          ;; Should this use doom--setq-org-id-link-to-org-use-id-for-org-roam-find-file-h ?
@@ -1322,7 +1345,7 @@ capture was not aborted."
                 :unnarrowed t
                 :immediate-finish t
                 :clock-in t)
-                ("!JL" "Journal Lunch" entry "* Lunch%?"
+                ("!JL" "Journal Lunch" entry "* Lunch :break:%?"
                 :target (file+head+olp ,file-name ,head ("Journal"))
                 :unnarrowed t
                 :immediate-finish t
@@ -1986,6 +2009,15 @@ tasks."
 (map! :n "M-8" 'harpoon-go-to-8)
 (map! :n "M-9" 'harpoon-go-to-9)
 
+;; Custom clocking functions
+(map!
+ :after org
+ :map org-mode-map
+ :localleader
+ (:prefix ("c" . "clock")
+  :desc "org-clock-in-at-time" "I" #'my/org-clock-in-at-specified-time
+  :desc "org-clock-in-at-time" "O" #'my/org-clock-out-at-specified-time
+  ))
 #+end_src
 *** Unused
 #+begin_src elisp :tangle no
@@ -2259,6 +2291,14 @@ Current focus : %`dm--my-focus
          (interactive)
          (call-interactively (org-roam-dailies-capture-today nil "jc")))
    "Clocked In")
+  ("T" (lambda()
+         (interactive)
+         (call-interactively (my/org-clock-in-at-specified-time)))
+   "Clocked In at Time")
+  ("O" (lambda()
+         (interactive)
+         (call-interactively (my/org-clock-out-at-specified-time)))
+   "Clock Out at Time")
   ("l" (lambda()
          (interactive)
          (call-interactively (org-roam-dailies-capture-today nil "!JL")))
