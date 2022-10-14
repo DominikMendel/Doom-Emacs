@@ -732,17 +732,17 @@ Refer to `org-agenda-prefix-format' for more information."
          :habit t
          :date today
          :order 2)
-        (:name "Overdue"
+        (:name "Overdue Deadline"
          :face error
          :deadline past
          :order 3)
         (:discard (:not (:scheduled past)))
-        (;; :name "Ongoing"
-         ;; :scheduled past
-         :auto-parent t
+        (:name "Previously Scheduled"
+         :face warning
+         :scheduled past
          :order 4)
-        ;; (:auto-parent t
-        ;;  :order 5)
+        (:auto-parent t
+         :order 5)
         (:discard (:anything t))))
 
 (setq my-super-group-alltodo-today
@@ -750,6 +750,7 @@ Refer to `org-agenda-prefix-format' for more information."
         ;; (:auto-category t)
         ;; You will see scheduled items from the agenda view, so discard any extras.
         (:discard (:scheduled today))
+        (:discard (:scheduled past))
         (:discard (:todo "SOMEDAY"))
         (:name "Important"
          :priority "A"
@@ -773,6 +774,7 @@ Refer to `org-agenda-prefix-format' for more information."
          :todo "BLOCKED"
          :order 7)
         (:discard (:not (:todo "TODO")))
+        (:discard (:scheduled future))
         (:auto-parent t
          :order 8)
         (:discard (:anything t))))
