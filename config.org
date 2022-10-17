@@ -816,6 +816,7 @@ Refer to `org-agenda-prefix-format' for more information."
          :order 7)
         (:discard (:not (:todo t)))
         (:discard (:todo "GOAL"))
+        (:discard (:tag "meeting"))
         (:discard (:scheduled (after ,date)))
         (
          ;; :auto-category t
