@@ -784,8 +784,12 @@ Refer to `org-agenda-prefix-format' for more information."
         (:auto-parent t)
         ))
 
-(setq my-super-group-alltodo-overview
-      '(
+(defun my/get-time-string-today-offset (dayOffSet)
+  (format-time-string "%Y-%m-%d %H:%M" (+ (string-to-number (format-time-string "%s" (current-time))) (* 86400 dayOffSet))))
+
+(defun my/get-super-group-alltodo-overview (dayOffSet)
+  (let ((date (my/get-time-string-today-offset dayOffSet)))
+    `(
         ;; (:auto-category t)
         ;; You will see scheduled items from the agenda view, so discard any extras.
         ;; (:discard (:scheduled today))
@@ -810,9 +814,9 @@ Refer to `org-agenda-prefix-format' for more information."
         (:name "Someday"
          :todo "SOMEDAY"
          :order 7)
-        ;; (:discard (:not (:todo "TODO")))
         (:discard (:not (:todo t)))
         (:discard (:todo "GOAL"))
+        (:discard (:scheduled (after ,date)))
         (
          ;; :auto-category t
          :auto-parent t
@@ -834,7 +838,7 @@ Refer to `org-agenda-prefix-format' for more information."
         ;;                   :todo ("INPROGRESS" "IN-REVIEW"))
         ;;                  (:name "Open Tasks"
         ;;                   :todo "TODO")))
-        (:discard (:anything t))))
+        (:discard (:anything t)))))
 
 (setq my-super-group-agenda-planning
       '(
@@ -1014,7 +1018,7 @@ Refer to `org-agenda-prefix-format' for more information."
                         )
                     )
             (alltodo "" ((org-agenda-overriding-header "")
-                         (org-super-agenda-groups my-super-group-alltodo-overview)))))
+                         (org-super-agenda-groups (my/get-super-group-alltodo-overview 5))))))
 
           ("b" "Bi-Week Overview"
           ((agenda "" ((org-agenda-overriding-header "Bi-Weekly view")
@@ -1024,7 +1028,7 @@ Refer to `org-agenda-prefix-format' for more information."
                         )
                     )
             (alltodo "" ((org-agenda-overriding-header "")
-                         (org-super-agenda-groups my-super-group-alltodo-overview)))))
+                         (org-super-agenda-groups (my/get-super-group-alltodo-overview 14))))))
 
           ("m" "Month Overview"
           ((agenda "" ((org-agenda-overriding-header "Month view")
@@ -1036,7 +1040,7 @@ Refer to `org-agenda-prefix-format' for more information."
                         )
                     )
             (alltodo "" ((org-agenda-overriding-header "")
-                         (org-super-agenda-groups my-super-group-alltodo-overview)))))
+                         (org-super-agenda-groups (my/get-super-group-alltodo-overview 30))))))
 
           ("y" "Year Overview"
           ((agenda "" ((org-agenda-overriding-header "Year view")
@@ -1046,7 +1050,7 @@ Refer to `org-agenda-prefix-format' for more information."
                         )
                     )
             (alltodo "" ((org-agenda-overriding-header "")
-                         (org-super-agenda-groups my-super-group-alltodo-overview)))))
+                         (org-super-agenda-groups (my/get-super-group-alltodo-overview 365))))))
 
 
           ("W" . "Weekly Review Helper")
