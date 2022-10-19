@@ -381,7 +381,8 @@ the beginning of the list."
 (defun my/org-capture-plus-store-link()
   (interactive)
   (call-interactively 'org-store-link)
-  (org-capture nil "jJ"))
+  ;; (org-capture nil "jJ"))
+  (org-roam-dailies-capture-today nil "jl"))
 (global-set-key (kbd "<f4>") 'my/org-capture-plus-store-link)
 
 (after! (:and org org-roam)
@@ -1164,10 +1165,11 @@ capture was not aborted."
    nil
    :filter-fn (my/org-roam-filter-by-tag "people")
    :templates
-   `(("h" "Helping" plain ""
+   ;; `(("h" "Helping" plain ""
+   `(("h" "Helping" entry "* Helping %<%Y-%m-%d %a %H:%M>"
       :clock-in t
       :unnarrowed t
-        :target (file+head+olp ,file-name ,head ("Helping"))))
+        :target (file+head+olp ,file-name ,head ("Helping :helping:"))))
                         )))
 
 (defun my/org-roam-capture-projects ()
