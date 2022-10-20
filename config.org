@@ -270,23 +270,26 @@ the beginning of the list."
            (org-clock-in-hook (remq #'my/org-roam-capture-clock-in org-clock-in-hook))
            (tags (vulpea-buffer-tags-get))
            (org-id-link-to-org-use-id (if (-contains? tags "journal") "use-existing" t)))
-      (if (org-clock-is-active)
-          (my/org-clock-out-at-specified-time thetime)
-        nil)
+      (when (org-clock-is-active)
+          (my/org-clock-out-at-specified-time thetime))
+
       (org-clock-in nil timestamp)
-    (org-roam-dailies--capture timestamp nil "!CI")))
+      (org-roam-dailies--capture timestamp nil "!CI")))
 
   (defun my/org-clock-out-at-specified-time (&optional time &rest _)
     (interactive)
     (require 'org-clock)
     (require 'org-roam-dailies)
-    (let* ((thetime (or time (org-read-date)))
+    (cl-letf* ((thetime (or time (org-read-date)))
            (timestamp (org-encode-time (parse-time-string thetime)))
-           (org-clock-out-hook (remq #'my/org-roam-capture-clock-out org-clock-out-hook))
+           ((symbol-function #'temp/org-clock-out) (symbol-function #'org-clock-out))
            (tags (vulpea-buffer-tags-get))
            (org-id-link-to-org-use-id (if (-contains? tags "journal") "use-existing" t)))
-      (org-clock-out nil nil timestamp)
-    (org-roam-dailies--capture timestamp nil "!CO")))
+
+      (advice-remove #'temp/org-clock-out #'my/org-roam-capture-clock-out)
+      ;; The capture needs to be called before the clock-out due to the %K in the template
+      (org-roam-dailies--capture timestamp nil "!CO")
+      (temp/org-clock-out nil nil timestamp)))
 
 (after! (:and org org-roam)
   ;; (defvar dm--org-archive-type "%s_archive::datetree/")
@@ -1244,7 +1247,9 @@ capture was not aborted."
         (org-roam-dailies-capture-today nil "!CO")))
 
 (add-hook 'org-clock-in-hook #'my/org-roam-capture-clock-in)
-(add-hook 'org-clock-out-hook #'my/org-roam-capture-clock-out)
+;; I've had some timing issues with org-clock-in versus clock-out,
+;; so to fix that I'm using advices before the clock-out.
+(advice-add 'org-clock-out :before #'my/org-roam-capture-clock-out)
 #+end_src
 ** Capture templates
 #+begin_src elisp
@@ -1340,12 +1345,14 @@ capture was not aborted."
             `(("d" "default" plain "%?"
                 :target (file+head ,file-name ,head)
                 :unarrowed t)
-                ("!CI" "Clocking In" item "1. %<%H:%M> %a"
+                ("!CI" "Clocking In" item "1. %<%H:%M> %K"
                 :unnarrowed t
                 :immediate-finish t
                 :clock-keep t
                 :target (file+head+olp ,file-name ,head ("Clock History" "Clock In")))
-                ("!CO" "Clocking Out" item "1. %<%H:%M> %a"
+                ;; %K is the current clocked in task. So this capture template must be ran
+                ;; BEFORE the clock is clocked out.
+                ("!CO" "Clocking Out" item "1. %<%H:%M> %K"
                 :unnarrowed t
                 :immediate-finish t
                 :clock-keep t
