@@ -2539,6 +2539,10 @@ Testing something %`dm--my-focus
 #+begin_src elisp :tangle (if (eq (doom-system-distro) 'ubuntu) "config.el" "no")
 (setq dm--my-focus "sirius")
 
+;; This is used to help with Windows to WSL Ubuntu file paths.
+;; The `find-file-visit-truename nil` only works if manually navigating to a path
+(setq directory-abbrev-alist '(("/mnt/c/Users/dmendel/Dropbox" . "/home/dmendel/Dropbox")))
+
 ;; (setq org-journal-dir "~/Dropbox/org/roam/vispero/daily"
 ;;       ;; org-journal-date-format "%A, %d %B %Y\n:CLOCKTABLE:\n#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:\n:END:\n"
 ;;       org-journal-date-format "%A, %d %B %Y"
