@@ -280,16 +280,19 @@ the beginning of the list."
     (interactive)
     (require 'org-clock)
     (require 'org-roam-dailies)
-    (cl-letf* ((thetime (or time (org-read-date)))
+    ;; (cl-letf* ((thetime (or time (org-read-date)))
+    (let* ((thetime (or time (org-read-date)))
            (timestamp (org-encode-time (parse-time-string thetime)))
-           ((symbol-function #'temp/org-clock-out) (symbol-function #'org-clock-out))
+           (org-clock-out-hook (remq #'my/org-roam-capture-clock-out org-clock-out-hook))
+           ;; ((symbol-function #'temp/org-clock-out) (symbol-function #'org-clock-out))
            (tags (vulpea-buffer-tags-get))
            (org-id-link-to-org-use-id (if (-contains? tags "journal") "use-existing" t)))
 
-      (advice-remove #'temp/org-clock-out #'my/org-roam-capture-clock-out)
+      ;; (advice-remove #'temp/org-clock-out #'my/org-roam-capture-clock-out)
       ;; The capture needs to be called before the clock-out due to the %K in the template
       (org-roam-dailies--capture timestamp nil "!CO")
-      (temp/org-clock-out nil nil timestamp)))
+      ;; (temp/org-clock-out nil nil timestamp)))
+      (org-clock-out nil nil timestamp)))
 
 (after! (:and org org-roam)
   ;; (defvar dm--org-archive-type "%s_archive::datetree/")
@@ -1243,13 +1246,38 @@ capture was not aborted."
   (interactive)
   (let* ((tags (vulpea-buffer-tags-get))
          ;; Should this use doom--setq-org-id-link-to-org-use-id-for-org-roam-find-file-h ?
-         (org-id-link-to-org-use-id (if (-contains? tags "journal") "use-existing" t)))
+         (org-id-link-to-org-use-id (if (-contains? tags "journal") "use-existing" t))
+         (+org-roam-link-to-org-use-id (if (-contains? tags "journal") "use-existing" t)))
+    (message "Tags are %s" tags)
+    (message "OrgId = %s, roam ID = %s" org-id-link-to-org-use-id +org-roam-link-to-org-use-id)
+    ;; (save-window-excursion
+    ;; (save-mark-and-excursion
+    ;; (org-clock-goto)
+    ;; (call-interactively 'org-store-link))
+    ;; (org-store-link))
         (org-roam-dailies-capture-today nil "!CO")))
 
+;; (defun my/org-clock-in (&rest _)
+;;   (interactive)
+;;   (when (org-clocking-p)
+;;     (my/org-roam-capture-clock-out))
+
+;;   (org-clock-in)
+;;   (my/org-roam-capture-clock-in))
+
+;; (defun my/org-clock-out (&rest _)
+;;   (interactive)
+;;   (when (org-clocking-p)
+;;     (my/org-roam-capture-clock-out))
+
+;;   (org-clock-out))
+
 (add-hook 'org-clock-in-hook #'my/org-roam-capture-clock-in)
+;; (add-hook 'org-clock-in-hook #'save-buffer)
+(add-hook 'org-clock-out-hook #'my/org-roam-capture-clock-out)
 ;; I've had some timing issues with org-clock-in versus clock-out,
 ;; so to fix that I'm using advices before the clock-out.
-(advice-add 'org-clock-out :before #'my/org-roam-capture-clock-out)
+;; (advice-add 'org-clock-out :before #'my/org-roam-capture-clock-out)
 #+end_src
 ** Capture templates
 #+begin_src elisp
@@ -1345,14 +1373,18 @@ capture was not aborted."
             `(("d" "default" plain "%?"
                 :target (file+head ,file-name ,head)
                 :unarrowed t)
-                ("!CI" "Clocking In" item "1. %<%H:%M> %K"
+                ;; ("!CI" "Clocking In" item "1. %<%H:%M> %K"
+                ("!CI" "Clocking In" item "1. %<%H:%M> %a"
+                ;; ("!CI" "Clocking In" item "1. %<%H:%M> [[roam:%k]]"
                 :unnarrowed t
                 :immediate-finish t
                 :clock-keep t
                 :target (file+head+olp ,file-name ,head ("Clock History" "Clock In")))
                 ;; %K is the current clocked in task. So this capture template must be ran
                 ;; BEFORE the clock is clocked out.
-                ("!CO" "Clocking Out" item "1. %<%H:%M> %K"
+                ;; ("!CO" "Clocking Out" item "1. %<%H:%M> %K"
+                ("!CO" "Clocking Out" item "1. %<%H:%M> %a"
+                ;; ("!CO" "Clocking Out" item "1. %<%H:%M> [[roam:%k]]"
                 :unnarrowed t
                 :immediate-finish t
                 :clock-keep t
@@ -1823,14 +1855,15 @@ If nil it defaults to `split-string-default-separators', normally
       (save-excursion
         (ignore-errors
           (org-back-to-heading)
-          (when (eq 'todo (org-element-property
-                           :todo-type
-                           (org-element-at-point)))
+          ;; (when (eq 'todo (org-element-property
+          ;;                  :todo-type
+          ;;                  (org-element-at-point)))
             (org-set-tags
              (seq-uniq
               (cons
                (vulpea--title-to-tag title)
-               (org-get-tags nil t))))))))))
+               (org-get-tags nil t)))))))))
+;; )
 
 (add-hook 'vulpea-insert-handle-functions
           #'my-vulpea-insert-handle)
