@@ -2071,6 +2071,23 @@ tasks."
   :desc "org-clock-in-at-time" "I" #'my/org-clock-in-at-specified-time
   :desc "org-clock-in-at-time" "O" #'my/org-clock-out-at-specified-time
   ))
+
+;; winum like spacemacs
+(map! :after winum :leader
+      :n "0" #'winum-select-window-0-or-10
+      :n "1" #'winum-select-window-1
+      :n "2" #'winum-select-window-2
+      :n "3" #'winum-select-window-3
+      :n "4" #'winum-select-window-4
+      :n "5" #'winum-select-window-5
+      :n "6" #'winum-select-window-6
+      :n "7" #'winum-select-window-7
+      :n "8" #'winum-select-window-8
+      :n "9" #'winum-select-window-9)
+(after! (winum which-key)
+  (push '((nil . "winum-select-window-[0-9]") . t) which-key-replacement-alist))
+(after! winum
+  (setq winum-scope 'global))
 #+end_src
 *** Unused
 #+begin_src elisp :tangle no
