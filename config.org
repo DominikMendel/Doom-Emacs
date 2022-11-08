@@ -1544,6 +1544,13 @@ capture was not aborted."
            :target (file ,(expand-file-name "%(url-host (url-generic-parse-url \"${ref}\"))-${slug}.org" dm--org-roam-website-dir))
            :unnarrowed t)
 
+        ("j" "jira" plain "- tags :: [[roam:Sirius Jira]] %?\n* TODO ${title}\nSCHEDULED: %^{Schedule}t"
+           :if-new (file+head "sirius/jira/${title}.org" ":PROPERTIES:
+:ROAM_REFS: ${ref}
+:END:
+,#+TITLE: ${title}\n#+filetags: :jira:\n")
+           :unnarrowed t)
+
         ("r" "review" plain "- tags :: [[roam:Vispero Swarm Reviews]] %?\n* TODO ${title}\nSCHEDULED: %^{Schedule}t"
            :if-new (file+head "vispero/reviews/${title}.org" ":PROPERTIES:
 :ROAM_REFS: ${ref}
