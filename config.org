@@ -782,7 +782,9 @@ Refer to `org-agenda-prefix-format' for more information."
          :order 7)
         (:discard (:not (:todo "TODO")))
         (:discard (:scheduled future))
-        (:auto-parent t
+        ;; (:auto-parent t
+        ;; Auto-parent for whatever reason excludes titles with "[ ]" like Jira tickets
+        (:auto-todo t
          :order 8)
         (:discard (:anything t))))
 
@@ -827,7 +829,9 @@ Refer to `org-agenda-prefix-format' for more information."
         (:discard (:scheduled (after ,date)))
         (
          ;; :auto-category t
-         :auto-parent t
+         ;; :auto-parent t
+         ;; Auto-parent for whatever reason excludes titles with "[ ]" like Jira tickets
+         :auto-todo t
          :order 6)
 
         ;; (:order-multi (6 (:todo "TODO") (:auto-category t)))
