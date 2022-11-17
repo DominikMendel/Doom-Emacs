@@ -389,7 +389,7 @@ the beginning of the list."
   (call-interactively 'org-store-link)
   ;; (org-capture nil "jJ"))
   (org-roam-dailies-capture-today nil "jl"))
-(global-set-key (kbd "<f4>") 'my/org-capture-plus-store-link)
+;; (global-set-key (kbd "<f4>") 'my/org-capture-plus-store-link)
 
 (after! (:and org org-roam)
   (defun my/set-org-capture-templates()
