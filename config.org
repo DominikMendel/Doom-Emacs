@@ -579,6 +579,12 @@ Added on %U - Last reviewed on %U
     (add-to-list 'org-tags-exclude-from-inheritance "project")
     (add-to-list 'org-tags-exclude-from-inheritance "ARCHIVE"))
 
+(defun my/enable-relative-line-numbers ()
+  (display-line-numbers-mode)
+  (setq-local display-line-numbers 'visual))
+
+(add-hook 'org-agenda-mode-hook #'my/enable-relative-line-numbers)
+
 ;; @TODO Need to set the list. The goal is to remove "A" as archive as subtree.
 ;; (after! org-agenda
 ;;   (add-to-list 'org-agenda-bulk-custom-functions
