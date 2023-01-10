@@ -749,13 +749,17 @@ Refer to `org-agenda-prefix-format' for more information."
          :face error
          :deadline past
          :order 3)
+        (:name "Approaching Deadline"
+         :face warning
+         :deadline future
+         :order 4)
         (:discard (:not (:scheduled past)))
         (:name "Previously Scheduled"
          :face warning
          :scheduled past
-         :order 4)
-        (:auto-parent t
          :order 5)
+        (:auto-parent t
+         :order 6)
         (:discard (:anything t))))
 
 (setq my-super-group-alltodo-today
