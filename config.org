@@ -1410,12 +1410,14 @@ capture was not aborted."
                 :target (file+head+olp ,file-name ,head ("Journal"))
                 :unnarrowed t
                 :immediate-finish t
-                :clock-in t)
+                ;; :clock-in t)
+                :jump-to-captured t)
                 ("!JL" "Journal Lunch" entry "* Lunch :break:%?"
                 :target (file+head+olp ,file-name ,head ("Journal"))
                 :unnarrowed t
                 :immediate-finish t
-                :clock-in t)
+                ;; :clock-in t)
+                :jump-to-captured t)
                 ("jj" "Journal New Entry" entry "* %?"
                 :target (file+head+olp ,file-name ,head ("Journal")))
                 ("jl" "Journal Link" entry "* %a %?"
