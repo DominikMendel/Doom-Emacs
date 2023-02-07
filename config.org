@@ -803,6 +803,9 @@ Refer to `org-agenda-prefix-format' for more information."
         (:auto-parent t)
         ))
 
+(setq my-super-group-todo-done-groups
+      '((:discard (:tag "jira"))))
+
 (defun my/get-time-string-today-offset (dayOffSet)
   (format-time-string "%Y-%m-%d %H:%M" (+ (string-to-number (format-time-string "%s" (current-time))) (* 86400 dayOffSet))))
 
@@ -1079,7 +1082,9 @@ Refer to `org-agenda-prefix-format' for more information."
           ("Wn" "New Tasks"
            ((tags "new" ((org-agenda-overriding-header "Remove new tag and assign TODO states and priorities")))))
           ("Wd" "Done Tasks"
-           ((todo "DONE|COMPLETED|CANCELLED|ABANDONED|ANSWERED|ACHIEVED|MISSED" ((org-agenda-overriding-header "Archive all DONE items")
+           ((todo "DONE|COMPLETED|CANCELLED|ABANDONED|ANSWERED|ACHIEVED|MISSED"
+                  ((org-agenda-overriding-header "Archive all DONE items")
+                   (org-super-agenda-groups my-super-group-todo-done-groups)
                          ))))
           ))
 
