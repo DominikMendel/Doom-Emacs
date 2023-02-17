@@ -2188,7 +2188,7 @@ tasks."
   Switch Window: _h_:left  _j_:down  _k_:up  _l_:right  _U_:undo  _R_:redo
     Move Window: _H_:left  _J_:down  _K_:up  _L_:right
         Buffers: _p_revious  _n_ext  _b_:select  _f_ind-file  _p_roject
-         Resize: _y_:splitter left  _u_:splitter down  _i_:splitter up  _o_:splitter right
+         Resize: _y_:splitter left  _u_:splitter down  _i_:splitter up  _o_:splitter right  _=_:balance
          Scroll: _a_:up  _z_:down
      Workspaces: _1_  _2_  _3_  _4_  _5_  _N_ew  _D_elete
 "
@@ -2219,6 +2219,7 @@ tasks."
   ("/" split-window-right)
 
   ("c" delete-window)
+  ("x" delete-window)
   ("o" delete-other-windows)
 
   ("y" (lambda()
@@ -2233,6 +2234,7 @@ tasks."
   ("o" (lambda()
          (interactive)
          (call-interactively (hydra-move-splitter-right 10))))
+  ("=" balance-windows)
 
   ("1" +workspace/switch-to-0)
   ("2" +workspace/switch-to-1)
