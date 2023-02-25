@@ -8,6 +8,9 @@
 (package! harpoon)
 (package! origami)
 
+;; Temporary fix for emacsql breaking on pre Emacs-29
+(package! emacsql :pin "c1a4407")
+
 ;; (unpin! org-roam company-org-roam)
 ;;; $DOOMDIR/packages.el
 
