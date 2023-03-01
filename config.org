@@ -2519,6 +2519,25 @@ Testing something %`dm--my-focus
   lsp-rust-analyzer-cargo-watch-command "clippy"
   ))
 #+end_src
+** C++
+#+begin_src elisp
+(after! lsp-clangd
+  (setq lsp-clients-clangd-args
+        '("-j=3"
+          "--background-index"
+          "--clang-tidy"
+          "--completion-style=detailed"
+          "--header-insertion=never"
+          "--header-insertion-decorators=0"))
+  (set-lsp-priority! 'clangd 2))
+#+end_src
+* Jira
+#+begin_src elisp
+;; (setq jiralib-url "https://ips-jira.siriusxm.com")
+(setq jiralib-url "ips-jira-int.siriusxm.com")
+(setq request-log-level 'blather)
+(setq request-message-level 'blather)
+#+end_src
 * Personal Machine
 - This is only tangled if my operating system is "arch", thus my personal machine.
 #+begin_src elisp :tangle (if (eq (doom-system-distro) 'arch) "config.el" "no")
