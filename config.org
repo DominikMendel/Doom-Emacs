@@ -2052,7 +2052,13 @@ tasks."
       :desc "Goto date" "n r d d" #'my/org-roam-dailies-goto-date
       :desc "Goto tomorrow" "n r d m" #'my/org-roam-dailies-goto-tomorrow
       :desc "Goto yesterday" "n r d y" #'my/org-roam-dailies-goto-yesterday
+      :desc "Jump to Header/C++" "c h" #'lsp-clangd-find-other-file
       )
+
+;; This doesn't work. How to remove C-z?
+;; (map!
+;;  :map evil-mode-map-alist
+;;  :n "C-z" nil)
 
 ;; Make Tab to fold groups and Shift-Tab to default back to org-agenda-goto
 (map! :after evil-org-agenda
