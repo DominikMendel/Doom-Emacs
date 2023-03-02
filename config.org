@@ -2060,10 +2060,10 @@ tasks."
   (interactive)
   (lsp-clangd-find-other-file t))
 
-;; This doesn't work. How to remove C-z?
-;; (map!
-;;  :map evil-mode-map-alist
-;;  :n "C-z" nil)
+;; Remove C-z keybind
+(after! evil
+  (map! :map 'evil-motion-state-map "C-z" nil)
+  (map! :map 'magit-mode-map :n "C-z" nil))
 
 ;; Make Tab to fold groups and Shift-Tab to default back to org-agenda-goto
 (map! :after evil-org-agenda
