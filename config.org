@@ -1556,6 +1556,9 @@ capture was not aborted."
            :unnarrowed t)
           ))
 
+(defun my/url-format (path1 path2 title)
+  (concat path1 "/" path2 "/" (string-replace "/" "-" title) ".org"))
+
   (setq org-roam-capture-ref-templates
         `(("g" "general" plain (file ,dm--org-roam-ref-general-template)
            :target (file ,(expand-file-name "%(url-host (url-generic-parse-url \"${ref}\"))-${slug}.org" dm--org-roam-website-dir))
@@ -1568,12 +1571,19 @@ capture was not aborted."
 ,#+TITLE: ${title}\n#+filetags: :jira:\n")
            :unnarrowed t)
 
-        ("r" "review" plain "- tags :: [[roam:Vispero Swarm Reviews]] %?\n* TODO ${title}\nSCHEDULED: %^{Schedule}t"
-           :if-new (file+head "vispero/reviews/${title}.org" ":PROPERTIES:
+        ("r" "review" plain "- tags :: [[roam:Sirius Reviews]] %?\n* TODO ${title}\nSCHEDULED: %^{Schedule}t"
+           :if-new (file+head ,(my/url-format "sirius" "reviews" "${slug}") ":PROPERTIES:
 :ROAM_REFS: ${ref}
 :END:
-,#+TITLE: ${title} for %^{prompt}\n#+filetags: :review:\n")
+,#+TITLE: ${title}\n#+filetags: :review:\n")
            :unnarrowed t)
+
+;;         ("r" "review" plain "- tags :: [[roam:Vispero Swarm Reviews]] %?\n* TODO ${title}\nSCHEDULED: %^{Schedule}t"
+;;            :if-new (file+head "vispero/reviews/${title}.org" ":PROPERTIES:
+;; :ROAM_REFS: ${ref}
+;; :END:
+;; ,#+TITLE: ${title} for %^{prompt}\n#+filetags: :review:\n")
+;;            :unnarrowed t)
 
         ("b" "bug" plain "- tags :: [[roam:Vispero Bugzilla]] %?\n* ${title}\n** Notes\n"
            :if-new (file+head "vispero/bugs/${title}.org" ":PROPERTIES:
