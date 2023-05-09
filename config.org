@@ -1329,6 +1329,12 @@ capture was not aborted."
     (defvar dm--org-roam-japanese-vocabulary-template (expand-file-name "roam-japanese-vocabulary.org" dm--org-templates-dir))
     (defvar dm--org-roam-japanese-dir (expand-file-name "japanese" org-roam-directory))
 
+
+
+    (defvar dm--org-roam-sirius-dir (expand-file-name "sirius" org-roam-directory))
+    (defvar dm--org-roam-sirius-review-dir (expand-file-name "reviews" dm--org-roam-sirius-dir))
+    (defvar dm--org-roam-jama-review-template (expand-file-name "roam-jama-review.org" dm--org-templates-dir))
+
     (defvar dm--org-roam-vispero-dir (expand-file-name "vispero" org-roam-directory))
     (defvar dm--org-vispero-inbox-file-name (expand-file-name "vispero_agenda.org" dm--org-roam-vispero-dir))
     (defvar dm--org-roam-vispero-default-template (expand-file-name "roam-vispero-default.org" dm--org-templates-dir))
@@ -1559,6 +1565,19 @@ capture was not aborted."
 (defun my/url-format (path1 path2 title)
   (concat path1 "/" path2 "/" (string-replace "/" "-" title) ".org"))
 
+(defun my/parse-jama-review (path1 path2 title url)
+ (concat path1 "/" path2 "/" title (string-remove-prefix "/r:REV-" (url-target (url-generic-parse-url (string url))))))
+
+(defun my/parse-jama-review-url (url)
+  (message "Url being called = " url)
+ (string-remove-prefix "/r:REV-" (url-target (url-generic-parse-url url))))
+
+(defun my/parse-jama-review-short (url)
+  (concat ":PROPERTIES:\n:ROAM_REFS: " url "\n:END:\n#+TITLE: Jama review - " (my/parse-jama-review-url url) "\n#+filetags: :review:\n"))
+
+(defun my/jama-test (url)
+  (expand-file-name (concat "Jama review - " (my/parse-jama-review-url url) ".org") dm--org-roam-sirius-review-dir))
+
   (setq org-roam-capture-ref-templates
         `(("g" "general" plain (file ,dm--org-roam-ref-general-template)
            :target (file ,(expand-file-name "%(url-host (url-generic-parse-url \"${ref}\"))-${slug}.org" dm--org-roam-website-dir))
@@ -1576,6 +1595,26 @@ capture was not aborted."
 :ROAM_REFS: ${ref}
 :END:
 ,#+TITLE: ${title}\n#+filetags: :review:\n")
+           :unnarrowed t)
+
+        ;; ("z" "jama" plain "- tags :: [[roam:Sirius Reviews]] %?\n* TODO ${title}\nSCHEDULED: %^{Schedule}t"
+        ;;    :if-new (file ,dm--org-roam-jama-review-template)
+
+        ("z" "jama" plain (file ,dm--org-roam-jama-review-template)
+           :target (file ,(expand-file-name "Jama_Reviews.org" dm--org-roam-sirius-review-dir))
+           ;; :target (file ,(expand-file-name (my/parse-jama-review-url "${ref}") dm--org-roam-sirius-review-dir))
+           ;; :target (file ,(expand-file-name (concat "Jama review - " (my/parse-jama-review-url "${ref}") ".org") dm--org-roam-sirius-review-dir))
+
+         ;; Working-ish
+           ;; :target (file ,(my/jama-test "${ref}"))
+
+           ;; :if-new (file+head ,(my/parse-jama-review "sirius" "reviews" "Jama review - " "${ref}") ,(my/parse-jama-review-short "${ref}"))
+
+;;            :if-new (file+head ,(my/parse-jama-review "sirius" "reviews" "Jama review - " "${ref}") ":PROPERTIES:
+;; :ROAM_REFS: ${ref}
+;; :END:
+;; ,#+TITLE: Jama review - %(my/parse-jama-review-short ${ref})\n#+filetags: :review:\n")
+;; ,#+TITLE: ${title}\n#+filetags: :review:\n")
            :unnarrowed t)
 
 ;;         ("r" "review" plain "- tags :: [[roam:Vispero Swarm Reviews]] %?\n* TODO ${title}\nSCHEDULED: %^{Schedule}t"
