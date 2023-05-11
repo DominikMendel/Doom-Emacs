@@ -1590,7 +1590,7 @@ capture was not aborted."
 ,#+TITLE: ${title}\n#+filetags: :jira:\n")
            :unnarrowed t)
 
-        ("r" "review" plain "- tags :: [[roam:Sirius Reviews]] %?\n* TODO ${title}\nSCHEDULED: %^{Schedule}t"
+        ("r" "review" plain "- tags :: [[roam:Sirius Reviews]] %?\n* TODO Review ${title}\nSCHEDULED: %^{Schedule}t"
            :if-new (file+head ,(my/url-format "sirius" "reviews" "${slug}") ":PROPERTIES:
 :ROAM_REFS: ${ref}
 :END:
