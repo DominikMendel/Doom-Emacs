@@ -754,10 +754,23 @@ Refer to `org-agenda-prefix-format' for more information."
          :deadline future
          :order 4)
         (:discard (:not (:scheduled past)))
-        (:name "Previously Scheduled"
-         :face warning
-         :scheduled past
-         :order 5)
+        ;; (:name "Previously Scheduled"
+        ;;  :face warning
+        ;;  :scheduled past
+        ;;  :order 5)
+        (:order-multi (5
+                       (:name "Reviews To-Do"
+                        :tag "review")
+                       (:name "Previously Scheduled To-Do"
+                        :face warning
+                        :and (:scheduled past :todo "TODO"))
+                       (:name "Previously Scheduled Inprogress"
+                        :face warning
+                        :and (:scheduled past :todo "INPROGRESS"))
+                       (:name "Previously Scheduled In-Review"
+                        :face warning
+                        :and (:scheduled past :todo "IN-REVIEW"))
+                       ))
         (:auto-parent t
          :order 6)
         (:discard (:anything t))))
