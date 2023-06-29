@@ -2117,6 +2117,8 @@ tasks."
       ;; Clang keymappings for C/C++ coding
       :desc "Jump to Header/C++" "c h" #'lsp-clangd-find-other-file
       :desc "Jump to Header/C++ other window" "c H"  #'(lambda () (interactive) (lsp-clangd-find-other-file t))
+      :desc "Find file - Invalidate Cache" "p F"  #'(lambda () (interactive) (projectile-find-file t))
+      ;; :desc "Find file - Other Project" "p O"  #'(lambda () (interactive) (doom/find-file-in-other-project))
       )
 
 ;; Remove C-z keybind
