@@ -2,7 +2,7 @@
 :ROAM_ALIASES: "Sirius %<%A, %B %d %Y>"
 :END:
 :CLOCKTABLE:
-#+BEGIN: clocktable :scope sirius-roam :block %<%Y-%m-%d> :maxlevel 9 :fileskip0 t :narrow 15! :tcolumns 2
+#+BEGIN: clocktable :scope sirius-roam :block %<%Y-%m-%d> :maxlevel 9 :fileskip0 t :narrow 50 :tcolumns 2 :hidefiles t
 #+END:
 :END:
 #+TITLE: Sirius %<%Y-%m-%d>
