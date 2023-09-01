@@ -785,11 +785,11 @@ Refer to `org-agenda-prefix-format' for more information."
         (:name "Important"
          :priority "A"
          :order 1)
+        (:name "Reviews To-Do"
+         :tag "review"
+         :order 2)
         (:name "Currently Open"
          :todo "INPROGRESS"
-         :order 2)
-        (:name "Reviews ToDo"
-         :tag "review"
          :order 3)
         (:name "Bugs Todo"
          :tag "bug"
