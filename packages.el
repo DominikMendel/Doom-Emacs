@@ -7,9 +7,23 @@
 (package! vulpea)
 (package! harpoon)
 (package! origami)
+(package! modus-themes)
+(package! impatient-mode)
+(package! catppuccin-theme)
+;; (package! xclip)
+(package! guide-key)
+
+;; This package doesn't work well
+(package! treesitter-context
+  :recipe (:host github :repo "zbelial/treesitter-context.el"))
+
+(package! topsy)
+(package! org-sticky-header)
+(package! zoxide)
 
 ;; Temporary fix for emacsql breaking on pre Emacs-29
-(package! emacsql :pin "c1a4407")
+;;(package! emacsql :pin "c1a4407")
+;; (package! emacsql :pin "3cec7dcb201568a09ee9cebf0ea1e43cba9d334a")
 
 ;; (unpin! org-roam company-org-roam)
 ;;; $DOOMDIR/packages.el

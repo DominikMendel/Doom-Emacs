@@ -55,12 +55,10 @@ Just some personal information and my doom-theme.
 #+end_src
 * General values and Org-journal
 #+begin_src elisp
+(remove-hook 'org-mode-hook #'+literate-enable-recompile-h)
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/Dropbox/org"
-      org-journal-date-prefix "* "
-      org-journal-enable-agenda-integration t
-      org-journal-enable-cache t
       +org-roam-open-buffer-on-find-file nil
       +snippets-dir "~/Dropbox/snippets"
       display-line-numbers-type 'visual
@@ -68,7 +66,9 @@ Just some personal information and my doom-theme.
       vertico-scroll-margin 4
       )
 
-(setq! org-journal-time-format "")
+;; Adding "--no-ignore" to allow to search ".gitignore" files
+(after! projectile
+  (setq projectile-git-fd-args "-tl -H -0 -E .git -tf --strip-cwd-prefix -c never --no-ignore"))
 
 ;; PDF auto-refresh after changes
 (add-hook 'pdf-view-mode-hook (lambda () (auto-revert-mode 1)))
@@ -79,8 +79,19 @@ Just some personal information and my doom-theme.
 (add-hook 'better-jumper-post-jump-hook #'recenter)
 (add-hook 'evil-jumps-post-jump-hook #'recenter)
 
-(after! org-journal
-  (setq! org-journal-carryover-items "TODO=\"TODO\"|TODO=\"INPROGRESS\"|TODO=\"WAITING\"|TODO=\"BLOCKED\"|TODO=\"QUESTION\""))
+;; Add zoxide entries after visting them
+(add-hook 'find-file-hook #'zoxide-add) ;; I don't think this adds any directory information
+(add-hook 'projectile-after-switch-project-hook #'zoxide-add) ;; This does work
+
+;; Camel case jumping
+(setq global-subword-mode t)
+
+;; Stop pasting for overwriting the register
+(setq evil-kill-on-visual-paste nil)
+
+;; BUG I don't think this is doing anything
+(after! treemacs
+  (treemacs--setup-follow-mode))
 #+end_src
 * Custom functions
 ** Youtube url link
@@ -129,7 +140,95 @@ text and copying to the killring."
          (setq mytmplink (format "[[id:%s][%s]]" mytmpid mytmphead))
          (kill-new mytmplink)
          (message "Copied %s to killring (clipboard)" mytmplink)))
-(global-set-key (kbd "<f5>") 'my/copy-idlink-to-clipboard)
+;; (global-set-key (kbd "<f5>") 'my/copy-idlink-to-clipboard)
+#+end_src
+** Custom surrounds
+#+begin_src elisp
+(defun my/get-matching-delimiters (left-delim right-delim)
+  ;; Allows going from "<" + ">" to 'test<Surrounded>'
+  (let ((base-delimiter (evil-surround-read-from-minibuffer
+                         "Enter the left delimiter to be surrounded by: (Can add multiple, i.e., 'Array Gd') "
+                         "")))
+    (cons (format "%s%s" (or base-delimiter "") left-delim)
+          right-delim)))
+
+;; Not tested, don't know how to delete/find/change
+(defun my/find-for-surrounding (left-delim right-delim)
+  "Find text matching the pattern defined by LEFT-DELIM and RIGHT-DELIM."
+  (let ((pattern (format "[^=%s(){}]+%b" left-delim right-delim)))
+    (list pattern)))
+
+;; Not tested, don't know how to delete/find/change
+(defun my/delete-for-surrounding (left-delim right-delim)
+  "Construct the delete pattern for LEFT-DELIM and RIGHT-DELIM."
+  (format "^(.*?\\%s)(.*?)(\\%s)$" left-delim right-delim))
+
+
+
+(defun my/get-angled-surround ()
+  (my/get-matching-delimiters "<" ">"))
+(defun my/get-paren-surround ()
+  (my/get-matching-delimiters "(" ")"))
+(defun my/get-bracket-surround ()
+  (my/get-matching-delimiters "[" "]"))
+(defun my/get-generic-surround ()
+  (let ((left-delimiter (evil-surround-read-from-minibuffer "Enter the left delimiter: "))
+        (right-delimiter (evil-surround-read-from-minibuffer "Enter the right delimiter: ")))
+    (cons left-delimiter right-delimiter)))
+
+(after! evil-embrace
+  (push '(?< . my/get-angled-surround) evil-surround-pairs-alist)
+  (push '(?( . my/get-paren-surround) evil-surround-pairs-alist)
+  (push '(?[ . my/get-bracket-surround) evil-surround-pairs-alist)
+  (push '(?i . my/get-generic-surround) evil-surround-pairs-alist)
+
+  ;; BUG This one doesn't work - Probably different mode hook
+  (add-hook! 'org-mode-hook
+    (lambda ()
+        (push '(?< . my/get-angled-surround) evil-surround-pairs-alist)
+        (push '(?( . my/get-paren-surround) evil-surround-pairs-alist)
+        (push '(?[ . my/get-bracket-surround) evil-surround-pairs-alist)
+        (push '(?i . my/get-generic-surround) evil-surround-pairs-alist)
+        (push '(?E . ("#+begin_example\n" "#+end_example\n")) evil-surround-pairs-alist)
+        )))
+
+    ;; (lambda ()
+    ;;     (push '(?< . my/get-angled-surround) evil-surround-pairs-alist))
+    ;; (lambda ()
+    ;;     (push '(?( . my/get-paren-surround) evil-surround-pairs-alist))
+    ;; (lambda ()
+    ;;     (push '(?[ . my/get-bracket-surround) evil-surround-pairs-alist))
+    ;; (lambda ()
+    ;;     (push '(?i . my/get-generic-surround) evil-surround-pairs-alist))
+    ;; (lambda ()
+    ;;   ;; BUG This one doesn't work - Probably different mode hook
+    ;;     (push '(?E . ("#+begin_example\n" "#+end_example\n")) evil-surround-pairs-alist))
+             ;; )
+
+  ;; (embrace-add-pair ?E "#+begin_example\n" "#+end_example\n")
+  ;; (add-hook! 'org-mode-hook :append
+  ;; ;; (add-hook! 'embrace-org-mode-hook :append
+  ;;   (embrace-add-pair ?E "#+begin_example\n" "#+end_example\n"))
+  ;; )
+#+end_src
+** Always show workspace
+#+begin_src elisp
+;; TODO This isn't the best solution
+(after! persp-mode
+  (defun display-workspaces-in-minibuffer ()
+    ;; (interactive)
+    (with-current-buffer " *Minibuf-0*"
+      (erase-buffer)
+      (insert (+workspace--tabline))))
+  (run-with-idle-timer 1 t #'display-workspaces-in-minibuffer)
+  (+workspace/display))
+#+end_src
+* Completion
+#+begin_src elisp
+;; (after! corfu
+;;   (setq +corfu-want-ret-to-confirm nil)
+;;   ;; (setq +corfu-want-tab-prefer-expand-snippets t) ;; Doesn't do anything
+;;   )
 #+end_src
 * Deft
 #+begin_src elisp
@@ -150,16 +249,17 @@ text and copying to the killring."
 * Theme
 #+begin_src elisp
 ;; (setq doom-theme 'doom-solarized-dark)
-(setq doom-theme 'doom-gruvbox)
 ;;(setq doom-theme 'doom-monokai-classic)
 ;; (setq doom-theme 'doom-moonlight)
+;; (setq doom-theme 'doom-gruvbox)
+;; (setq doom-theme 'modus-vivendi-tritanopia)
 (after! doom-themes
   (setq doom-themes-enable-bold t
         doom-themes-enable-italic t))
 (custom-set-faces!
   '(font-lock-comment-face :slant italic)
   '(font-lock-keyword-face :slant italic)
-  '(vterm-color-blue :foreground "color-51")
+  ;; '(vterm-color-blue :foreground "color-51") ;; For doom-gruvbox
   ;; '(region :background "DarkSlateBlue")
   ;; '(vertico-current :background "DarkSlateBlue")
   )
@@ -186,6 +286,11 @@ the beginning of the list."
 * Org
 ** General org
 #+begin_src elisp
+;; This fixes org clock functions
+(add-hook! 'org-mode-hook
+  (add-hook! 'after-change-major-mode-hook :local
+    (setq-local tab-width 8)))
+
 ;; Marks a ToDo entry as done but makes the "LAST_REPEAT" the day of the schedule
 ;; This currenlty ONLY works with SCHEDULED items and not DEADLINES
 (defun willdo-naggins--mark-done ()
@@ -226,6 +331,10 @@ the beginning of the list."
             ;trick org-store-note into thinking the task was done when scheduled
             (define-advice org-add-log-setup (:after (&rest _) trick-store-note)
             (setq org-log-note-effective-time thetime))
+            ;; TODO This doesn't work, but should? It sets the date wrong
+            ;; (when (eq major-mode 'org-agenda-mode) ;if we are in agenda mode we switch to orgmode
+            ;;   (org-agenda-show)
+            ;;   (org-agenda-goto))
             (org-todo 'done)
             ;; (org-agenda-todo 'done) ;; This doesn't work
             (advice-remove 'org-add-log-setup #'org-add-log-setup@trick-store-note)
@@ -251,6 +360,10 @@ the beginning of the list."
             ;trick org-store-note into thinking the task was done when scheduled
             (define-advice org-add-log-setup (:after (&rest _) trick-store-note)
             (setq org-log-note-effective-time thetime))
+            ;; TODO This doesn't work, but should? It sets the date wrong
+            ;; (when (eq major-mode 'org-agenda-mode) ;if we are in agenda mode we switch to orgmode
+            ;;   (org-agenda-show)
+            ;;   (org-agenda-goto))
             (org-todo 'done)
             (advice-remove 'org-add-log-setup #'org-add-log-setup@trick-store-note)
             ;set LAST_REPEAT to reflect the latest scheduling of task
@@ -270,11 +383,23 @@ the beginning of the list."
            (org-clock-in-hook (remq #'my/org-roam-capture-clock-in org-clock-in-hook))
            (tags (vulpea-buffer-tags-get))
            (org-id-link-to-org-use-id (if (-contains? tags "journal") "use-existing" t)))
+
       (when (org-clock-is-active)
           (my/org-clock-out-at-specified-time thetime))
 
-      (org-clock-in nil timestamp)
-      (org-roam-dailies--capture timestamp nil "!CI")))
+        (save-window-excursion
+                (cond
+                 ((eq major-mode 'org-agenda-mode) ;if we are in agenda mode we switch to
+                       ;; Have to manually go to the org-entry from org-agenda, and recheck the value
+                       ;; Since org-agenda doesn't get if tags from the let* scope
+                    (org-agenda-show)
+                    (org-agenda-goto)
+                    (setq org-id-link-to-org-use-id (if (-contains? tags "journal") "use-existing" t))
+                    (org-clock-in nil timestamp)
+                    (org-roam-dailies--capture timestamp nil "!CI"))
+                ((eq major-mode 'org-mode) ; do this only in org-mode
+                        (org-clock-in nil timestamp)
+                        (org-roam-dailies--capture timestamp nil "!CI"))))))
 
   (defun my/org-clock-out-at-specified-time (&optional time &rest _)
     (interactive)
@@ -284,15 +409,34 @@ the beginning of the list."
     (let* ((thetime (or time (org-read-date)))
            (timestamp (org-encode-time (parse-time-string thetime)))
            (org-clock-out-hook (remq #'my/org-roam-capture-clock-out org-clock-out-hook))
-           ;; ((symbol-function #'temp/org-clock-out) (symbol-function #'org-clock-out))
            (tags (vulpea-buffer-tags-get))
            (org-id-link-to-org-use-id (if (-contains? tags "journal") "use-existing" t)))
 
-      ;; (advice-remove #'temp/org-clock-out #'my/org-roam-capture-clock-out)
-      ;; The capture needs to be called before the clock-out due to the %K in the template
-      (org-roam-dailies--capture timestamp nil "!CO")
-      ;; (temp/org-clock-out nil nil timestamp)))
-      (org-clock-out nil nil timestamp)))
+      ;; Manually jump to the current clock, for the %a in the template
+        (save-window-excursion
+                (save-excursion
+                (org-clock-goto)
+                (org-roam-dailies--capture timestamp nil "!CO")))
+        (org-clock-out nil nil timestamp)))
+
+(defun my/kill-all-other-buffer (&optional _)
+  (interactive)
+  (restore-buffer-modified-p nil)
+  (doom/kill-other-buffers))
+
+(setq! org-clock-auto-clock-resolution nil)
+
+(defun my/org-roam-sync (&optional _)
+  (interactive)
+  (let* ((org-ids-path (concat org-directory "/" ".orgids")))
+         (message "Deleting org-ids at : %s" org-ids-path)
+         ;; May want to add "let" (restore-buffer-modified-p nil) to remove modified buffers
+         ;; (restore-buffer-modified-p nil)
+         (delete-file org-ids-path)
+         (setq! org-agenda-files nil)
+         (setq! org-id-files nil)
+         (org-roam-db-clear-all)
+         (org-roam-db-sync)))
 
 (after! (:and org org-roam)
   ;; (defvar dm--org-archive-type "%s_archive::datetree/")
@@ -350,6 +494,8 @@ the beginning of the list."
         '((heading . nil)
         (plain-list-item . nil)))
   (setq org-fold-core-style 'overlays)
+
+  (add-hook 'org-mode-hook #'org-sticky-header-mode)
   )
 
   (defun +org/opened-buffer-files ()
@@ -366,7 +512,41 @@ the beginning of the list."
 - %a allows for a link inserted from the file/headline you are currently at and inserts it into the capture
 - %A is the same as %a but prompts for a description of the link
 #+begin_src elisp
+;; TODO this doesn't work
+;; (defcustom my/org-capture-bookmark nil "SomeDocument")
+(defun my/test-save-variable ()
+  (interactive)
+  (customize-save-variable 'my/org-capture-bookmark t "SomeDocument"))
+
+(defvar my/org-capture-bookmark nil "SomeDocument")
+;; Allows my custom variable to persist accross sessions
+(after! savehist
+  (add-to-list
+   'savehist-additional-variables
+   'my/org-capture-bookmark))
+
+(defvar my/git-project-note-file-path nil
+  "A string system path to perform org-captures related to a git project.
+A roam note should already be created.")
+(defvar my/git-project-note-capture-name "Default"
+  "A string that is used in org-capture as the default ertny location.
+This will be updated to the relative file path")
+
 (defvar org-journal--date-location-scheduled-time nil)
+
+;; TODO Complete
+(defun my/git-project-capture ()
+  (interactive)
+  (let ((original-kill-ring (copy-sequence kill-ring))
+        (+default/yank-buffer-path-relative-to-project)
+        (let ((my/git-project-note-capture-name (copy-sequence kill-ring))
+              )
+          (org-capture nil "pp")
+          )
+        (setq kill-ring original-kill-ring)
+        )))
+
+;; (file-relative-name buffer-file-name)
 
 (defun org-journal-date-location (&optional scheduled-time)
   (let ((scheduled-time (or scheduled-time (org-read-date nil nil nil "Date:"))))
@@ -423,14 +603,24 @@ the beginning of the list."
           ("T" "Scheduled ToDo" entry (file+headline +org-capture-todo-file "Tasks")
            "* TODO %^{What Todo?}%? :new:\nSCHEDULED: %^{Schedule}t")
 
+          ("m" "Meeting ToDo" entry (file+headline dm--org-sirius-meetings-file-name "Non-repeating meetings")
+           "* TODO %c%?\nSCHEDULED: %^{Schedule}t")
+
           ("i" "General New Idea" entry (file+headline +org-capture-todo-file "Ideas")
            "* %^{What's your idea?}%? :new:\n%i")
 
           ("I" "General Inprogress" entry (file+headline +org-capture-todo-file "Tasks")
            "* INPROGRESS %?")
 
-          ("p" "General Project" entry (file+headline +org-capture-todo-file "Projects")
-           "* TODO %^{What ToDo?}%? :new:\n%i\nFrom : %a\n")
+          ;; ("p" "General Project" entry (file+headline +org-capture-todo-file "Projects")
+          ;;  "* TODO %^{What ToDo?}%? :new:\n%i\nFrom : %a\n")
+
+          ("p" "Project templates")
+          ;; TODO Alter this
+          ("pp" "Git Project" entry (file+headline my/git-project-note-file-path my/git-project-note-capture-name)
+           ;; "* TODO %^{What ToDo?}%? :new:\n%i\nFrom : %a\n")
+           "* %U %?\n%i\n%a"
+           :prepend t)
 
           ("g" "New Goal" entry (file+headline +org-capture-todo-file "Goals")
            "* GOAL %^{Describe your goal} %? :new:
@@ -583,43 +773,66 @@ Added on %U - Last reviewed on %U
   (display-line-numbers-mode)
   (setq-local display-line-numbers 'visual))
 
+;; Add relative line numbers to modes that don't usually have line numbers
 (add-hook 'org-agenda-mode-hook #'my/enable-relative-line-numbers)
+(add-hook 'dired-mode-hook #'my/enable-relative-line-numbers)
+(add-hook 'magit-mode-hook #'my/enable-relative-line-numbers)
+
+(setq org-agenda-skip-scheduled-if-done t
+      org-agenda-skip-deadline-if-done t
+      org-agenda-skip-timestamp-if-done t
+      org-agenda-include-deadlines t
+      org-agenda-block-separator nil
+      org-agenda-tags-column 100 ;; from testing this seems to be a good value
+      org-agenda-compact-blocks t
+      )
+
 
 ;; @TODO Need to set the list. The goal is to remove "A" as archive as subtree.
 ;; (after! org-agenda
 ;;   (add-to-list 'org-agenda-bulk-custom-functions
 ;;                '(?A org-agenda-archive)))
-#+end_src
-*** Unused
-#+begin_src elisp :tangle no
-(after! org-agenda
-  (add-to-list 'org-agenda-bulk-custom-functions
-               '(?a org-agenda-archive-to-archive-sibling)))
-#+end_src
-** Org-super-agenda
-- Types of agenda custom command keywords: ([[https://orgmode.org/worg/org-tutorials/org-custom-agenda-commands.html][link]])
-  The desired agenda display/search. The options include agenda, todo, search, tags, alltodo, tags-todo, todo-tree, tags-tree, occur-tree, or a user-defined function.
-#+begin_src elisp
-(after! org-agenda
-  (add-hook 'org-agenda-mode-hook #'origami-mode))
 
-;; (use-package origami
-;;     ;; :general (:keymaps 'org-super-agenda-header-map
-;;     ;;                  "TAB" #'origami-toggle-node)
-;;     :hook ((org-agenda-mode . origami-mode)))
-
-(use-package! org-super-agenda
-  :commands (org-super-agenda-mode))
-
-(after! org-agenda
-  (org-super-agenda-mode))
-
+;; I used to use this before I needed to configure the "_" to spaces.
 ;; Vulpea functions to help with naming view
+;; (setq org-agenda-prefix-format
+;;       '((agenda . " %i %(vulpea-agenda-category 1)%?-20t% s")
+;;         (todo . " %i %(vulpea-agenda-category 1) ")
+;;         (tags . " %i %(vulpea-agenda-category 1) ")
+;;         (search . " %i %(vulpea-agenda-category 1) ")))
+
+;; Customize: max length for filename display
+(defvar my/org-agenda-fname-max 20
+  "Max characters to show for file names in the agenda.")
+
+(defun my/org-agenda-filename-prefix ()
+  "Return a short filename string for org-agenda prefix.
+Replaces underscores with spaces, capitalizes the first letter of each word,
+and truncates to `my/org-agenda-fname-max`. If truncated, appends an ellipsis."
+  (let* ((file (or (buffer-file-name (current-buffer))
+                   (or (buffer-name) "")))
+         ;; Get base name without directory and extension
+         (base (file-name-base file))
+         ;; Replace underscores with spaces
+         (repl (replace-regexp-in-string "_" " " base))
+         ;; Capitalize the first letter of each word
+         (capitalized (mapconcat 'capitalize (split-string repl) " "))
+         ;; Trim leading/trailing spaces
+         (trim (string-trim capitalized))
+         ;; Truncate if too long
+         (len (length trim)))
+    (if (<= len my/org-agenda-fname-max)
+        trim
+      (concat (substring trim 0 (- my/org-agenda-fname-max 1)) "…"))))
+
+
 (setq org-agenda-prefix-format
-      '((agenda . " %i %(vulpea-agenda-category 20)%?-20t% s")
-        (todo . " %i %(vulpea-agenda-category 20) ")
-        (tags . " %i %(vulpea-agenda-category 20) ")
-        (search . " %i %(vulpea-agenda-category 20) ")))
+      ;; '((agenda . " %i %-12(my/org-agenda-filename-prefix):") ;; QUESTION not sure if the extra stuff is needed?
+      '((agenda . " %i %-12(my/org-agenda-filename-prefix): %?-20t% s")
+        (timeline . " %i %-20(my/org-agenda-filename-prefix): %s")
+        (todo . " %i %-12(my/org-agenda-filename-prefix): ")
+        (tags . " %i %-12(my/org-agenda-filename-prefix): ")
+        (search . " %i %-12(my/org-agenda-filename-prefix): ")))
 
 (defun vulpea-agenda-category (&optional len)
   "Get category of item at point for agenda.
@@ -645,7 +858,8 @@ Refer to `org-agenda-prefix-format' for more information."
                       (file-name-sans-extension
                        (file-name-nondirectory buffer-file-name))))
          (title (vulpea-buffer-prop-get "title"))
-         (category (org-get-category))
+         ;; (category (org-get-category))
+         (category (if (derived-mode-p 'org-mode) (org-get-category) nil)) ;; For org bug
          (result
           (or (if (and
                    title
@@ -657,14 +871,43 @@ Refer to `org-agenda-prefix-format' for more information."
         (s-truncate len (s-pad-right len " " result))
       result)))
 
-(setq org-agenda-skip-scheduled-if-done t
-      org-agenda-skip-deadline-if-done t
-      org-agenda-skip-timestamp-if-done t
-      org-agenda-include-deadlines t
-      org-agenda-block-separator nil
-      org-agenda-tags-column 100 ;; from testing this seems to be a good value
-      org-agenda-compact-blocks t
-      )
+(defun my-error-logging-hook (orig-fun &rest args)
+  "A function that logs errors and the current buffer."
+  (condition-case err
+      (apply orig-fun args)
+    (error
+     (message "Error in %s\nError: %s"
+              (buffer-name (current-buffer))
+              (error-message-string err))
+     (signal (car err) (cdr err)))))
+
+;; Hook the target function with the error-logging hook
+;; (advice-add 'org-get-category :around 'my-error-logging-hook)
+
+#+end_src
+*** Unused
+#+begin_src elisp :tangle no
+(after! org-agenda
+  (add-to-list 'org-agenda-bulk-custom-functions
+               '(?a org-agenda-archive-to-archive-sibling)))
+#+end_src
+** Org-super-agenda
+- Types of agenda custom command keywords: ([[https://orgmode.org/worg/org-tutorials/org-custom-agenda-commands.html][link]])
+  The desired agenda display/search. The options include agenda, todo, search, tags, alltodo, tags-todo, todo-tree, tags-tree, occur-tree, or a user-defined function.
+#+begin_src elisp
+(after! org-agenda
+  (add-hook 'org-agenda-mode-hook #'origami-mode))
+
+;; (use-package origami
+;;     ;; :general (:keymaps 'org-super-agenda-header-map
+;;     ;;                  "TAB" #'origami-toggle-node)
+;;     :hook ((org-agenda-mode . origami-mode)))
+
+(use-package! org-super-agenda
+  :commands (org-super-agenda-mode))
+
+(after! org-agenda
+  (org-super-agenda-mode))
 
 (defun my-agenda-skip-work ()
   "Skip tasks that as work related by checking the file name."
@@ -761,15 +1004,17 @@ Refer to `org-agenda-prefix-format' for more information."
         (:order-multi (5
                        (:name "Reviews To-Do"
                         :tag "review")
-                       (:name "Previously Scheduled To-Do"
+                       (:name "Previously Scheduled: To-Do"
                         :face warning
                         :and (:scheduled past :todo "TODO"))
-                       (:name "Previously Scheduled Inprogress"
+                       (:name "Previously Scheduled: Inprogress"
                         :face warning
                         :and (:scheduled past :todo "INPROGRESS"))
-                       (:name "Previously Scheduled In-Review"
+                       (:name "Previously Scheduled: In-Review"
                         :face warning
                         :and (:scheduled past :todo "IN-REVIEW"))
+                       (:name "Previously Scheduled: Waiting"
+                        :and (:scheduled past :todo "WAITING"))
                        ))
         (:auto-parent t
          :order 6)
@@ -1122,13 +1367,32 @@ Refer to `org-agenda-prefix-format' for more information."
   (org-id-get-create)
   (goto-char (point-max)))
 #+end_src
+* Dirvish - Dired 2.0
+#+begin_src elisp
+;; TODO Want to add dirvish-peek-mode by default - can see files if file viewer like Spc-p-f
+
+;; Jump to quick access with "b" inside dirvish
+(setq! dirvish-quick-access-entries
+        '(("h" "~/" "home")
+        ("D" "~/Downloads" "downloads")
+        ("d" "~/Documents" "documents")
+        ("p" "~/projects" "projects")
+        ("P" "~/Pictures" "pictures")
+        ("o" "~/Dropbox/org" "org")
+        ("r" "~/repos" "repos")
+        ("c" "~/.home" ".config")))
+
+#+end_src
 * Org-roam
 ** General
 #+begin_src elisp
 (setq lexical-binding t)
 
-(after! roam
-  (setq org-roam-directory "~/Dropbox/org/roam"))
+(after! org-roam
+  (setq org-roam-directory "~/Dropbox/org/roam")
+  ;; Remote org-roam autocomplete
+  (setq org-roam-completion-everywhere nil))
+
 
 (setq org-roam-node-default-sort nil)
 
@@ -1181,6 +1445,7 @@ capture was not aborted."
    (my/org-roam-filter-by-tag "people")
    :templates org-roam-capture-templates))
 
+;; Not used anymore, but good reference for filter function use
 (defun my/org-roam-help-people ()
   (interactive)
   ;; Select a project file to open, creating it if necessary
@@ -1330,6 +1595,34 @@ capture was not aborted."
   (interactive "p")
   (org-roam-dailies-goto-yesterday n "d"))
 
+(defun my/org-roam-dailies-startup ()
+  (interactive)
+  (org-roam-dailies-capture-today nil "!JS")
+  (my/org-clock-in-at-specified-time))
+
+(defun my/org-roam-dailies-discussion ()
+  (interactive)
+  (org-roam-dailies-capture-today nil "!Jd")
+        (end-of-visible-line)
+        (evil-append 1)
+        (insert " ")
+        ;; Or can use : (vulpea-insert (lambda (note) (seq-contains-p (vulpea-note-tags note) "people")))
+        (vulpea-insert (lambda (note) (vulpea-note-tagged-all-p note "people")))
+        (evil-force-normal-state))
+
+(defun my/org-roam-dailies-helping-person ()
+  (interactive)
+  (org-roam-dailies-capture-today nil "!Jh")
+        (end-of-visible-line)
+        (evil-append 1)
+        ;; This is a bit of a hack to force proper spacing
+        (insert " ")
+        (org-set-tags ":helping:")
+        ;; Or can use : (vulpea-insert (lambda (note) (seq-contains-p (vulpea-note-tags note) "people")))
+        (insert " ")
+        (vulpea-insert (lambda (note) (vulpea-note-tagged-all-p note "people")))
+        (evil-force-normal-state))
+
 (after! org-roam
     ;; Template and directory locations
     (defvar dm--org-templates-dir (expand-file-name "templates" doom-private-dir))
@@ -1374,6 +1667,8 @@ capture was not aborted."
     (defvar dm--org-roam-sirius-dailies-dir (expand-file-name "daily" dm--org-roam-sirius-dir))
     (defvar dm--org-sirius-daily-template (expand-file-name "sirius-daily.org" dm--org-templates-dir))
     (defvar dm--org-sirius-file-name "Sirius %<%Y-%m-%d>.org")
+
+    (defvar dm--org-sirius-meetings-file-name (expand-file-name "sirius_meetings.org" dm--org-roam-sirius-dir))
 
     (defun dm/prompt-string (prompt variable)
       (set variable (read-string prompt)))
@@ -1437,6 +1732,20 @@ capture was not aborted."
                 ;; :clock-in t)
                 :jump-to-captured t)
                 ("!JL" "Journal Lunch" entry "* Lunch :break:%?"
+                :target (file+head+olp ,file-name ,head ("Journal"))
+                :unnarrowed nil
+                :immediate-finish nil
+                ;; :unnarrowed t
+                ;; :immediate-finish t
+                ;; :clock-in t)
+                :jump-to-captured t)
+                ("!Jd" "Journal Discussion" entry "* Discussion with %?"
+                :target (file+head+olp ,file-name ,head ("Journal"))
+                :unnarrowed t
+                :immediate-finish t
+                ;; :clock-in t)
+                :jump-to-captured t)
+                ("!Jh" "Journal Helping Person" entry "* Helping %?"
                 :target (file+head+olp ,file-name ,head ("Journal"))
                 :unnarrowed t
                 :immediate-finish t
@@ -1575,8 +1884,8 @@ capture was not aborted."
            :unnarrowed t)
           ))
 
-(defun my/url-format (path1 path2 title)
-  (concat path1 "/" path2 "/" (string-replace "/" "-" title) ".org"))
+(defun my/url-format (path1 path2 title &rest remaining)
+  (concat path1 "/" path2 "/" (string-replace "/" "-" title) (if remaining (string-replace "/" "-" remaining)) ".org"))
 
 (defun my/parse-jama-review (path1 path2 title url)
  (concat path1 "/" path2 "/" title (string-remove-prefix "/r:REV-" (url-target (url-generic-parse-url (string url))))))
@@ -1597,7 +1906,10 @@ capture was not aborted."
            :unnarrowed t)
 
         ("j" "jira" plain "- tags :: [[roam:Sirius Jira]] %?\n* TODO ${title}\nSCHEDULED: %^{Schedule}t"
-           :if-new (file+head "sirius/jira/${title}.org" ":PROPERTIES:
+           ;; :if-new (file+head "sirius/jira/${title}.org" ":PROPERTIES:
+           ;; Why does this not work?
+           ;; :if-new (file+head ,(my/url-format "sirius" "jira" "${title}") ":PROPERTIES:
+           :if-new (file+head ,(my/url-format "sirius" "jira" "${slug}") ":PROPERTIES:
 :ROAM_REFS: ${ref}
 :END:
 ,#+TITLE: ${title}\n#+filetags: :jira:\n")
@@ -1652,6 +1964,16 @@ capture was not aborted."
 ;;          :head "#+TITLE: ${title}\n#+roam_key: ${ref}\n- tags ::  "
 ;;          :unnarrowed t))))
                         )))
+#+end_src
+* Org-journal
+#+begin_src elisp
+(setq org-journal-date-prefix "* "
+      org-journal-enable-agenda-integration t
+      org-journal-enable-cache t)
+
+(setq! org-journal-time-format "")
+(after! org-journal
+  (setq! org-journal-carryover-items "TODO=\"TODO\"|TODO=\"INPROGRESS\"|TODO=\"WAITING\"|TODO=\"BLOCKED\"|TODO=\"QUESTION\""))
 #+end_src
 * Vulpea
 - [[https://github.com/d12frosted/vulpea][GitHub]]
@@ -1845,7 +2167,7 @@ If nil it defaults to `split-string-default-separators', normally
 
 (defun vulpea-agenda-files-update (&rest _)
   "Update the value of `org-agenda-files'."
-  (message "vulpea-agenda-files-updated called. Should ignore = %s" dm--ignore-vulpea-agenda-files-update-for-done-state)
+  ;; (message "vulpea-agenda-files-updated called. Should ignore = %s" dm--ignore-vulpea-agenda-files-update-for-done-state)
   (if dm--ignore-vulpea-agenda-files-update-for-done-state
         (cond
                 ((string-equal dm--my-focus "vispero") (funcall #'my/set-agenda-files-vispero))
@@ -2078,6 +2400,8 @@ tasks."
 * Key mappings
 ** General
 #+begin_src elisp
+(define-key! :keymaps +default-minibuffer-maps [C-return] #'find-file-other-window)
+
 (defun my/org-next-parent-heading ()
   "Jumps to the next parent heading."
     (interactive)
@@ -2087,26 +2411,46 @@ tasks."
 ;; Code completion to use TAB
 (map! :after company
       :map company-active-map
-      [tab] #'company-complete-selection)
+      [tab] #'company-complete-selection
+      "C-y" #'company-complete-selection
+      [return] nil
+      "RET" nil)
 
 (map! :leader
+      ;; cmd! is Doom's shorthand of a interactive lambda
+      "SPC" (cmd! (let ((current-prefix-arg t)) (evil-avy-goto-char-timer))) ;; This is also mapped to g-s-SPC
       "+" #'hydra/text-zoom/body
       "W" #'my/hydra/window-nav/body
       "A" #'my/hydra/agenda-nav/body
       "X" #'my/hydra/general-capture/body
       "R" #'my/hydra/roam/body
-      "w /" #'evil-window-vsplit
-      "w -" #'evil-window-split
-      "RET" #'org-insert-subheading
-      "k" #'org-previous-visible-heading
-      "K" #'outline-up-heading
-      "j" #'org-next-visible-heading
-      "J" #'my/org-next-parent-heading
+      "w /" #'+evil/window-vsplit-and-follow
+      "w -" #'+evil/window-split-and-follow
+      "w s" #'ace-swap-window
+      "fY" #'+default/yank-buffer-path
+      "fy" #'+default/yank-buffer-path-relative-to-project
+      "ps" #'+default/search-project
+      :desc "Open project in terminal" "pP" (cmd!
+                                       (let* ((+workspaces-switch-project-function #'+vterm/here))
+                                         (projectile-switch-project)))
+      :desc "Open project with magit" "pg" (cmd!
+                                       (let* ((+workspaces-switch-project-function #'magit-status))
+                                         (projectile-switch-project)))
+      :desc "Find file - Invalidate Cache" "p F"  #'(lambda () (interactive) (projectile-find-file t))
+      ;; :desc "Find file - Other Project" "p O"  #'(lambda () (interactive) (doom/find-file-in-other-project))
+      :desc "Open directory in zoxide" "p z" #'zoxide-travel
+      :desc "Find file in zoxide" "p Z" #'zoxide-find-file
+      ;; TODO look into : +default/search-other-project
+      ;; TODO make a function to pass highlight phrase based on visual select
+      "bh" #'highlight-phrase
+      "bH" #'unhighlight-regexp
       ;; "J" #'(lambda () (interactive) (call-interactively #'outline-up-heading) (call-interactively #'org/insert-item-below))
       ;; "J" #'(lambda () (interactive) (call-interactively #'outline-up-heading) (#'org/insert-item-below 1))
       "I" #'org-roam-insert
+      :desc "Open Scratch" "o x" #'doom/switch-to-scratch-buffer
       :desc "Insert Immediate" "n r I" #'org-roam-node-insert-immediate
       :desc "Roam Refile Header" "n r !" #'org-roam-refile
+      :desc "Roam Clean Sync" "n r S" #'my/org-roam-sync
       :desc "Journal Schedule View" "n j S" #'org-journal-schedule-view
       :desc "Journal Reschedule Scheduled Entry" "n j r" #'org-journal-reschedule-scheduled-entry
       ;; Org-roam-dailies key-remapping :
@@ -2117,8 +2461,6 @@ tasks."
       ;; Clang keymappings for C/C++ coding
       :desc "Jump to Header/C++" "c h" #'lsp-clangd-find-other-file
       :desc "Jump to Header/C++ other window" "c H"  #'(lambda () (interactive) (lsp-clangd-find-other-file t))
-      :desc "Find file - Invalidate Cache" "p F"  #'(lambda () (interactive) (projectile-find-file t))
-      ;; :desc "Find file - Other Project" "p O"  #'(lambda () (interactive) (doom/find-file-in-other-project))
       )
 
 ;; Remove C-z keybind
@@ -2137,8 +2479,98 @@ tasks."
 (map! :n "," (cmd! (push (cons t ?m) unread-command-events)
                    (push (cons t 32) unread-command-events)))
 
+(after! dirvish
+(map! :map dirvish-mode-map
+      :n "f" #'dirvish-fd
+      :n "F" #'dirvish-file-info-menu))
+
 (map! :v "J" #'drag-stuff-down)
 (map! :v "K" #'drag-stuff-up)
+
+;; Remove C-j movements for window movement
+(map! :map 'c++-mode-map
+      "C-j" #'evil-window-down
+      "C-k" #'evil-window-up
+      "C-l" #'evil-window-right
+      "C-h" #'evil-window-left)
+(map! :map 'c-mode-map
+      "C-j" #'evil-window-down
+      "C-k" #'evil-window-up
+      "C-l" #'evil-window-right
+      "C-h" #'evil-window-left)
+(map! :map 'cpp-mode-map
+      "C-j" #'evil-window-down
+      "C-k" #'evil-window-up
+      "C-l" #'evil-window-right
+      "C-h" #'evil-window-left)
+;; BUG C-j/k don't work for org agenda
+(map!
+ :after (:and org org-agenda evil)
+ :map (org-agenda-mode-map org-agenda-keymap)
+      "C-j" #'evil-window-down
+      "C-k" #'evil-window-up
+      "C-l" #'evil-window-right
+      "C-h" #'evil-window-left
+      "M-1" nil
+      "M-2" nil
+      "M-3" nil
+      "M-4" nil
+      "M-5" nil
+      "M-6" nil
+      "M-7" nil
+      "M-8" nil
+      "M-9" nil
+      "<f1>" nil
+      "<f2>" nil
+      "<f3>" nil
+      "<f4>" nil
+      "<f5>" nil
+      "<f6>" nil
+      "<f7>" nil
+      "<f8>" nil
+      "<f9>" nil)
+
+(map!
+ :after org-agenda
+ :map evil-org-agenda-mode-map
+      "C-j" #'evil-window-down
+      "C-k" #'evil-window-up
+      "C-l" #'evil-window-right
+      "C-h" #'evil-window-left)
+
+;; Set global window montion keys to a map with high priority
+(map!
+        :nvig "C-h" #'evil-window-left
+        :nvig "C-j" #'evil-window-down
+        :nvig "C-k" #'evil-window-up
+        :nvig "C-l" #'evil-window-right)
+
+(map!
+        :nvig "M-h" #'evil-window-left
+        :nvig "M-j" #'evil-window-down
+        :nvig "M-k" #'evil-window-up
+        :nvig "M-l" #'evil-window-right)
+
+(map!
+        :nvig "M-1" #'+workspace/switch-to-0
+        :nvig "M-2" #'+workspace/switch-to-1
+        :nvig "M-3" #'+workspace/switch-to-2
+        :nvig "M-4" #'+workspace/switch-to-3
+        :nvig "M-5" #'+workspace/switch-to-4
+        :nvig "M-6" #'+workspace/switch-to-5
+        :nvig "M-7" #'+workspace/switch-to-6
+        :nvig "M-8" #'+workspace/switch-to-7
+        :nvig "M-9" #'+workspace/switch-to-8
+        :nvig "<f1>" #'+workspace/switch-to-0
+        :nvig "<f2>" #'+workspace/switch-to-1
+        :nvig "<f3>" #'+workspace/switch-to-2
+        :nvig "<f4>" #'+workspace/switch-to-3
+        :nvig "<f5>" #'+workspace/switch-to-4
+        :nvig "<f6>" #'+workspace/switch-to-5
+        :nvig "<f7>" #'+workspace/switch-to-6
+        :nvig "<f8>" #'+workspace/switch-to-7
+        :nvig "<f9>" #'+workspace/switch-to-8)
+
 
 (map!
 :leader
@@ -2153,25 +2585,56 @@ tasks."
 (map! :n "C-s" 'harpoon-add-file)
 ;; (map! :n "C-SPC" 'harpoon-toggle-quick-menu)
 (map! :n "C-SPC" 'harpoon-quick-menu-hydra)
-(map! :n "<f1>" 'harpoon-go-to-1)
-(map! :n "<f2>" 'harpoon-go-to-2)
-(map! :n "<f3>" 'harpoon-go-to-3)
-(map! :n "<f4>" 'harpoon-go-to-4)
-(map! :n "<f5>" 'harpoon-go-to-5)
-(map! :n "<f6>" 'harpoon-go-to-6)
-(map! :n "<f7>" 'harpoon-go-to-7)
-(map! :n "<f8>" 'harpoon-go-to-8)
-(map! :n "<f9>" 'harpoon-go-to-9)
+;; (map! :n "<f1>" 'harpoon-go-to-1)
+;; (map! :n "<f2>" 'harpoon-go-to-2)
+;; (map! :n "<f3>" 'harpoon-go-to-3)
+;; (map! :n "<f4>" 'harpoon-go-to-4)
+;; (map! :n "<f5>" 'harpoon-go-to-5)
+;; (map! :n "<f6>" 'harpoon-go-to-6)
+;; (map! :n "<f7>" 'harpoon-go-to-7)
+;; (map! :n "<f8>" 'harpoon-go-to-8)
+;; (map! :n "<f9>" 'harpoon-go-to-9)
 
 ;; Custom clocking functions
+(defun my/clock-in-history ()
+  (interactive)
+  ;; 4 is C-u, 16 is C-u C-u, 64 is C-u C-u C-
+  (org-clock-in '(4)))
+
 (map!
  :after org
- :map org-mode-map
+ :map (org-mode-map org-agenda-mode-map)
+        ;; BUG This doesn't work
+        ;; :nvigm "M-h" nil
+        ;; :nvigm "M-j" nil
+        ;; :nvigm "M-k" nil
+        ;; :nvigm "M-l" nil
+        ;; :nvigm "M-S-h" 'org-metaleft
+        ;; :nvigm "M-S-j" 'org-metadown
+        ;; :nvigm "M-S-k" 'org-metaup
+        ;; :nvigm "M-S-l" 'org-metaright
+        ;; :nvigm "M-S-C-h" 'org-shiftmetaleft
+        ;; :nvigm "M-S-C-j" 'org-shiftmetadown
+        ;; :nvigm "M-S-C-k" 'org-shiftmetaup
+        ;; :nvigm "M-S-C-l" 'org-shiftmetaright
  :localleader
  (:prefix ("c" . "clock")
   :desc "org-clock-in-at-time" "I" #'my/org-clock-in-at-specified-time
-  :desc "org-clock-in-at-time" "O" #'my/org-clock-out-at-specified-time
-  ))
+  :desc "org-clock-out-at-time" "O" #'my/org-clock-out-at-specified-time
+  :desc "org-clock-in-history" "h" #'my/clock-in-history)
+ :leader
+      "j" #'org-next-visible-heading
+      "J" #'my/org-next-parent-heading
+      "k" #'org-previous-visible-heading
+      "K" #'outline-up-heading
+      "RET" #'org-insert-subheading)
+
+;; BUG why doesn't this work?
+      ;; "j" (cmd! (org-next-visible-heading) (recenter))
+      ;; "J" (cmd! (my/org-next-parent-heading) (recenter))
+      ;; "k" (cmd! (org-previous-visible-heading) (recenter))
+      ;; "K" (cmd! (outline-up-heading) (recenter))
+      ;; "RET" (cmd! (org-insert-subheading) (recenter)))
 
 ;; winum like spacemacs
 (map! :after winum :leader
@@ -2189,6 +2652,14 @@ tasks."
   (push '((nil . "winum-select-window-[0-9]") . t) which-key-replacement-alist))
 (after! winum
   (setq winum-scope 'global))
+
+(after! guide-key
+  (setq guide-key/guide-key-sequence '("C-x r" "C-x 4"))
+  (setq guide-key-mode 1))
+
+(map! :after dired
+      :map dired-mode-map
+      :n "Y" (cmd! (dired-copy-filename-as-kill 0)))
 #+end_src
 *** Unused
 #+begin_src elisp :tangle no
@@ -2286,14 +2757,16 @@ tasks."
   ("f" find-file)
   ("p" projectile-switch-project)
 
-  ("s" split-window-below)
-  ("-" split-window-below)
-  ("v" split-window-right)
-  ("/" split-window-right)
+  ("s" +evil/window-split-and-follow)
+  ("-" +evil/window-split-and-follow)
+  ("v" +evil/window-vsplit-and-follow)
+  ("/" +evil/window-vsplit-and-follow)
 
   ("c" delete-window)
   ("x" delete-window)
   ("o" delete-other-windows)
+
+  ("s" ace-swap-window)
 
   ("y" (lambda()
          (interactive)
@@ -2327,24 +2800,24 @@ tasks."
   "Toggles agenda focus for custom hydra menu."
   (interactive)
 
-        (message "focus current value IN SETTER before = %s" dm--focus-current-buffer)
+        ;; (message "focus current value IN SETTER before = %s" dm--focus-current-buffer)
   (if (equal dm--focus-current-buffer "<")
         (setq dm--focus-current-buffer nil)
         (setq dm--focus-current-buffer "<")
-        (message "focus current value IN SETTER after = %s" dm--focus-current-buffer)
+        ;; (message "focus current value IN SETTER after = %s" dm--focus-current-buffer)
         )
   )
 
 (defun dm--reset-agenda-buffer-focus (&rest _)
   "Resets agenda focus for custom hydra menu."
     (interactive)
-    (message "focus current value in RESET initial value = %s" dm--focus-current-buffer)
+    ;; (message "focus current value in RESET initial value = %s" dm--focus-current-buffer)
     (setq dm--focus-current-buffer nil))
 
 (defun dm--org-agenda-wrapper (key)
     (interactive)
     ()
-    (message "focus current value in wrapper = %s" dm--focus-current-buffer)
+    ;; (message "focus current value in wrapper = %s" dm--focus-current-buffer)
     (with-current-buffer (buffer-name) (call-interactively (org-agenda nil key dm--focus-current-buffer))))
 
 ;; Reset the custom variable on each entry. Hydra's pre/post is buggy.
@@ -2376,7 +2849,7 @@ Current buffer focus : %`dm--focus-current-buffer
          (interactive)
          (message "Current buffer = %s" (buffer-name))
          (message "Org-agenda-files = %s" org-agenda-files)
-        (message "focus current value = %s" dm--focus-current-buffer)
+        ;; (message "focus current value = %s" dm--focus-current-buffer)
          (call-interactively (dm--org-agenda-wrapper "t")))
    "Today" :column "Agenda Views"
    )
@@ -2445,6 +2918,10 @@ Current focus : %`dm--my-focus
          (interactive)
          (call-interactively (org-capture nil "i")))
    "New Idea")
+  ("m" (lambda()
+         (interactive)
+         (call-interactively (org-capture nil "m")))
+   "Meeting ToDo")
 )
 #+end_src
 *** Journal capture
@@ -2484,12 +2961,11 @@ Current focus : %`dm--my-focus
          (interactive)
          (call-interactively (org-roam-dailies-capture-today nil "!JL")))
    "Lunch")
-  ("s" (lambda()
-         (interactive)
-         (call-interactively (org-roam-dailies-capture-today nil "!JS")))
-   "Startup")
-  ("h" my/org-roam-help-people "Helping Person")
+  ("s" my/org-roam-dailies-startup "Startup")
+  ("d" my/org-roam-dailies-discussion "Discussion")
+  ("h" my/org-roam-dailies-helping-person "Helping Person")
 )
+
 #+end_src
 *** Roam
 #+begin_src elisp
@@ -2545,6 +3021,72 @@ Testing something %`dm--my-focus
 
   ("q" nil))
 #+end_src
+** Corfu
+#+begin_src elisp
+
+;; Code completion to use TAB
+;; This doesn't work
+;; (map! :after corfu
+;;       :map corfu-map
+;;       [tab] #'corfu-complete
+;;       [return] nil
+;;       "RET" nil)
+
+;; (map! :after corfu
+;;       :map corfu-popupinfo-map
+;;       "C-e" #'corfu-popupinfo-scroll-down
+;;       "C-y" #'corfu-popupinfo-scroll-up)
+
+;; Corfu tab work around?
+;; (map!
+;;  :i [tab]
+;;  `(menu-item "Evil insert smart tab" nil :filter
+;;    (lambda (cmd)
+;;      (cond
+;;       ((or (doom-lookup-key [tab] overriding-terminal-local-map)
+;;            (doom-lookup-key (kbd "TAB") overriding-terminal-local-map))
+;;        cmd)
+;;       ((eq 'vterm-mode major-mode)
+;;        #'vterm-send-tab)
+;;       (t
+;;        (if (derived-mode-p 'eshell-mode 'comint-mode)
+;;            #'completion-at-point
+;;          #'indent-for-tab-command)))))
+
+;;  :m [tab]
+;;  `(menu-item "Evil motion smart tab" nil :filter
+;;    (lambda (cmd)
+;;      (cond
+;;       ((or (doom-lookup-key [tab] overriding-terminal-local-map)
+;;            (doom-lookup-key (kbd "TAB") overriding-terminal-local-map))
+;;        cmd)
+;;       ,@(when (modulep! :editor snippets)
+;;           '(((and (evil-visual-state-p)
+;;                   (or (eq evil-visual-selection 'line)
+;;                       (not (memq (char-after)
+;;                                  (list ?\( ?\[ ?\{ ?\} ?\] ?\))))))
+;;              #'yas-insert-snippet)))
+;;       ,@(when (modulep! :editor fold)
+;;           '(((save-excursion (end-of-line) (invisible-p (point)))
+;;              #'+fold/toggle)))
+;;       ;; Fixes #4548: without this, this tab keybind overrides
+;;       ;; mode-local ones for modes that don't have an evil
+;;       ;; keybinding scheme or users who don't have :editor (evil
+;;       ;; +everywhere) enabled.
+;;       ((or (doom-lookup-key
+;;             [tab]
+;;             (list (evil-get-auxiliary-keymap (current-local-map)
+;;                                              evil-state)
+;;                   (current-local-map)))
+;;            (doom-lookup-key
+;;             (kbd "TAB")
+;;             (list (evil-get-auxiliary-keymap (current-local-map)
+;;                                              evil-state)))
+;;            (doom-lookup-key (kbd "TAB") (list (current-local-map))))
+;;        cmd)
+;;       ((fboundp 'evil-jump-item)
+;;        #'evil-jump-item)))))
+#+end_src
 * Swap focuses
 - Functions used to swap focuses between personal and work.
 - This utilized in various places in my configuration.
@@ -2580,20 +3122,38 @@ Testing something %`dm--my-focus
   (my/set-org-capture-templates))
 #+end_src
 * Coding
+** General
+#+begin_src elisp
+;; Add sticky hooks to see function definitions at top of line
+(add-hook 'prog-mode-hook #'topsy-mode)
+(add-hook 'magit-section-mode-hook #'topsy-mode)
+#+end_src
 ** Rust
 #+begin_src elisp
 (after! lsp-rust
   (setq
-  lsp-rust-analyzer-server-display-inlay-hints t
-  lsp-rust-analyzer-display-parameter-hints t
-  lsp-rust-analyzer-max-inlay-hint-length 25
-  lsp-rust-analyzer-proc-macro-enable t
-  lsp-rust-analyzer-experimental-proc-attr-macros t
-  lsp-rust-analyzer-cargo-watch-command "clippy"
+    lsp-rust-analyzer-display-type-hints t
+    lsp-rust-analyzer-display-parameter-hints t
+    lsp-rust-analyzer-display-chaining-hints t
+    lsp-rust-analyzer-display-closure-parameter-hints t
+    lsp-rust-analyzer-display-closure-return-type-hints t
+    ;; lsp-rust-analyzer-display-lifetime-elision-hints-enable t
+    ;; lsp-rust-analyzer-display-lifetime-elision-hints-use-parameter-names t
+    ;; lsp-rust-analyzer-display-reborrow-hints t
+    lsp-rust-analyzer-max-inlay-hint-length 50
+    lsp-rust-analyzer-proc-macro-enable t
+    lsp-rust-analyzer-experimental-proc-attr-macros t
+    lsp-rust-analyzer-cargo-watch-command "clippy"
   ))
+
+(after! lsp-mode
+  (setq lsp-inlay-hint-enable t)      ;; required for any hints to render
+  (add-hook 'rustic-mode-hook #'lsp-inlay-hints-mode))  ;; turn them on in buffers
 #+end_src
 ** C++
 #+begin_src elisp
+(setq lsp-file-watch-threshold nil)
+
 (after! lsp-clangd
   (setq lsp-clients-clangd-args
         '("-j=3"
@@ -2603,6 +3163,8 @@ Testing something %`dm--my-focus
           "--header-insertion=never"
           "--header-insertion-decorators=0"))
   (set-lsp-priority! 'clangd 2))
+
+(add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
 #+end_src
 * Jira
 #+begin_src elisp
@@ -2611,10 +3173,60 @@ Testing something %`dm--my-focus
 (setq request-log-level 'blather)
 (setq request-message-level 'blather)
 #+end_src
+* Markdown
+#+begin_src elisp
+(defun markdown-html (buffer)
+    (princ (with-current-buffer buffer
+        (format "<!DOCTYPE html><html><title>Impatient Markdown</title><xmp theme=\"united\" style=\"display:none;\"> %s  </xmp><script src=\"http://ndossougbe.github.io/strapdown/dist/strapdown.js\"></script></html>" (buffer-substring-no-properties (point-min) (point-max))))
+    (current-buffer)))
+
+
+(defun my/markdown-live-view ()
+  ;; Launches a live markdown preview in browser
+  (interactive)
+  (unless (httpd-running-p)
+    (httpd-start))
+  (impatient-mode 1)
+  (imp-set-user-filter #'markdown-html)
+  (browse-url "localhost:8080/imp"))
+#+end_src
+* Vterm and fish
+#+begin_src elisp
+;; (after! vterm
+;;   (setq! vterm-shell "/usr/bin/fish"))
+(setq shell-file-name (executable-find "bash"))
+(setq-default vterm-shell (executable-find "fish"))
+(setq-default explicit-shell-file-name (executable-find "fish"))
+
+;; (after! vterm
+;;   (setq! vterm-sehll "/usr/bin/fish")
+;;   ;; This might not work properly
+;;   ;; (remove-hook 'vterm-mode-hook #'hide-mode-line-mode)
+;;   )
+#+end_src
+* SSH and Tramp
+#+begin_src elisp
+;; (after! tramp ((setq tramp-shell-prompt-pattern "\\(?:^\\|\r\\)[^]#$%>\n]*#?[]#$%>].* *\\(^[\\[[0-9;]*[a-zA-Z] *\\)*")))
+#+end_src
+* Garbage collection
+#+begin_src elisp
+(setq inhibit-compacting-font-caches nil)
+#+end_src
 * Personal Machine
 - This is only tangled if my operating system is "arch", thus my personal machine.
 #+begin_src elisp :tangle (if (eq (doom-system-distro) 'arch) "config.el" "no")
 (setq dm--my-focus "personal")
+
+;; BUG Alpha-background somehow not working for Arch
+;; (setq doom-theme 'modus-operandi-deuteranopia)
+;; (add-to-list 'default-frame-alist '(alpha-background . 40))
+
+(setq doom-theme 'catppuccin)
+(setq catppuccin-flavor 'mocha)
+
+(custom-set-faces!
+  ;; '(default :background "red")
+  '(region :background "DarkSlateBlue"))
 
 (setq org-journal-dir "~/Dropbox/org/roam/daily"
     org-journal-date-format "%A, %d %B %Y"
@@ -2623,9 +3235,11 @@ Testing something %`dm--my-focus
     org-journal-file-format "Personal %Y-%m-%d.org"
     )
 
-(setq doom-font (font-spec :family "Fira Code Retina" :size 18)
-      doom-unicode-font (font-spec :family "JuliaMono Medium" :size 18)
-      doom-variable-pitch-font (font-spec :family "JuliaMono Medium" :size 18)
+(setq doom-font (font-spec :family "Fira Code Retina" :size 20)
+      ;; doom-unicode-font (font-spec :family "JuliaMono Medium" :size 18)
+      ;; doom-variable-pitch-font (font-spec :family "JuliaMono Medium" :size 18)
+      doom-unicode-font (font-spec :family "JuliaMono" :size 20)
+      doom-variable-pitch-font (font-spec :family "JuliaMono" :size 18)
       doom-big-font (font-spec :family "Fira Code Retina" :size 24))
 
 (defun test-directory-string (file-path)
@@ -2633,6 +3247,11 @@ Testing something %`dm--my-focus
 
 (defun test-directory-multiple (a b c d)
   (concat "testDirectory/" a b c d))
+
+;; Add default search to projectile projects
+(projectile-discover-projects-in-directory "~/repos/" 1)
+(projectile-discover-projects-in-directory "~/projects/" 3)
+(projectile-discover-projects-in-directory "~/Dropbox/coding/" 3)
 
 ;; Unused journal code that needs to be removed
 ;; (setq org-journal-dir "~/Dropbox/org/roam/journal"
@@ -2720,9 +3339,16 @@ Testing something %`dm--my-focus
 #+begin_src elisp :tangle (if (eq (doom-system-distro) 'ubuntu) "config.el" "no")
 (setq dm--my-focus "sirius")
 
+(setq doom-theme 'catppuccin)
+;; (setq catppuccin-flavor 'mocha)
+(setq catppuccin-flavor 'frappe)
+
 ;; This is used to help with Windows to WSL Ubuntu file paths.
 ;; The `find-file-visit-truename nil` only works if manually navigating to a path
 (setq directory-abbrev-alist '(("/mnt/c/Users/dmendel/Dropbox" . "/home/dmendel/Dropbox")))
+
+;; Add default search to projectile projects
+(projectile-discover-projects-in-directory "~/repos/" 2)
 
 ;; (setq org-journal-dir "~/Dropbox/org/roam/vispero/daily"
 ;;       ;; org-journal-date-format "%A, %d %B %Y\n:CLOCKTABLE:\n#+BEGIN: clocktable :scope subtree :maxlevel 9\n#+END:\n:END:\n"
@@ -2736,10 +3362,11 @@ Testing something %`dm--my-focus
 ;;       )
 
 
-(setq doom-font (font-spec :family "Fira Code" :size 18)
-      doom-variable-pitch-font (font-spec :family "Fira Code" :size 18)
-      doom-unicode-font (font-spec :family "JuliaMono Medium" :size 18)
-      doom-big-font (font-spec :family "Fira Code" :size 24))
+(setq doom-font (font-spec :family "Fira Code" :size 28)
+      doom-variable-pitch-font (font-spec :family "Fira Code" :size 28)
+      doom-unicode-font (font-spec :family "JuliaMono Medium" :size 28)
+      ;; doom-unicode-font (font-spec :family "Fira Code" :size 28)
+      doom-big-font (font-spec :family "Fira Code" :size 30))
 #+end_src
 * Unused functions
 ** Checkbox attempts
